@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>InstaHeadshots with a Bird — 5 headshots, one bird, $1.</title>
+<meta name="description" content="Upload one selfie, get 5 professional headshots for $1 — each starring the one bird we've paired to you, plus your own Bird ID." />
+<style>
+  :root{
+    --ink:#0d0f14; --paper:#f7f5ef; --card:#ffffff;
+    --brand:#ff5a3c; --brand-2:#1b6cff; --accent:#ffd23c;
+    --muted:#6b7180; --line:#e6e2d8; --good:#16a34a; --star:#f5a623;
+    --shadow:0 10px 40px rgba(13,15,20,.12); --r:18px;
+  }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
+    color:var(--ink);background:var(--paper);line-height:1.5;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:920px;margin:0 auto;padding:0 22px}
+
+  nav{display:flex;align-items:center;justify-content:space-between;padding:18px 0}
+  .logo{font-weight:800;font-size:20px;letter-spacing:-.02em;display:flex;align-items:center;gap:8px}
+  .logo .b{background:var(--ink);color:#fff;border-radius:8px;padding:2px 8px}
+  .pill{font-size:13px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:7px 14px;font-weight:600}
+
+  .hero{padding:46px 0 14px;text-align:center}
+  .badge{display:inline-flex;gap:8px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:999px;padding:7px 16px;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:20px}
+  .badge .dot{width:8px;height:8px;border-radius:50%;background:var(--good)}
+  h1{font-size:clamp(36px,6vw,62px);line-height:.99;letter-spacing:-.04em;margin:0 0 14px;font-weight:850}
+  h1 .hl{color:var(--brand);white-space:nowrap}
+  .sub{font-size:clamp(16px,2.2vw,20px);color:var(--muted);max-width:620px;margin:0 auto 10px}
+  .micro{font-size:14px;color:var(--muted);font-style:italic;max-width:540px;margin:0 auto}
+
+  .tool{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);margin:34px auto 0;padding:26px;max-width:620px}
+  .step-label{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 12px}
+  .drop{border:2px dashed var(--line);border-radius:14px;padding:30px;text-align:center;cursor:pointer;transition:.15s;background:#fcfbf8}
+  .drop:hover,.drop.drag{border-color:var(--brand);background:#fff7f4}
+  .drop input{display:none}
+  .drop .icon{font-size:34px} .drop p{margin:8px 0 2px;font-weight:600} .drop small{color:var(--muted)}
+  .have{display:none;margin-top:6px;align-items:center;gap:14px}
+  .have img{width:84px;height:84px;border-radius:12px;object-fit:cover;border:1px solid var(--line)}
+  .have .swap{background:none;border:none;color:var(--brand);font-weight:700;cursor:pointer;font-size:13px}
+  .whatsincluded{margin-top:18px;font-size:13.5px;color:var(--muted);background:#fcfbf8;border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+  .whatsincluded b{color:var(--ink)}
+  .go{width:100%;margin-top:18px;background:var(--brand);color:#fff;border:none;border-radius:13px;padding:17px;font-size:17px;font-weight:800;cursor:pointer;letter-spacing:-.01em;transition:.12s}
+  .go:hover{filter:brightness(1.05)} .go:disabled{opacity:.5;cursor:not-allowed}
+  .note{font-size:12.5px;color:var(--muted);text-align:center;margin-top:12px}
+  .err{display:none;background:#fff0ee;border:1px solid #ffcfc6;color:#b3261e;border-radius:11px;padding:12px 16px;font-size:14px;font-weight:600;margin-top:16px;text-align:center}
+  .canceled{display:none;background:#fff8e6;border:1px solid #ffe6a3;color:#8a6300;border-radius:11px;padding:12px 16px;font-size:14px;font-weight:600;margin:16px auto 0;max-width:620px;text-align:center}
+
+  /* result */
+  #result{display:none;margin-top:36px}
+  .birdcard{background:var(--ink);color:#fff;border-radius:var(--r);padding:24px;display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+  .birdcard .emoji{font-size:54px;line-height:1}
+  .birdcard .meta{flex:1;min-width:230px}
+  .birdcard .kicker{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);font-weight:700}
+  .birdcard h2{margin:4px 0 2px;font-size:26px;letter-spacing:-.02em}
+  .birdcard .sci{font-style:italic;color:#b9bdc8;font-size:14px;margin-bottom:8px}
+  .birdcard .bio{font-size:15px;color:#e7e9ee;margin:0 0 10px}
+  .birdcard .facts{display:flex;flex-direction:column;gap:4px;font-size:13px;color:#cdd1da}
+  .birdcard .facts span::before{content:"🪶 ";}
+  .pbar{margin:20px 0 6px;height:8px;background:var(--line);border-radius:999px;overflow:hidden}
+  .pbar i{display:block;height:100%;width:0;background:var(--brand);transition:width .4s}
+  .pmsg{font-size:13px;color:var(--muted);font-weight:600;text-align:center;margin-bottom:14px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:14px}
+  .cell{aspect-ratio:1;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:#efece4;position:relative}
+  .cell img{width:100%;height:100%;object-fit:cover;display:block}
+  .cell .lbl{position:absolute;left:8px;bottom:8px;background:rgba(13,15,20,.72);color:#fff;font-size:11px;font-weight:700;padding:4px 9px;border-radius:999px}
+  .cell .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+  .cell .ops{position:absolute;top:8px;right:8px;display:none;gap:6px}
+  .cell:hover .ops{display:flex}
+  .cell .ops button{width:30px;height:30px;border:none;border-radius:8px;background:rgba(255,255,255,.94);cursor:pointer;font-size:14px}
+  .cell.failed{display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--muted);text-align:center;padding:10px}
+  .spin{width:26px;height:26px;border:3px solid #ddd;border-top-color:var(--brand);border-radius:50%;animation:s 1s linear infinite}
+  @keyframes s{to{transform:rotate(360deg)}}
+  .res-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:20px}
+  .btn{border:1px solid var(--line);background:#fff;border-radius:11px;padding:11px 18px;font-weight:700;cursor:pointer;font-size:14px;text-decoration:none;color:var(--ink)}
+  .btn.primary{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+  /* review modal */
+  .overlay{position:fixed;inset:0;background:rgba(13,15,20,.55);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
+  .modal{background:#fff;border-radius:18px;max-width:440px;width:100%;padding:26px;box-shadow:var(--shadow)}
+  .modal h3{margin:0 0 4px;font-size:21px;letter-spacing:-.02em}
+  .modal p.lead{margin:0 0 16px;color:var(--muted);font-size:14px}
+  .stars{display:flex;gap:6px;font-size:30px;cursor:pointer;margin-bottom:14px}
+  .stars span{color:#d9d5cc;transition:.1s} .stars span.on{color:var(--star)}
+  .modal textarea{width:100%;border:1px solid var(--line);border-radius:11px;padding:11px;font:inherit;resize:vertical;min-height:74px}
+  .wc{font-size:12px;color:var(--muted);text-align:right;margin-top:4px} .wc.over{color:var(--brand);font-weight:700}
+  .modal input[type=text]{width:100%;border:1px solid var(--line);border-radius:11px;padding:11px;font:inherit;margin-top:10px}
+  .consent{display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--muted);margin-top:12px}
+  .modal .mrow{display:flex;gap:10px;margin-top:16px}
+  .modal .mrow .btn{flex:1;text-align:center}
+  .thanks{display:none;text-align:center;padding:8px 0}
+  .thanks .big{font-size:40px}
+
+  /* carousel */
+  .reviews{padding:58px 0 20px;display:none}
+  .reviews h2{text-align:center;font-size:28px;letter-spacing:-.03em;margin:0 0 4px}
+  .reviews .sub2{text-align:center;color:var(--muted);margin:0 0 24px;font-size:15px}
+  .carousel{position:relative;overflow:hidden}
+  .track{display:flex;transition:transform .4s ease}
+  .rcard{min-width:100%;display:flex;gap:18px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px;flex-wrap:wrap}
+  .rcard img{width:130px;height:130px;border-radius:12px;object-fit:cover;border:1px solid var(--line)}
+  .rcard .rbody{flex:1;min-width:200px}
+  .rcard .rstars{color:var(--star);font-size:18px;letter-spacing:2px}
+  .rcard .rtext{font-size:17px;margin:8px 0 10px;line-height:1.4}
+  .rcard .rwho{font-weight:700;font-size:14px} .rcard .rbird{font-size:13px;color:var(--muted)}
+  .cdots{display:flex;gap:7px;justify-content:center;margin-top:16px}
+  .cdots button{width:9px;height:9px;border-radius:50%;border:none;background:var(--line);cursor:pointer}
+  .cdots button.on{background:var(--ink)}
+
+  footer{padding:48px 0 40px;text-align:center;color:var(--muted);font-size:13px}
+  footer .big{font-weight:800;color:var(--ink);font-size:15px;margin-bottom:6px}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:999px;font-size:14px;font-weight:600;opacity:0;transition:.2s;z-index:60}
+  .toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <div class="logo"><span class="b">Insta</span>Headshots<span>🐦</span></div>
+    <span class="pill">$1 · 5 headshots · 1 bird</span>
+  </nav>
+
+  <header class="hero">
+    <div class="badge"><span class="dot"></span> 148 birds. You don't get to choose yours.</div>
+    <h1>Five headshots.<br><span class="hl">One bird. $1.</span></h1>
+    <p class="sub">Upload one selfie and get five polished headshots — five outfits, five backdrops — each starring the single bird we've paired to you, plus your own <strong>Bird ID</strong>.</p>
+    <p class="micro">You don't pick the bird. The bird picks you. It cannot be removed. There is no button.</p>
+  </header>
+
+  <div class="canceled" id="canceled">Payment canceled — no charge made. Your bird is still waiting. 🐦</div>
+
+  <section class="tool" id="tool">
+    <p class="step-label">Upload one selfie</p>
+    <label class="drop" id="drop">
+      <input type="file" id="file" accept="image/*" />
+      <div class="icon">📸</div>
+      <p>Click to upload or drop a photo</p>
+      <small>A clear, front-facing selfie works best · JPG/PNG · up to 12MB</small>
+    </label>
+    <div class="have" id="have">
+      <img id="haveImg" alt="your selfie" />
+      <div><div style="font-weight:700">Looking good.</div><button class="swap" id="swap" type="button">Use a different photo</button></div>
+    </div>
+
+    <div class="whatsincluded">
+      <b>Your $1 gets all 5 looks:</b> Blue Suit · Black Tee · Colour Top · Charcoal Half-Zip · Dark Suit —
+      each with the same bird on your shoulder.
+    </div>
+
+    <button class="go" id="go" disabled>Continue to payment · $1</button>
+    <p class="note">The bird is non-negotiable and appears in all five. 🐦</p>
+    <div class="err" id="err"></div>
+  </section>
+</div>
+
+<div class="wrap">
+  <section id="result">
+    <p class="step-label" style="text-align:center">Your Bird ID</p>
+    <div class="birdcard" id="birdcard"></div>
+    <div class="pbar"><i id="bar"></i></div>
+    <p class="pmsg" id="pmsg">Starting up…</p>
+    <div class="grid" id="grid"></div>
+    <div class="res-actions">
+      <button class="btn" id="leaveReview" type="button">★ Leave a review</button>
+      <button class="btn primary" id="again" type="button">↻ Make another ($1)</button>
+    </div>
+  </section>
+</div>
+
+<!-- carousel of real, approved reviews -->
+<section class="reviews" id="reviews">
+  <div class="wrap">
+    <h2>What real people (and their birds) say</h2>
+    <p class="sub2">Actual customers. Actual headshots. Actual, permanent birds.</p>
+    <div class="carousel"><div class="track" id="track"></div></div>
+    <div class="cdots" id="cdots"></div>
+  </div>
+</section>
+
+<footer><div class="wrap">
+  <div class="big">InstaHeadshots with a Bird 🐦</div>
+  A parody. Not affiliated with any other headshot service. We don't store your selfie after generating.<br>
+  Your bird is assigned at random and is, regrettably for you, permanent.
+</div></footer>
+
+<!-- REVIEW MODAL -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div id="reviewForm">
+      <h3>How did we do?</h3>
+      <p class="lead">Rate your headshots and bird in 30 words or fewer. Great reviews get featured on the homepage.</p>
+      <div class="stars" id="stars">
+        <span data-v="1">★</span><span data-v="2">★</span><span data-v="3">★</span><span data-v="4">★</span><span data-v="5">★</span>
+      </div>
+      <textarea id="rtext" maxlength="280" placeholder="e.g. Genuinely good headshots and I now have a pigeon. Worth every cent."></textarea>
+      <div class="wc" id="wc">0/30 words</div>
+      <input type="text" id="rname" placeholder="Your name or @handle (optional)" />
+      <label class="consent"><input type="checkbox" id="consent" checked /> <span>You can feature my headshot &amp; review on the site.</span></label>
+      <div class="mrow">
+        <button class="btn" id="skipReview" type="button">No thanks</button>
+        <button class="btn primary" id="submitReview" type="button">Submit review</button>
+      </div>
+    </div>
+    <div class="thanks" id="thanks">
+      <div class="big">🐦</div>
+      <h3>Thank you!</h3>
+      <p class="lead">If it's a good one, you might spot it on the homepage soon.</p>
+      <button class="btn primary" id="closeThanks" type="button">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  let photo=null, currentJob=null, reviewShown=false, featuredSrc=null, rating=0;
+
+  function toast(t){ const el=$('toast'); el.textContent=t; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),1600); }
+
+  // ---- upload ----
+  function refresh(){ $('go').disabled = !photo; }
+  function setPhoto(f){ if(!f||!f.type.startsWith('image/'))return; photo=f; $('haveImg').src=URL.createObjectURL(f); $('drop').style.display='none'; $('have').style.display='flex'; refresh(); }
+  $('file').addEventListener('change',e=>setPhoto(e.target.files[0]));
+  $('swap').addEventListener('click',()=>{ photo=null; $('file').value=''; $('drop').style.display='block'; $('have').style.display='none'; refresh(); });
+  ['dragover','dragenter'].forEach(ev=>$('drop').addEventListener(ev,e=>{e.preventDefault();$('drop').classList.add('drag');}));
+  ['dragleave','drop'].forEach(ev=>$('drop').addEventListener(ev,e=>{e.preventDefault();$('drop').classList.remove('drag');}));
+  $('drop').addEventListener('drop',e=>setPhoto(e.dataTransfer.files[0]));
+
+  $('go').addEventListener('click', async ()=>{
+    $('err').style.display='none'; $('go').disabled=true; $('go').textContent='Reserving your bird…';
+    try{
+      const fd=new FormData(); fd.append('photo',photo);
+      const s=await fetch('/api/start',{method:'POST',body:fd}); const sd=await s.json();
+      if(!s.ok) throw new Error(sd.error||'Could not start.');
+      const c=await fetch('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jobId:sd.jobId})});
+      const cd=await c.json(); if(!c.ok) throw new Error(cd.error||'Could not start checkout.');
+      window.location = cd.url;
+    }catch(err){ $('err').textContent=err.message; $('err').style.display='block'; $('go').disabled=false; $('go').textContent='Continue to payment · $1'; }
+  });
+
+  // ---- result ----
+  function renderBird(b){
+    $('birdcard').innerHTML = `
+      <div class="emoji">${b.emoji||'🐦'}</div>
+      <div class="meta">
+        <div class="kicker">Your Bird ID — #${String(b.assignmentNumber||1).padStart(4,'0')}</div>
+        <h2>${b.name}</h2><div class="sci">${b.sci||''}</div>
+        <p class="bio">${b.blurb||''}</p>
+        <div class="facts">${(b.facts||[]).map(f=>`<span>${f}</span>`).join('')}</div>
+      </div>`;
+  }
+  function buildGrid(n){ $('grid').innerHTML=''; for(let i=0;i<n;i++){ const c=document.createElement('div'); c.className='cell'; c.id='cell'+i; c.innerHTML='<div class="ph"><div class="spin"></div></div>'; $('grid').appendChild(c);} }
+  let placed=0;
+  function fillCell(r){
+    const cell=[...$('grid').children].find(c=>!c.dataset.filled) || $('grid').firstChild; if(!cell)return;
+    cell.dataset.filled='1';
+    if(r.error){ cell.className='cell failed'; cell.innerHTML=`${r.label}<br>· skipped ·`; return; }
+    if(!featuredSrc) featuredSrc=r.src;
+    cell.innerHTML = `<img src="${r.src}" alt="${r.label}"><span class="lbl">${r.label}</span>
+      <div class="ops"><button title="Download" data-dl="${r.src}">⬇</button><button title="Share" data-sh="${r.src}">↗</button></div>`;
+  }
+  $('grid').addEventListener('click', e=>{
+    const dl=e.target.closest('[data-dl]'); const sh=e.target.closest('[data-sh]');
+    if(dl){ downloadImg(dl.dataset.dl); maybeReview(dl.dataset.dl); }
+    if(sh){ shareImg(sh.dataset.sh); maybeReview(sh.dataset.sh); }
+  });
+  async function downloadImg(src){
+    try{ const r=await fetch(src); const b=await r.blob(); const u=URL.createObjectURL(b); const a=document.createElement('a'); a.href=u; a.download='headshot-with-a-bird.jpg'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(u); }
+    catch{ window.open(src,'_blank'); }
+  }
+  async function shareImg(src){
+    const url=location.origin;
+    if(navigator.share){ try{ await navigator.share({title:'My InstaHeadshot 🐦', text:'I got paired with a bird.', url}); return; }catch{} }
+    try{ await navigator.clipboard.writeText(url); toast('Link copied'); }catch{}
+  }
+
+  async function enterResult(jobId){
+    currentJob=jobId; $('tool').style.display='none'; $('result').style.display='block'; window.scrollTo({top:0,behavior:'smooth'});
+    let fin; try{ fin=await (await fetch('/api/finalize/'+jobId)).json(); }catch{ $('pmsg').textContent='Could not verify payment.'; return; }
+    if(fin.error){ $('pmsg').textContent=fin.error; return; }
+    if(!fin.paid){ $('pmsg').textContent='Payment not confirmed. If you were charged, refresh in a moment.'; return; }
+    renderBird(fin.bird); buildGrid(fin.total); pollImages(jobId, fin.total);
+  }
+  const msgs=['Developing your headshots…','Tailoring outfits…','Coaxing the bird onto your shoulder…','Adjusting the lighting…','Almost there…'];
+  function pollImages(jobId,total){
+    let mi=0; const mt=setInterval(()=>$('pmsg').textContent = $('bar').style.width==='100%'?'✓ All 5 ready. Same bird, every shot.':msgs[mi=(mi+1)%msgs.length],2200);
+    let shown=0;
+    const tick=async()=>{
+      const j=await (await fetch('/api/job/'+jobId)).json();
+      for(let i=shown;i<j.results.length;i++) fillCell(j.results[i]); shown=j.results.length;
+      $('bar').style.width=Math.round((j.done/total)*100)+'%';
+      if(j.status==='running'||j.status==='generating') setTimeout(tick,2000);
+      else { clearInterval(mt); $('pmsg').textContent = j.status==='failed' ? 'Generation failed — your $1 will be refunded.' : '✓ All 5 ready. Same bird, every shot.'; }
+    };
+    tick();
+  }
+
+  // ---- review modal ----
+  function openReview(src){ if(src) featuredSrc=src; $('overlay').style.display='flex'; }
+  function maybeReview(src){ if(!reviewShown){ reviewShown=true; openReview(src); } }
+  $('leaveReview').addEventListener('click',()=>openReview(featuredSrc));
+  $('stars').addEventListener('click',e=>{ const s=e.target.closest('span'); if(!s)return; rating=+s.dataset.v;
+    [...$('stars').children].forEach(x=>x.classList.toggle('on', +x.dataset.v<=rating)); });
+  $('rtext').addEventListener('input',()=>{ const w=$('rtext').value.trim().split(/\s+/).filter(Boolean).length;
+    $('wc').textContent=`${w}/30 words`; $('wc').classList.toggle('over',w>30); });
+  $('skipReview').addEventListener('click',()=>$('overlay').style.display='none');
+  $('closeThanks').addEventListener('click',()=>$('overlay').style.display='none');
+  $('submitReview').addEventListener('click', async ()=>{
+    const text=$('rtext').value.trim(); const w=text.split(/\s+/).filter(Boolean).length;
+    if(!rating) return toast('Please pick a star rating');
+    if(w>30) return toast('Keep it under 30 words');
+    try{
+      const r=await fetch('/api/review',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({jobId:currentJob,stars:rating,text,name:$('rname').value,consent:$('consent').checked,featuredSrc})});
+      const d=await r.json(); if(!r.ok) throw new Error(d.error||'Could not submit.');
+      $('reviewForm').style.display='none'; $('thanks').style.display='block';
+    }catch(err){ toast(err.message); }
+  });
+
+  $('again').addEventListener('click',()=>location.href='/');
+
+  // ---- carousel ----
+  (async function loadReviews(){
+    let list=[]; try{ list=await (await fetch('/api/reviews')).json(); }catch{}
+    if(!list.length) return;
+    $('reviews').style.display='block';
+    $('track').innerHTML = list.map(r=>`
+      <div class="rcard">
+        ${r.media?`<img src="${r.media}" alt="headshot by ${r.name}">`:''}
+        <div class="rbody">
+          <div class="rstars">${'★'.repeat(r.stars)}${'☆'.repeat(5-r.stars)}</div>
+          <div class="rtext">“${r.text}”</div>
+          <div class="rwho">${r.name}</div>
+          ${r.birdName?`<div class="rbird">Paired with ${r.birdEmoji||''} ${r.birdName}</div>`:''}
+        </div>
+      </div>`).join('');
+    $('cdots').innerHTML = list.map((_,i)=>`<button data-i="${i}" class="${i===0?'on':''}"></button>`).join('');
+    let idx=0; const go=i=>{ idx=(i+list.length)%list.length; $('track').style.transform=`translateX(-${idx*100}%)`;
+      [...$('cdots').children].forEach((d,k)=>d.classList.toggle('on',k===idx)); };
+    $('cdots').addEventListener('click',e=>{ const b=e.target.closest('button'); if(b) go(+b.dataset.i); });
+    if(list.length>1) setInterval(()=>go(idx+1),5000);
+  })();
+
+  // on load: returning from payment?
+  const q=new URLSearchParams(location.search);
+  if(q.get('paid')==='1' && q.get('job')) enterResult(q.get('job'));
+  else if(q.get('canceled')==='1') $('canceled').style.display='block';
+</script>
+</body>
+</html>

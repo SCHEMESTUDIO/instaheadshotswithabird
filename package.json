@@ -1,0 +1,20 @@
+{
+  "name": "instaheadshotswithabird",
+  "version": "2.0.0",
+  "description": "One selfie, one bird, one $1 headshot. Now with your own Bird ID.",
+  "type": "module",
+  "main": "server.js",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "multer": "^1.4.5-lts.1",
+    "stripe": "^16.12.0"
+  }
+}

@@ -1,0 +1,8 @@
+node_modules/
+.env
+*.log
+.DS_Store
+
+# runtime state — never commit (lives on a disk / data store in prod)
+data/*
+!data/.gitkeep
