@@ -32,7 +32,8 @@
 
   .tool{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);margin:34px auto 0;padding:26px;max-width:620px}
   .step-label{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 12px}
-  .drop{border:2px dashed var(--line);border-radius:14px;padding:30px;text-align:center;cursor:pointer;transition:.15s;background:#fcfbf8}
+  .drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border:2px dashed var(--line);border-radius:14px;padding:30px;text-align:center;cursor:pointer;transition:.15s;background:#fcfbf8}
+  .drop>*{margin:0}
   .drop:hover,.drop.drag{border-color:var(--brand);background:#fff7f4}
   .drop input{display:none}
   .drop .icon{font-size:34px} .drop p{margin:8px 0 2px;font-weight:600} .drop small{color:var(--muted)}
