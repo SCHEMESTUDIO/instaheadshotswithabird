@@ -61,7 +61,13 @@
   .pbar{margin:20px 0 6px;height:8px;background:var(--line);border-radius:999px;overflow:hidden}
   .pbar i{display:block;height:100%;width:0;background:var(--brand);transition:width .4s}
   .pmsg{font-size:13px;color:var(--muted);font-weight:600;text-align:center;margin-bottom:14px}
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:14px}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media (max-width:560px){ .grid{grid-template-columns:repeat(2,1fr)} }
+  .cell.dummy{border:2px dashed var(--line);background:#fcfbf8;display:flex;align-items:center;justify-content:center;cursor:pointer;text-align:center;color:var(--muted)}
+  .cell.dummy:hover{border-color:var(--brand);color:var(--brand)}
+  .cell.dummy .di{font-weight:700;font-size:15px;line-height:1.3}
+  .cell.dummy .di .plus{font-size:32px;display:block;margin-bottom:4px}
+  .cell.dummy .di small{display:block;font-weight:600;color:var(--muted);font-size:12px;margin-top:2px}
   .cell{aspect-ratio:1;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:#efece4;position:relative}
   .cell img{width:100%;height:100%;object-fit:cover;display:block}
   .cell .lbl{position:absolute;left:8px;bottom:8px;background:rgba(13,15,20,.72);color:#fff;font-size:11px;font-weight:700;padding:4px 9px;border-radius:999px}
@@ -156,11 +162,11 @@
 
 <div class="wrap">
   <section id="result">
-    <p class="step-label" style="text-align:center">Your Bird ID</p>
-    <div class="birdcard" id="birdcard"></div>
     <div class="pbar"><i id="bar"></i></div>
     <p class="pmsg" id="pmsg">Starting up…</p>
     <div class="grid" id="grid"></div>
+    <p class="step-label" style="text-align:center;margin-top:30px">Your Bird ID</p>
+    <div class="birdcard" id="birdcard"></div>
     <div class="res-actions">
       <button class="btn" id="leaveReview" type="button">★ Leave a review</button>
       <button class="btn primary" id="again" type="button">↻ Make another ($1)</button>
@@ -251,10 +257,17 @@
         <div class="facts">${(b.facts||[]).map(f=>`<span>${f}</span>`).join('')}</div>
       </div>`;
   }
-  function buildGrid(n){ $('grid').innerHTML=''; for(let i=0;i<n;i++){ const c=document.createElement('div'); c.className='cell'; c.id='cell'+i; c.innerHTML='<div class="ph"><div class="spin"></div></div>'; $('grid').appendChild(c);} }
-  let placed=0;
-  function fillCell(r){
-    const cell=[...$('grid').children].find(c=>!c.dataset.filled) || $('grid').firstChild; if(!cell)return;
+  function buildGrid(n){
+    const g=$('grid'); g.innerHTML='';
+    for(let i=0;i<n;i++){ const c=document.createElement('div'); c.className='cell'; c.id='cell'+i; c.innerHTML='<div class="ph"><div class="spin"></div></div>'; g.appendChild(c); }
+    // slot 6 — fake-door upsell placeholder (wire to analytics / a real offer later)
+    const d=document.createElement('div'); d.className='cell dummy'; d.id='dummyUpsell';
+    d.innerHTML='<div class="di"><span class="plus">＋</span>More looks<small>coming soon</small></div>';
+    d.addEventListener('click',()=>toast('More looks coming soon 🐦'));
+    g.appendChild(d);
+  }
+  function fillCell(i, r){
+    const cell=document.getElementById('cell'+i); if(!cell || cell.dataset.filled) return;
     cell.dataset.filled='1';
     if(r.error){ cell.className='cell failed'; cell.innerHTML=`${r.label}<br>· skipped ·`; return; }
     if(!featuredSrc) featuredSrc=r.src;
@@ -286,10 +299,9 @@
   const msgs=['Developing your headshots…','Tailoring outfits…','Coaxing the bird onto your shoulder…','Adjusting the lighting…','Almost there…'];
   function pollImages(jobId,total){
     let mi=0; const mt=setInterval(()=>$('pmsg').textContent = $('bar').style.width==='100%'?'✓ All 5 ready. Same bird, every shot.':msgs[mi=(mi+1)%msgs.length],2200);
-    let shown=0;
     const tick=async()=>{
       const j=await (await fetch('/api/job/'+jobId)).json();
-      for(let i=shown;i<j.results.length;i++) fillCell(j.results[i]); shown=j.results.length;
+      (j.results||[]).forEach((r,i)=>{ if(r) fillCell(i,r); });
       $('bar').style.width=Math.round((j.done/total)*100)+'%';
       if(j.status==='running'||j.status==='generating') setTimeout(tick,2000);
       else { clearInterval(mt); $('pmsg').textContent = j.status==='failed' ? 'Generation failed — your $1 will be refunded.' : '✓ All 5 ready. Same bird, every shot.'; }

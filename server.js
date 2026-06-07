@@ -13,7 +13,7 @@ dotenv.config();
 
 const PRICE_CENTS = Number(process.env.PRICE_CENTS || 100);
 const DAILY_CAP = Number(process.env.DAILY_CAP || 20);
-const CONCURRENCY = Number(process.env.CONCURRENCY || 3);
+const CONCURRENCY = Number(process.env.CONCURRENCY || 1); // serial by default — respects Replicate's low-credit burst limit. Raise once credit > $5.
 const ADMIN_KEY = process.env.ADMIN_KEY || "";
 const PAYMENTS_ENABLED = !!process.env.STRIPE_SECRET_KEY;
 const stripe = PAYMENTS_ENABLED ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
@@ -61,24 +61,41 @@ setInterval(() => {
   for (const [id, j] of jobs) if (j.createdAt < cutoff) jobs.delete(id);
 }, 5 * 60 * 1000).unref?.();
 
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+function throttleWaitMs(msg) {
+  const m = /resets in ~?(\d+)\s*s/i.exec(msg || "");
+  return (m ? Number(m[1]) : 12) * 1000 + 1500; // honor Replicate's reset hint, padded
+}
+
+async function generateLook(job, look) {
+  const provider = getProvider();
+  const prompt = buildPrompt(look, job.bird);
+  const MAX_ATTEMPTS = 6;
+  let lastErr;
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    try {
+      const { src } = await provider.generate({ images: [job.photo], prompt });
+      return { look: look.id, label: look.label, src };
+    } catch (err) {
+      lastErr = err;
+      console.error(`[job ${job.id}] ${look.id} try ${attempt}: ${err.message}`);
+      if (attempt < MAX_ATTEMPTS) {
+        const throttled = /throttle/i.test(err.message || "");
+        await sleep(throttled ? throttleWaitMs(err.message) : 2500); // wait out rate limits before retrying
+      }
+    }
+  }
+  return { look: look.id, label: look.label, error: lastErr?.message || "Generation failed." };
+}
+
 async function startGeneration(job) {
   if (job.status === "generating" || job.status === "complete") return;
   job.status = "generating";
-  const provider = getProvider();
   let cursor = 0;
   async function worker() {
     while (cursor < LOOKS.length) {
       const i = cursor++;
-      const look = LOOKS[i];
-      let lastErr;
-      for (let attempt = 0; attempt < 2; attempt++) {
-        try {
-          const { src } = await provider.generate({ images: [job.photo], prompt: buildPrompt(look, job.bird) });
-          job.results[i] = { look: look.id, label: look.label, src };
-          lastErr = null; break;
-        } catch (err) { lastErr = err; console.error(`[job ${job.id}] ${look.id} try ${attempt + 1}:`, err.message); }
-      }
-      if (lastErr) job.results[i] = { look: look.id, label: look.label, error: lastErr.message };
+      job.results[i] = await generateLook(job, LOOKS[i]);
       job.done++;
     }
   }
@@ -158,7 +175,7 @@ app.get("/api/job/:id", (req, res) => {
   res.json({
     status: job.status, paid: job.paid, total: job.total, done: job.done,
     bird: job.paid ? job.bird : null,
-    results: job.paid ? job.results.filter(Boolean) : [],
+    results: job.paid ? job.results : [],
     error: job.error,
   });
 });

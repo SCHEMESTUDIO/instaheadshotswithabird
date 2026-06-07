@@ -1,89 +1,143 @@
-# Deploy guide — Render (Path B), Stripe test mode
+# Deploy guide — Render (Path B), Stripe test mode (detailed)
 
-Goal: a live public URL running the current code, with Stripe in **test mode**.
-Render is used below; Railway is nearly identical (it auto-detects `npm start` via the Procfile).
-
----
-
-## 0. One-time: get your keys ready
-
-- **Replicate token** — https://replicate.com/account/api-tokens (you have this).
-- **Stripe TEST secret key** — https://dashboard.stripe.com/test/apikeys → "Secret key" starting `sk_test_...`.
-  (Make sure the dashboard toggle says **Test mode**.)
-- **Admin key** — invent any random string (used to approve reviews).
+Follow top to bottom. Labels in the Render/Stripe/GitHub UIs may differ slightly over time,
+but the actions are the same.
 
 ---
 
-## 1. Push to GitHub
+## Step 0 — Clear the git lock files (one-time, ~30 sec)
 
-I've already run `git init` and made the first commit locally. Now create an empty repo and push:
+The repo was created for you but left 3 stale lock files. In your Mac **Terminal**:
 
 ```bash
-cd "instaheadshotswithabird"
-# create a new EMPTY repo on github.com first (no README), then:
-git remote add origin https://github.com/<you>/instaheadshotswithabird.git
-git branch -M main
-git push -u origin main
+cd "/Users/jameshd/Documents/Claude/Projects/Scheme Studio/instaheadshotswithabird"
+rm -f .git/index.lock .git/HEAD.lock .git/objects/maintenance.lock
+git status
 ```
 
-(Or use GitHub Desktop: Add Local Repository → this folder → Publish.)
+`git status` should print "nothing to commit, working tree clean" and mention 1 commit. Good.
 
 ---
 
-## 2. Deploy on Render
+## Step 1 — Push the code to GitHub
 
-1. https://dashboard.render.com → **New → Blueprint** → connect the repo. It reads `render.yaml`.
-   (Or **New → Web Service**, build `npm install`, start `npm start`.)
-2. When prompted, set the secret env vars:
-   - `REPLICATE_API_TOKEN` = your token
-   - `STRIPE_SECRET_KEY` = your `sk_test_...`
-   - `ADMIN_KEY` = your random string
-   - `PROVIDER` = `replicate` (already in the blueprint)
-3. Deploy. You'll get a URL like `https://instaheadshotswithabird.onrender.com`.
-4. Add **`PUBLIC_URL`** = that exact URL, then redeploy (so Stripe redirects are correct).
-5. Open the URL. Health check: `…/healthz` should return `paymentsEnabled: true`.
+You need a GitHub account (github.com). Two ways — pick ONE.
 
-> Free plan note: the disk is **ephemeral** — reviews and the no-repeat bird counter reset on
-> restart/redeploy. Fine for testing. For real beta persistence, see the bottom of `render.yaml`
-> (switch to `starter` + add a disk + `DATA_DIR=/var/data`).
+### Option A — GitHub Desktop (easiest, no tokens)
+1. Install GitHub Desktop (desktop.github.com) and sign in with your GitHub account.
+2. **File → Add Local Repository** → choose the folder
+   `…/Scheme Studio/instaheadshotswithabird` → Add.
+3. Top bar will say "Publish repository." Click it.
+4. Set the name `instaheadshotswithabird`, choose **Private** (recommended for now),
+   leave "Keep this code private" checked, click **Publish repository.**
+5. Done — your code is on GitHub.
 
----
-
-## 3. Test the $1 flow (test mode)
-
-1. On the live site: upload a selfie → **Continue to payment**.
-2. On Stripe Checkout use the test card: **4242 4242 4242 4242**, any future expiry, any CVC, any ZIP.
-3. You'll be redirected back; your bird is revealed and 5 headshots generate.
-4. Click download/share → leave a review.
-5. Approve it so it appears in the homepage carousel:
+### Option B — Terminal
+1. On github.com, click **+** (top right) → **New repository.**
+2. Name it `instaheadshotswithabird`. Choose Private. **Do NOT** check "Add a README,"
+   ".gitignore," or "license" (the repo must be empty). Click **Create repository.**
+3. GitHub shows a URL like `https://github.com/<you>/instaheadshotswithabird.git`. Copy it.
+4. Back in Terminal (still in the project folder):
    ```bash
-   curl "https://<your-url>/api/admin/reviews?key=YOUR_ADMIN_KEY"          # find the id
+   git remote add origin https://github.com/<you>/instaheadshotswithabird.git
+   git branch -M main
+   git push -u origin main
+   ```
+5. **Auth prompt:** GitHub no longer accepts your password here. When asked, either:
+   - let it open a browser to authorize, OR
+   - use a **Personal Access Token** as the password: github.com → Settings → Developer
+     settings → Personal access tokens → Tokens (classic) → Generate new token → tick `repo`
+     → copy it → paste as the password.
+   (GitHub Desktop, Option A, avoids all of this.)
+
+---
+
+## Step 2 — Deploy on Render
+
+### 2a. Get your three secret values first (so they're ready to paste)
+- **REPLICATE_API_TOKEN:** replicate.com → sign in → click your avatar → **API tokens** →
+  Create token → copy the `r8_...` string.
+- **STRIPE_SECRET_KEY (test):** dashboard.stripe.com → make sure the **Test mode** toggle
+  (top-right) is ON → **Developers → API keys** → under "Secret key" click **Reveal** →
+  copy the `sk_test_...` string.
+- **ADMIN_KEY:** just invent a random string. Generate one in Terminal if you like:
+  ```bash
+  openssl rand -hex 16
+  ```
+  Copy the output. (This is what lets you approve reviews later.)
+
+### 2b. Create the Render service
+1. Go to dashboard.render.com → **Sign up** / log in. Easiest: **Sign in with GitHub**
+   (this pre-connects your repos).
+2. Click **New +** (top right) → **Blueprint.**
+3. Find and select your `instaheadshotswithabird` repo. If you don't see it, click
+   **Configure account / Connect GitHub** and grant Render access to the repo, then retry.
+4. Render reads `render.yaml` and shows a service named `instaheadshotswithabird`. Give the
+   blueprint group any name. Click **Apply** / **Create.**
+5. Render will ask for the env vars marked as secrets. Paste:
+   - `REPLICATE_API_TOKEN` → your `r8_...`
+   - `STRIPE_SECRET_KEY` → your `sk_test_...`
+   - `ADMIN_KEY` → your random string
+   (Leave `PUBLIC_URL` blank for now — you'll set it in Step 3. `PROVIDER` is already `replicate`.)
+6. Click to start the deploy. Watch the **Logs** tab. When it finishes it shows
+   "Live" and a URL like `https://instaheadshotswithabird.onrender.com`.
+
+> If you used **New + → Web Service** instead of Blueprint: set Build Command `npm install`,
+> Start Command `npm start`, then add the same env vars under the **Environment** tab.
+
+---
+
+## Step 3 — Set PUBLIC_URL (this is what makes payment work)
+
+1. Copy your live URL (e.g. `https://instaheadshotswithabird.onrender.com`).
+2. In Render: open the service → **Environment** (left sidebar) → **Add Environment Variable.**
+3. Key: `PUBLIC_URL`  ·  Value: your exact URL, starting with `https://`, **no trailing slash.**
+4. **Save changes** — Render redeploys automatically (~1–2 min).
+5. Verify: open `https://<your-url>/healthz` in a browser. You should see
+   `"paymentsEnabled": true`. If it says `false`, your `STRIPE_SECRET_KEY` isn't set.
+
+---
+
+## Step 4 — Test the $1 flow (test mode, no real money)
+
+1. Open your live URL. (First load after idle can take ~30–60s on the free plan — normal.)
+2. **Upload a selfie** → **Continue to payment · $1.**
+3. You land on Stripe Checkout. Enter the **test card**:
+   - Card number: **4242 4242 4242 4242**
+   - Expiry: any future date (e.g. 12/34)
+   - CVC: any 3 digits (e.g. 123)
+   - Name/ZIP: anything
+   Click **Pay.**
+4. You're redirected back. Your **Bird ID** appears and the **5 headshots** generate
+   (a few seconds each). If they error, check `REPLICATE_API_TOKEN` in Render → Logs.
+5. Hover any headshot → click **⬇ download** or **↗ share**. A **review** prompt appears.
+   Give it stars + a ≤30-word note + submit.
+6. **Approve that review** so it shows in the homepage carousel. In Terminal:
+   ```bash
+   # list reviews to find the id
+   curl "https://<your-url>/api/admin/reviews?key=YOUR_ADMIN_KEY"
+   # approve it
    curl -X POST https://<your-url>/api/admin/approve \
      -H "Content-Type: application/json" \
-     -d '{"key":"YOUR_ADMIN_KEY","id":"REVIEW_ID","approved":true}'
+     -d '{"key":"YOUR_ADMIN_KEY","id":"THE_ID","approved":true}'
    ```
-
-No real money moves in test mode. Test payments show under **Test mode** in your Stripe dashboard.
-
----
-
-## 4. Your domain (optional, when ready)
-
-Render → service → **Settings → Custom Domains** → add `instaheadshotswithabird.com`, then add the
-CNAME/A records it shows at your registrar. Update `PUBLIC_URL` to `https://instaheadshotswithabird.com`.
+   Reload the homepage — the review now appears in the carousel.
+7. Confirm in Stripe: dashboard.stripe.com (Test mode) → **Payments** → you'll see the $1 test payment.
 
 ---
 
-## 5. Going live for real (later)
-
-- Flip Stripe to **live** keys (`sk_live_...`) and update `STRIPE_SECRET_KEY`.
-- Move to a paid plan + disk (or external store) so reviews/bird-count persist.
-- Consider the webhook (`/api/stripe/webhook` + `STRIPE_WEBHOOK_SECRET`) as a payment backstop.
+## Common snags
+- **Redirected to an http:// page or Stripe error** → `PUBLIC_URL` is missing or wrong (Step 3).
+- **Logs say "payments: DEV BYPASS"** → `STRIPE_SECRET_KEY` isn't set on Render.
+- **Headshots fail** → bad/missing `REPLICATE_API_TOKEN`, or you're out of Replicate credit.
+- **Reviews disappear after a redeploy** → expected on the free plan (ephemeral disk). For
+  persistence: Render → upgrade to **Starter**, add a **Disk** (mount `/var/data`, 1GB), and add
+  env var `DATA_DIR=/var/data`. (See the commented block in `render.yaml`.)
+- **Site slow on first hit** → free-plan cold start; upgrade to a paid instance to keep it warm.
 
 ---
 
-### Quick troubleshooting
-- **Stripe redirect goes to http / fails** → set `PUBLIC_URL` to your https URL and redeploy.
-- **"payments: DEV BYPASS" in logs** → `STRIPE_SECRET_KEY` isn't set on the host.
-- **Generations fail** → check `REPLICATE_API_TOKEN`; watch the Render logs.
-- **Cold start delay (~30–60s)** on free plan after inactivity is normal.
+## When you're ready for real money
+Swap `STRIPE_SECRET_KEY` to your live `sk_live_...` key, add your domain (Render → Settings →
+Custom Domains → add `instaheadshotswithabird.com` + the DNS records it shows), and update
+`PUBLIC_URL` to `https://instaheadshotswithabird.com`.
