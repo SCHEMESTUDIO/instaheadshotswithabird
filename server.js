@@ -3,8 +3,12 @@ import multer from "multer";
 import dotenv from "dotenv";
 import { randomUUID } from "crypto";
 import Stripe from "stripe";
-import { buildPrompt } from "./lib/prompt.js";
+import fs from "fs";
+import { buildPrompt, buildMultiPrompt, buildTwoPersonPrompt } from "./lib/prompt.js";
 import { LOOKS } from "./lib/looks.js";
+import { hasRef, refPath, refPublicUrl } from "./lib/birdref.js";
+import { imageDimensions } from "./lib/imagesize.js";
+import * as kontextMulti from "./lib/providers/kontext-multi.js";
 import { assignBird, stats } from "./lib/assign.js";
 import { getProvider } from "./lib/providers/index.js";
 import { addReview, listReviews, setApproved, wordCount, MEDIA_DIR } from "./lib/reviews.js";
@@ -15,12 +19,14 @@ const PRICE_CENTS = Number(process.env.PRICE_CENTS || 100);
 const DAILY_CAP = Number(process.env.DAILY_CAP || 20);
 const CONCURRENCY = Number(process.env.CONCURRENCY || 1); // serial by default — respects Replicate's low-credit burst limit. Raise once credit > $5.
 const ADMIN_KEY = process.env.ADMIN_KEY || "";
+const USE_BIRD_REF = process.env.USE_BIRD_REF !== "false"; // use the locked reference image when one exists
+const MIN_IMAGE_DIM = Number(process.env.MIN_IMAGE_DIM || 768); // reject tiny uploads that produce bad results
 const PAYMENTS_ENABLED = !!process.env.STRIPE_SECRET_KEY;
 const stripe = PAYMENTS_ENABLED ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 
 const app = express();
 app.set("trust proxy", true); // honor x-forwarded-proto so Stripe redirect URLs are https behind a host's proxy
-const upload = multer({ limits: { fileSize: 12 * 1024 * 1024, files: 1 } });
+const upload = multer({ limits: { fileSize: 12 * 1024 * 1024, files: 2 } });
 
 // ---- Stripe webhook (raw body) BEFORE express.json ----
 app.post("/api/stripe/webhook", express.raw({ type: "application/json" }), (req, res) => {
@@ -67,18 +73,33 @@ function throttleWaitMs(msg) {
   return (m ? Number(m[1]) : 12) * 1000 + 1500; // honor Replicate's reset hint, padded
 }
 
+function withBirdImage(bird) {
+  if (!bird) return bird;
+  return { ...bird, image: hasRef(bird.id) ? refPublicUrl(bird.id) : null };
+}
+
 async function generateLook(job, look) {
-  const provider = getProvider();
-  const prompt = buildPrompt(look, job.bird);
+  const photos = job.photos || [];
+  const twoPerson = photos.length >= 2;                              // 2 selfies → better likeness
+  const useRef = !twoPerson && USE_BIRD_REF && hasRef(job.bird.id);  // else lock the bird via reference image
+  const mode = twoPerson ? "2-photo" : useRef ? "ref" : "single";
   const MAX_ATTEMPTS = 6;
   let lastErr;
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     try {
-      const { src } = await provider.generate({ images: [job.photo], prompt });
+      let src;
+      if (twoPerson) {
+        ({ src } = await kontextMulti.generateMulti({ imageA: photos[0], imageB: photos[1], prompt: buildTwoPersonPrompt(look, job.bird) }));
+      } else if (useRef) {
+        const birdImage = { buffer: fs.readFileSync(refPath(job.bird.id)), mimeType: "image/jpeg" };
+        ({ src } = await kontextMulti.generateMulti({ imageA: photos[0], imageB: birdImage, prompt: buildMultiPrompt(look) }));
+      } else {
+        ({ src } = await getProvider().generate({ images: [photos[0]], prompt: buildPrompt(look, job.bird) }));
+      }
       return { look: look.id, label: look.label, src };
     } catch (err) {
       lastErr = err;
-      console.error(`[job ${job.id}] ${look.id} try ${attempt}: ${err.message}`);
+      console.error(`[job ${job.id}] ${look.id} try ${attempt} (${mode}): ${err.message}`);
       if (attempt < MAX_ATTEMPTS) {
         const throttled = /throttle/i.test(err.message || "");
         await sleep(throttled ? throttleWaitMs(err.message) : 2500); // wait out rate limits before retrying
@@ -101,17 +122,26 @@ async function startGeneration(job) {
   }
   await Promise.all(Array.from({ length: Math.min(CONCURRENCY, LOOKS.length) }, worker));
   job.status = job.results.every((r) => r?.error) ? "failed" : "complete";
-  job.photo = null; // drop the uploaded selfie once done
+  job.photos = null; // drop the uploaded selfies once done
 }
 
 // 1) hold upload, assign hidden bird
-app.post("/api/start", upload.single("photo"), (req, res) => {
+app.post("/api/start", upload.array("photos", 2), (req, res) => {
   try {
-    if (!req.file) return res.status(400).json({ error: "Please upload a selfie." });
+    if (!req.files?.length) return res.status(400).json({ error: "Please upload at least one selfie." });
+    // validate type + resolution (server-side backstop)
+    for (const f of req.files) {
+      if (!/^image\/(jpe?g|png)$/.test(f.mimetype)) return res.status(400).json({ error: "Please upload JPG or PNG photos only." });
+      const dim = imageDimensions(f.buffer);
+      if (!dim) return res.status(400).json({ error: "Couldn't read that image — please use a standard JPG or PNG." });
+      if (dim.width < MIN_IMAGE_DIM || dim.height < MIN_IMAGE_DIM) {
+        return res.status(400).json({ error: `That photo is ${dim.width}×${dim.height}. Please use at least ${MIN_IMAGE_DIM}×${MIN_IMAGE_DIM} (1024×1024 or larger is best) for sharp results.` });
+      }
+    }
     const bird = assignBird();
     const job = {
       id: randomUUID(), bird,
-      photo: { buffer: req.file.buffer, mimeType: req.file.mimetype },
+      photos: req.files.map((f) => ({ buffer: f.buffer, mimeType: f.mimetype })),
       paid: false, status: "awaiting_payment",
       total: LOOKS.length, done: 0, results: new Array(LOOKS.length).fill(null),
       sessionId: null, createdAt: Date.now(),
@@ -164,7 +194,7 @@ app.get("/api/finalize/:jobId", async (req, res) => {
       if (peek(ip) >= DAILY_CAP) return res.status(429).json({ error: "Daily limit reached — try again tomorrow." });
       bump(ip); startGeneration(job);
     }
-    res.json({ paid: true, bird: job.bird, status: job.status, total: job.total });
+    res.json({ paid: true, bird: withBirdImage(job.bird), status: job.status, total: job.total });
   } catch (err) { console.error("[finalize]", err); res.status(500).json({ error: err.message }); }
 });
 
@@ -174,7 +204,7 @@ app.get("/api/job/:id", (req, res) => {
   if (!job) return res.status(404).json({ error: "Job not found or expired." });
   res.json({
     status: job.status, paid: job.paid, total: job.total, done: job.done,
-    bird: job.paid ? job.bird : null,
+    bird: job.paid ? withBirdImage(job.bird) : null,
     results: job.paid ? job.results : [],
     error: job.error,
   });

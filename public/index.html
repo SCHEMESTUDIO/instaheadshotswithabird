@@ -40,6 +40,11 @@
   .have{display:none;margin-top:6px;align-items:center;gap:14px}
   .have img{width:84px;height:84px;border-radius:12px;object-fit:cover;border:1px solid var(--line)}
   .have .swap{background:none;border:none;color:var(--brand);font-weight:700;cursor:pointer;font-size:13px}
+  .thumbs{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+  .thumb{position:relative;width:84px;height:84px;border-radius:12px;overflow:hidden;border:1px solid var(--line)}
+  .thumb img{width:100%;height:100%;object-fit:cover}
+  .thumb button{position:absolute;top:3px;right:3px;width:20px;height:20px;border:none;border-radius:50%;background:rgba(13,15,20,.7);color:#fff;cursor:pointer;font-size:12px;line-height:1}
+  .count{font-size:13px;color:var(--muted);margin-top:8px;font-weight:600}
   .whatsincluded{margin-top:18px;font-size:13.5px;color:var(--muted);background:#fcfbf8;border:1px solid var(--line);border-radius:12px;padding:12px 14px}
   .whatsincluded b{color:var(--ink)}
   .go{width:100%;margin-top:18px;background:var(--brand);color:#fff;border:none;border-radius:13px;padding:17px;font-size:17px;font-weight:800;cursor:pointer;letter-spacing:-.01em;transition:.12s}
@@ -52,6 +57,7 @@
   #result{display:none;margin-top:36px}
   .birdcard{background:var(--ink);color:#fff;border-radius:var(--r);padding:24px;display:flex;gap:20px;align-items:center;flex-wrap:wrap}
   .birdcard .emoji{font-size:54px;line-height:1}
+  .birdcard .birdpic{width:96px;height:96px;border-radius:14px;object-fit:cover;border:1px solid rgba(255,255,255,.18)}
   .birdcard .meta{flex:1;min-width:230px}
   .birdcard .kicker{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);font-weight:700}
   .birdcard h2{margin:4px 0 2px;font-size:26px;letter-spacing:-.02em}
@@ -138,17 +144,15 @@
   <div class="canceled" id="canceled">Payment canceled — no charge made. Your bird is still waiting. 🐦</div>
 
   <section class="tool" id="tool">
-    <p class="step-label">Upload one selfie</p>
+    <p class="step-label">Upload 1–2 selfies</p>
     <label class="drop" id="drop">
-      <input type="file" id="file" accept="image/*" />
+      <input type="file" id="file" accept="image/*" multiple />
       <div class="icon">📸</div>
-      <p>Click to upload or drop a photo</p>
-      <small>A clear, front-facing selfie works best · JPG/PNG · up to 12MB</small>
+      <p>Click to upload or drop your photo(s)</p>
+      <small>1 works — add a 2nd angle for better likeness · JPG or PNG · at least 768×768 (1024+ recommended)</small>
     </label>
-    <div class="have" id="have">
-      <img id="haveImg" alt="your selfie" />
-      <div><div style="font-weight:700">Looking good.</div><button class="swap" id="swap" type="button">Use a different photo</button></div>
-    </div>
+    <div class="thumbs" id="thumbs"></div>
+    <div class="count" id="count"></div>
 
     <div class="whatsincluded">
       <b>Your $1 gets all 5 looks:</b> Blue Suit · Black Tee · Colour Top · Charcoal Half-Zip · Dark Suit —
@@ -222,23 +226,51 @@
 
 <script>
   const $ = (id) => document.getElementById(id);
-  let photo=null, currentJob=null, reviewShown=false, featuredSrc=null, rating=0;
+  let photos=[], currentJob=null, reviewShown=false, featuredSrc=null, rating=0;
+  const MAXP=2, MIN_DIM=768;
 
   function toast(t){ const el=$('toast'); el.textContent=t; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),1600); }
 
-  // ---- upload ----
-  function refresh(){ $('go').disabled = !photo; }
-  function setPhoto(f){ if(!f||!f.type.startsWith('image/'))return; photo=f; $('haveImg').src=URL.createObjectURL(f); $('drop').style.display='none'; $('have').style.display='flex'; refresh(); }
-  $('file').addEventListener('change',e=>setPhoto(e.target.files[0]));
-  $('swap').addEventListener('click',()=>{ photo=null; $('file').value=''; $('drop').style.display='block'; $('have').style.display='none'; refresh(); });
+  // ---- upload (up to 2 photos) ----
+  function refresh(){ $('go').disabled = photos.length<1; renderThumbs(); }
+  function renderThumbs(){
+    $('thumbs').innerHTML='';
+    photos.forEach((f,i)=>{
+      const d=document.createElement('div'); d.className='thumb';
+      const im=document.createElement('img'); im.src=URL.createObjectURL(f); d.appendChild(im);
+      const b=document.createElement('button'); b.textContent='×'; b.title='Remove'; b.onclick=()=>{photos.splice(i,1);refresh();}; d.appendChild(b);
+      $('thumbs').appendChild(d);
+    });
+    const n=photos.length;
+    $('count').textContent = n ? `${n} of ${MAXP} photos${n<2?' · add a 2nd angle for better likeness':''}` : '';
+    $('drop').style.display = n>=MAXP ? 'none' : 'flex';
+  }
+  function addFiles(list){
+    $('err').style.display='none';
+    for(const f of list){
+      if(photos.length>=MAXP) break;
+      if(!/^image\/(jpe?g|png)$/.test(f.type)){ showErr('Please use JPG or PNG photos only.'); continue; }
+      const url=URL.createObjectURL(f), img=new Image();
+      img.onload=()=>{
+        if(img.naturalWidth<MIN_DIM || img.naturalHeight<MIN_DIM){
+          showErr(`That photo is ${img.naturalWidth}×${img.naturalHeight}. Please use at least ${MIN_DIM}×${MIN_DIM} (1024+ is best) — small photos come out blurry.`);
+        } else if(photos.length<MAXP){ photos.push(f); refresh(); }
+        URL.revokeObjectURL(url);
+      };
+      img.onerror=()=>{ showErr("Couldn't read that image — try a standard JPG or PNG."); URL.revokeObjectURL(url); };
+      img.src=url;
+    }
+  }
+  function showErr(m){ $('err').textContent=m; $('err').style.display='block'; }
+  $('file').addEventListener('change',e=>{ addFiles(e.target.files); e.target.value=''; });
   ['dragover','dragenter'].forEach(ev=>$('drop').addEventListener(ev,e=>{e.preventDefault();$('drop').classList.add('drag');}));
   ['dragleave','drop'].forEach(ev=>$('drop').addEventListener(ev,e=>{e.preventDefault();$('drop').classList.remove('drag');}));
-  $('drop').addEventListener('drop',e=>setPhoto(e.dataTransfer.files[0]));
+  $('drop').addEventListener('drop',e=>addFiles(e.dataTransfer.files));
 
   $('go').addEventListener('click', async ()=>{
     $('err').style.display='none'; $('go').disabled=true; $('go').textContent='Reserving your bird…';
     try{
-      const fd=new FormData(); fd.append('photo',photo);
+      const fd=new FormData(); photos.forEach(f=>fd.append('photos',f));
       const s=await fetch('/api/start',{method:'POST',body:fd}); const sd=await s.json();
       if(!s.ok) throw new Error(sd.error||'Could not start.');
       const c=await fetch('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jobId:sd.jobId})});
@@ -249,8 +281,9 @@
 
   // ---- result ----
   function renderBird(b){
+    const visual = b.image ? `<img class="birdpic" src="${b.image}" alt="${b.name}">` : `<div class="emoji">${b.emoji||'🐦'}</div>`;
     $('birdcard').innerHTML = `
-      <div class="emoji">${b.emoji||'🐦'}</div>
+      ${visual}
       <div class="meta">
         <div class="kicker">Your Bird ID — #${String(b.assignmentNumber||1).padStart(4,'0')}</div>
         <h2>${b.name}</h2><div class="sci">${b.sci||''}</div>
