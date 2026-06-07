@@ -45,6 +45,7 @@
   .thumb img{width:100%;height:100%;object-fit:cover}
   .thumb button{position:absolute;top:3px;right:3px;width:20px;height:20px;border:none;border-radius:50%;background:rgba(13,15,20,.7);color:#fff;cursor:pointer;font-size:12px;line-height:1}
   .count{font-size:13px;color:var(--muted);margin-top:8px;font-weight:600}
+  .heicph{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%;font-size:11px;font-weight:800;color:var(--muted);text-align:center;background:#fcfbf8}
   .whatsincluded{margin-top:18px;font-size:13.5px;color:var(--muted);background:#fcfbf8;border:1px solid var(--line);border-radius:12px;padding:12px 14px}
   .whatsincluded b{color:var(--ink)}
   .go{width:100%;margin-top:18px;background:var(--brand);color:#fff;border:none;border-radius:13px;padding:17px;font-size:17px;font-weight:800;cursor:pointer;letter-spacing:-.01em;transition:.12s}
@@ -146,10 +147,10 @@
   <section class="tool" id="tool">
     <p class="step-label">Upload 1–2 selfies</p>
     <label class="drop" id="drop">
-      <input type="file" id="file" accept="image/*" multiple />
+      <input type="file" id="file" accept="image/jpeg,image/png,image/heic,image/heif,.heic,.heif" multiple />
       <div class="icon">📸</div>
       <p>Click to upload or drop your photo(s)</p>
-      <small>1 works — add a 2nd angle for better likeness · JPG or PNG · at least 768×768 (1024+ recommended)</small>
+      <small>1 works — add a 2nd angle for better likeness · JPG, PNG, or HEIC · at least 768×768 (1024+ recommended)</small>
     </label>
     <div class="thumbs" id="thumbs"></div>
     <div class="count" id="count"></div>
@@ -228,6 +229,7 @@
   const $ = (id) => document.getElementById(id);
   let photos=[], currentJob=null, reviewShown=false, featuredSrc=null, rating=0;
   const MAXP=2, MIN_DIM=768;
+  const isHeicFile = (f) => /heic|heif/i.test(f.type) || /\.(heic|heif)$/i.test(f.name);
 
   function toast(t){ const el=$('toast'); el.textContent=t; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),1600); }
 
@@ -237,7 +239,8 @@
     $('thumbs').innerHTML='';
     photos.forEach((f,i)=>{
       const d=document.createElement('div'); d.className='thumb';
-      const im=document.createElement('img'); im.src=URL.createObjectURL(f); d.appendChild(im);
+      if(isHeicFile(f)){ const ph=document.createElement('div'); ph.className='heicph'; ph.innerHTML='📷<br>HEIC'; d.appendChild(ph); }
+      else { const im=document.createElement('img'); im.src=URL.createObjectURL(f); d.appendChild(im); }
       const b=document.createElement('button'); b.textContent='×'; b.title='Remove'; b.onclick=()=>{photos.splice(i,1);refresh();}; d.appendChild(b);
       $('thumbs').appendChild(d);
     });
@@ -249,7 +252,8 @@
     $('err').style.display='none';
     for(const f of list){
       if(photos.length>=MAXP) break;
-      if(!/^image\/(jpe?g|png)$/.test(f.type)){ showErr('Please use JPG or PNG photos only.'); continue; }
+      if(isHeicFile(f)){ photos.push(f); refresh(); continue; } // HEIC: can't preview/measure in-browser; converted + checked server-side
+      if(!/^image\/(jpe?g|png)$/.test(f.type)){ showErr('Please use JPG, PNG, or HEIC photos.'); continue; }
       const url=URL.createObjectURL(f), img=new Image();
       img.onload=()=>{
         if(img.naturalWidth<MIN_DIM || img.naturalHeight<MIN_DIM){

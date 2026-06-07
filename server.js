@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import { randomUUID } from "crypto";
 import Stripe from "stripe";
 import fs from "fs";
+import heicConvert from "heic-convert";
 import { buildPrompt, buildMultiPrompt, buildTwoPersonPrompt } from "./lib/prompt.js";
 import { LOOKS } from "./lib/looks.js";
 import { hasRef, refPath, refPublicUrl } from "./lib/birdref.js";
@@ -73,6 +74,12 @@ function throttleWaitMs(msg) {
   return (m ? Number(m[1]) : 12) * 1000 + 1500; // honor Replicate's reset hint, padded
 }
 
+function isHeic(buf) {
+  if (!buf || buf.length < 12) return false;
+  if (buf.toString("latin1", 4, 8) !== "ftyp") return false; // ISO-BMFF box
+  return /heic|heif|heix|hevc|hevx|mif1|msf1/.test(buf.toString("latin1", 8, 12).toLowerCase());
+}
+
 function withBirdImage(bird) {
   if (!bird) return bird;
   return { ...bird, image: hasRef(bird.id) ? refPublicUrl(bird.id) : null };
@@ -126,14 +133,20 @@ async function startGeneration(job) {
 }
 
 // 1) hold upload, assign hidden bird
-app.post("/api/start", upload.array("photos", 2), (req, res) => {
+app.post("/api/start", upload.array("photos", 2), async (req, res) => {
   try {
     if (!req.files?.length) return res.status(400).json({ error: "Please upload at least one selfie." });
-    // validate type + resolution (server-side backstop)
+    // convert HEIC → JPEG, then validate type + resolution (before assigning a bird)
     for (const f of req.files) {
-      if (!/^image\/(jpe?g|png)$/.test(f.mimetype)) return res.status(400).json({ error: "Please upload JPG or PNG photos only." });
+      if (isHeic(f.buffer)) {
+        try {
+          f.buffer = Buffer.from(await heicConvert({ buffer: f.buffer, format: "JPEG", quality: 0.92 }));
+          f.mimetype = "image/jpeg";
+        } catch { return res.status(400).json({ error: "Couldn't read that HEIC photo — try exporting it as JPG." }); }
+      }
+      if (!/^image\/(jpe?g|png)$/.test(f.mimetype)) return res.status(400).json({ error: "Please upload a JPG, PNG, or HEIC photo." });
       const dim = imageDimensions(f.buffer);
-      if (!dim) return res.status(400).json({ error: "Couldn't read that image — please use a standard JPG or PNG." });
+      if (!dim) return res.status(400).json({ error: "Couldn't read that image — please use a standard JPG, PNG, or HEIC." });
       if (dim.width < MIN_IMAGE_DIM || dim.height < MIN_IMAGE_DIM) {
         return res.status(400).json({ error: `That photo is ${dim.width}×${dim.height}. Please use at least ${MIN_IMAGE_DIM}×${MIN_IMAGE_DIM} (1024×1024 or larger is best) for sharp results.` });
       }
