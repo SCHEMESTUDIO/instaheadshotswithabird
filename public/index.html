@@ -211,10 +211,9 @@
 
 <section class="showcase" id="showcaseWrap">
   <div class="wrap">
-    <p class="sub2">Real headshots. Real birds. Every single time.</p>
     <div class="vids">
-      <video src="/videos/demo1.mp4" autoplay muted loop playsinline preload="metadata" aria-label="Headshot demo"></video>
-      <video src="/videos/man.mp4" autoplay muted loop playsinline preload="metadata" aria-label="Headshot demo"></video>
+      <video src="/videos/demo1.mp4" autoplay muted loop playsinline webkit-playsinline preload="auto" aria-label="Headshot demo"></video>
+      <video src="/videos/man.mp4" autoplay muted loop playsinline webkit-playsinline preload="auto" aria-label="Headshot demo"></video>
     </div>
     <p class="vidnote">Headshots are delivered as static <strong>.jpg</strong> images only. These videos are for illustration and entertainment purposes only.</p>
   </div>
@@ -242,7 +241,7 @@
     <label style="display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--muted);margin-top:10px;text-align:left">
       <input type="checkbox" id="optin" /> <span>Email me occasional updates from Headshots with a Bird (optional).</span>
     </label>
-    <input type="text" id="code" placeholder="Have a beta code? Enter it here" autocomplete="off"
+    <input type="text" id="code" name="beta-code" placeholder="Have a beta code? Enter it here" autocomplete="off" autocorrect="off" autocapitalize="off" readonly onfocus="this.removeAttribute('readonly')"
       style="display:block;width:100%;margin-top:12px;border:1px solid var(--line);border-radius:11px;padding:11px 14px;font:inherit;text-align:center" />
     <button class="go" id="go" disabled>Continue to payment · $1</button>
     <p class="note">The bird is non-negotiable and appears in all five. 🐦</p>
@@ -437,7 +436,7 @@
       const c=await fetch('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jobId:sd.jobId, code:($('code').value||'').trim()})});
       const cd=await c.json(); if(!c.ok) throw new Error(cd.error||'Could not start checkout.');
       window.location = cd.url;
-    }catch(err){ $('err').textContent=err.message; $('err').style.display='block'; $('go').disabled=false; $('go').textContent='Continue to payment · $1'; }
+    }catch(err){ const m=/load failed|failed to fetch|networkerror/i.test(err.message||'')?'Upload failed — check your connection and try again (large photos can take a moment).':(err.message||'Something went wrong.'); $('err').textContent=m; $('err').style.display='block'; $('go').disabled=false; $('go').textContent='Continue to payment · $1'; }
   });
 
   // ---- result ----
@@ -588,6 +587,10 @@
   })();
 
   // on load: returning from payment?
+  // nudge mobile browsers to autoplay the (muted, inline) demo videos
+  document.querySelectorAll('.vids video').forEach(v=>{ v.muted=true; const p=v.play&&v.play(); if(p&&p.catch) p.catch(()=>{}); });
+  document.addEventListener('touchstart', ()=>{ document.querySelectorAll('.vids video').forEach(v=>{ if(v.paused){ v.muted=true; v.play&&v.play().catch(()=>{}); } }); }, {once:true});
+
   const q=new URLSearchParams(location.search);
   if(q.get('paid')==='1' && q.get('job')) enterResult(q.get('job'));
   else if(q.get('canceled')==='1') $('canceled').style.display='block';
