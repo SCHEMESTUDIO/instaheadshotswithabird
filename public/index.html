@@ -110,16 +110,17 @@
   .compare{padding:48px 0 10px}
   .compare h2{text-align:center;font-size:28px;letter-spacing:-.03em;margin:0 0 6px}
   .compare .sub2{text-align:center;color:var(--muted);margin:0 0 22px;font-size:15px}
-  .ctable-wrap{overflow-x:auto}
-  .ctable{width:100%;border-collapse:collapse;min-width:560px;background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden}
-  .ctable th,.ctable td{padding:14px 16px;text-align:center;border-bottom:1px solid var(--line);font-size:14px}
-  .ctable thead th{font-weight:800;background:#fcfbf8}
+  .ctable-wrap{overflow-x:auto;padding:4px}
+  .ctable{width:100%;border-collapse:separate;border-spacing:0;min-width:580px;background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:var(--shadow)}
+  .ctable th,.ctable td{padding:16px 18px;text-align:center;border-bottom:1px solid var(--line);font-size:14px}
+  .ctable thead th{font-weight:800;background:#faf8f2}
   .ctable tbody th{text-align:left;font-weight:700;color:var(--muted);white-space:nowrap}
-  .ctable .us{background:#fff7f4;border-left:2px solid var(--brand);border-right:2px solid var(--brand)}
-  .ctable thead .us{color:var(--brand)}
-  .ctable tbody tr:last-child .us{border-bottom:2px solid var(--brand)}
+  .ctable tbody tr:nth-child(even) th,.ctable tbody tr:nth-child(even) td:not(.us){background:#fcfbf8}
+  .ctable .us{background:#fff3ef}
+  .ctable thead .us{background:var(--brand);color:#fff}
+  .ctable tbody .us{font-weight:700;color:var(--ink)}
   .ctable .yes{color:var(--good);font-weight:800}
-  .ctable .no{color:#c0392b;opacity:.55;font-weight:700}
+  .ctable .no{color:#c0392b;opacity:.5;font-weight:700;font-size:16px}
   .ctable tr:last-child td,.ctable tr:last-child th{border-bottom:none}
   .compare .foot{font-size:11.5px;color:var(--muted);text-align:center;margin-top:10px}
   .how{padding:48px 0 10px}
@@ -175,9 +176,9 @@
 
   <header class="hero">
     <div class="badge"><span class="dot"></span> 148 birds. You don't get to choose yours.</div>
-    <h1>Five headshots.<br><span class="hl">One bird. $1.</span></h1>
-    <p class="sub">Upload one selfie and get five polished headshots — five outfits, five backdrops — each starring the single bird we've paired to you, plus your own <strong>Bird ID</strong>.</p>
-    <p class="micro">You don't pick the bird. The bird picks you. It cannot be removed. There is no button.</p>
+    <h1>Five headshots.<br><span class="hl">One bird. <span style="color:var(--good)">$1.</span></span></h1>
+    <p class="sub">Professional headshots without a photographer. Upload two selfies and get five polished headshots. Plus a bird.</p>
+    <p class="micro">You must not forget about the bird.</p>
   </header>
 
   <div class="canceled" id="canceled">Payment canceled — no charge made. Your bird is still waiting. 🐦</div>
