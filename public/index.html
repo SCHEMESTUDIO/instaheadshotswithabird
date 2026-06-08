@@ -496,7 +496,7 @@
   function canShareFiles(files){ try{ return !!(navigator.canShare && navigator.canShare({files})); }catch{ return false; } }
   async function cardCanvas(){
     const el=$('sharecard'), prev=el.style.transform; el.style.transform='none';
-    try{ return await html2canvas(el,{backgroundColor:null,scale:2,useCORS:true,width:400,height:560,windowWidth:400}); }
+    try{ return await html2canvas(el,{backgroundColor:null,scale:1,useCORS:true,width:400,height:560,windowWidth:400}); }
     finally{ el.style.transform=prev; fitCard(); }
   }
   async function cardBlob(){ const c=await cardCanvas(); return await new Promise(r=>c.toBlob(r,'image/png')); }
