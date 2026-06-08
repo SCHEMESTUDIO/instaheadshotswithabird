@@ -107,6 +107,21 @@
   .thanks .big{font-size:40px}
 
   /* carousel */
+  .compare{padding:48px 0 10px}
+  .compare h2{text-align:center;font-size:28px;letter-spacing:-.03em;margin:0 0 6px}
+  .compare .sub2{text-align:center;color:var(--muted);margin:0 0 22px;font-size:15px}
+  .ctable-wrap{overflow-x:auto}
+  .ctable{width:100%;border-collapse:collapse;min-width:560px;background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+  .ctable th,.ctable td{padding:14px 16px;text-align:center;border-bottom:1px solid var(--line);font-size:14px}
+  .ctable thead th{font-weight:800;background:#fcfbf8}
+  .ctable tbody th{text-align:left;font-weight:700;color:var(--muted);white-space:nowrap}
+  .ctable .us{background:#fff7f4;border-left:2px solid var(--brand);border-right:2px solid var(--brand)}
+  .ctable thead .us{color:var(--brand)}
+  .ctable tbody tr:last-child .us{border-bottom:2px solid var(--brand)}
+  .ctable .yes{color:var(--good);font-weight:800}
+  .ctable .no{color:#c0392b;opacity:.55;font-weight:700}
+  .ctable tr:last-child td,.ctable tr:last-child th{border-bottom:none}
+  .compare .foot{font-size:11.5px;color:var(--muted);text-align:center;margin-top:10px}
   .reviews{padding:58px 0 20px;display:none}
   .reviews h2{text-align:center;font-size:28px;letter-spacing:-.03em;margin:0 0 4px}
   .reviews .sub2{text-align:center;color:var(--muted);margin:0 0 24px;font-size:15px}
@@ -165,6 +180,27 @@
     <div class="err" id="err"></div>
   </section>
 </div>
+
+<section class="compare" id="compareWrap">
+  <div class="wrap">
+    <h2>InstaHeadshots with a Bird vs. everyone else</h2>
+    <p class="sub2">They give you more headshots. We give you a bird.</p>
+    <div class="ctable-wrap">
+      <table class="ctable">
+        <thead>
+          <tr><th></th><th class="us">Us 🐦</th><th>HeadshotPro</th><th>InstaHeadshots</th><th>Dr. Headshot</th></tr>
+        </thead>
+        <tbody>
+          <tr><th>Price</th><td class="us"><b>$1</b></td><td>from $29</td><td>from ~$39</td><td>from ~$30</td></tr>
+          <tr><th>Headshots you get</th><td class="us">5</td><td>70+</td><td>40</td><td>40</td></tr>
+          <tr><th>Turnaround</th><td class="us"><b>~1 min</b></td><td>~10 min–2 hrs</td><td>~90 min</td><td>~2 hrs</td></tr>
+          <tr><th>Bird on your shoulder</th><td class="us yes">✓ Always</td><td class="no">✗</td><td class="no">✗</td><td class="no">✗</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="foot">Competitor figures are their advertised entry plans (approximate). The bird is exclusively ours.</p>
+  </div>
+</section>
 
 <div class="wrap">
   <section id="result">
@@ -328,7 +364,8 @@
   }
 
   async function enterResult(jobId){
-    currentJob=jobId; $('tool').style.display='none'; $('result').style.display='block'; window.scrollTo({top:0,behavior:'smooth'});
+    currentJob=jobId; $('tool').style.display='none'; $('result').style.display='block';
+    { const cw=$('compareWrap'); if(cw) cw.style.display='none'; } window.scrollTo({top:0,behavior:'smooth'});
     let fin; try{ fin=await (await fetch('/api/finalize/'+jobId)).json(); }catch{ $('pmsg').textContent='Could not verify payment.'; return; }
     if(fin.error){ $('pmsg').textContent=fin.error; return; }
     if(!fin.paid){ $('pmsg').textContent='Payment not confirmed. If you were charged, refresh in a moment.'; return; }

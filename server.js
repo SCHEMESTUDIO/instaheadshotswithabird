@@ -21,6 +21,7 @@ const DAILY_CAP = Number(process.env.DAILY_CAP || 20);
 const CONCURRENCY = Number(process.env.CONCURRENCY || 1); // serial by default — respects Replicate's low-credit burst limit. Raise once credit > $5.
 const ADMIN_KEY = process.env.ADMIN_KEY || "";
 const USE_BIRD_REF = process.env.USE_BIRD_REF !== "false"; // use the locked reference image when one exists
+const PROVIDER_NAME = (process.env.PROVIDER || "replicate").toLowerCase();
 const MIN_IMAGE_DIM = Number(process.env.MIN_IMAGE_DIM || 768); // reject tiny uploads that produce bad results
 const PAYMENTS_ENABLED = !!process.env.STRIPE_SECRET_KEY;
 const stripe = PAYMENTS_ENABLED ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
@@ -96,7 +97,12 @@ async function generateLook(job, look) {
     try {
       let src;
       if (twoPerson) {
-        ({ src } = await kontextMulti.generateMulti({ imageA: photos[0], imageB: photos[1], prompt: buildTwoPersonPrompt(look, job.bird) }));
+        if (PROVIDER_NAME === "gemini") {
+          // Gemini Nano Banana takes both selfies as references in one call
+          ({ src } = await getProvider().generate({ images: photos, prompt: buildTwoPersonPrompt(look, job.bird) }));
+        } else {
+          ({ src } = await kontextMulti.generateMulti({ imageA: photos[0], imageB: photos[1], prompt: buildTwoPersonPrompt(look, job.bird) }));
+        }
       } else if (useRef) {
         const birdImage = { buffer: fs.readFileSync(refPath(job.bird.id)), mimeType: "image/jpeg" };
         ({ src } = await kontextMulti.generateMulti({ imageA: photos[0], imageB: birdImage, prompt: buildMultiPrompt(look) }));
