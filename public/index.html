@@ -122,6 +122,22 @@
   .ctable .no{color:#c0392b;opacity:.55;font-weight:700}
   .ctable tr:last-child td,.ctable tr:last-child th{border-bottom:none}
   .compare .foot{font-size:11.5px;color:var(--muted);text-align:center;margin-top:10px}
+  .how{padding:48px 0 10px}
+  .how h2{text-align:center;font-size:28px;letter-spacing:-.03em;margin:0 0 22px}
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media(max-width:640px){.steps{grid-template-columns:1fr}}
+  .step{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px;text-align:center}
+  .step .n{width:34px;height:34px;border-radius:50%;background:var(--brand);color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;margin:0 auto 12px}
+  .step h3{margin:0 0 6px;font-size:17px} .step p{margin:0;font-size:14px;color:var(--muted)}
+  .faq{padding:48px 0 10px}
+  .faq .wrap{max-width:720px}
+  .faq h2{text-align:center;font-size:28px;letter-spacing:-.03em;margin:0 0 18px}
+  .faq details{background:#fff;border:1px solid var(--line);border-radius:12px;padding:0 16px;margin-bottom:10px}
+  .faq summary{cursor:pointer;font-weight:700;padding:14px 0;font-size:15px;list-style:none}
+  .faq summary::-webkit-details-marker{display:none}
+  .faq summary::after{content:"+";float:right;color:var(--brand);font-weight:800}
+  .faq details[open] summary::after{content:"–"}
+  .faq details p{margin:0 0 14px;font-size:14px;color:#3a3d44}
   .reviews{padding:58px 0 20px;display:none}
   .reviews h2{text-align:center;font-size:28px;letter-spacing:-.03em;margin:0 0 4px}
   .reviews .sub2{text-align:center;color:var(--muted);margin:0 0 24px;font-size:15px}
@@ -198,14 +214,26 @@
           <tr><th></th><th class="us">Us 🐦</th><th>HeadshotPro</th><th>InstaHeadshots</th><th>Dr. Headshot</th></tr>
         </thead>
         <tbody>
-          <tr><th>Price</th><td class="us"><b>$1</b></td><td>from $29</td><td>from ~$39</td><td>from ~$30</td></tr>
-          <tr><th>Headshots you get</th><td class="us">5</td><td>70+</td><td>40</td><td>40</td></tr>
+          <tr><th>Price</th><td class="us"><b>$1</b></td><td>from $29</td><td>from $59</td><td>from $34</td></tr>
+          <tr><th>Headshots you get</th><td class="us">5</td><td>70+</td><td>100</td><td>40</td></tr>
+          <tr><th>Outfits &amp; backdrops</th><td class="us">5</td><td>100s</td><td>5</td><td>4</td></tr>
           <tr><th>Turnaround</th><td class="us"><b>~1 min</b></td><td>~10 min–2 hrs</td><td>~90 min</td><td>~2 hrs</td></tr>
           <tr><th>Bird on your shoulder</th><td class="us yes">✓ Always</td><td class="no">✗</td><td class="no">✗</td><td class="no">✗</td></tr>
         </tbody>
       </table>
     </div>
     <p class="foot">Competitor figures are their advertised entry plans (approximate). The bird is exclusively ours.</p>
+  </div>
+</section>
+
+<section class="how" id="howWrap">
+  <div class="wrap">
+    <h2>How it works</h2>
+    <div class="steps">
+      <div class="step"><div class="n">1</div><h3>Upload 2 selfies</h3><p>Two clear, front-facing angles — that's what makes the likeness work.</p></div>
+      <div class="step"><div class="n">2</div><h3>Pay $1</h3><p>One dollar, secure checkout via Stripe. No subscription.</p></div>
+      <div class="step"><div class="n">3</div><h3>Get 5 headshots</h3><p>Five professional looks in about a minute — each with your bird, plus your Bird ID.</p></div>
+    </div>
   </div>
 </section>
 
@@ -233,12 +261,26 @@
   </div>
 </section>
 
+<section class="faq" id="faqWrap">
+  <div class="wrap">
+    <h2>Questions</h2>
+    <details><summary>Can I remove the bird?</summary><p>No. There is no button to remove the bird. There never was a button. The bird stays.</p></details>
+    <details><summary>Will it actually look like me?</summary><p>Yes — that's why we ask for two angles. The headshots are AI-generated and occasionally surprising, but a real likeness is the whole point.</p></details>
+    <details><summary>What do I get for $1?</summary><p>Five professional headshots across five outfit-and-backdrop looks, each starring the one bird we've paired to you — plus a shareable Bird ID card.</p></details>
+    <details><summary>How long does it take?</summary><p>About a minute. No model training, no waiting hours like the other guys.</p></details>
+    <details><summary>What photos work best?</summary><p>Two clear, front-facing, well-lit shots from slightly different angles, at least 768px on the short side. JPG, PNG, or HEIC.</p></details>
+    <details><summary>Do you keep my photos?</summary><p>No. Your uploads are used to generate your headshots and then discarded — we don't store them. See our <a href="/privacy.html">Privacy Policy</a>.</p></details>
+    <details><summary>Can I choose my bird?</summary><p>No. The bird chooses you. There are 148 species; you get exactly one.</p></details>
+    <details><summary>Refunds?</summary><p>If we fail to deliver your headshots, you're refunded. Otherwise all sales — and all birds — are final.</p></details>
+  </div>
+</section>
+
 <section class="about" id="about">
   <div class="wrap">
     <h2>About</h2>
     <p>Headshot companies were charging $30–60 a pop and pocketing most of it. We thought working professionals deserved a sharp, professional headshot for about the price of a coffee. So we built one for a dollar.</p>
     <p>Why the bird? Frankly, we can't explain it. We've tried to get it to leave. It won't.</p>
-    <p class="by">InstaHeadshots with a Bird is a project by <a href="https://schemestudio.lol" target="_blank" rel="noopener">SCHEME Studio</a>. Questions, press, or (futile) bird-removal requests: <a href="mailto:james@schemestudios.lol">james@schemestudios.lol</a>.</p>
+    <p class="by">InstaHeadshots with a Bird is a project by <a href="https://schemestudio.lol" target="_blank" rel="noopener">SCHEME Studio</a>. Questions, press, or (futile) bird-removal requests: <a href="mailto:james@schemestudio.lol">james@schemestudio.lol</a>.</p>
   </div>
 </section>
 
@@ -246,7 +288,7 @@
   <div class="big">InstaHeadshots with a Bird 🐦</div>
   A parody. Not affiliated with any other headshot service. We don't store your selfie after generating.<br>
   Your bird is assigned at random and is, regrettably for you, permanent.
-  <div class="links"><a href="#about">About</a> · <a href="/terms.html">Terms</a> · <a href="/privacy.html">Privacy</a> · <a href="mailto:james@schemestudios.lol">Contact</a> · <a href="https://schemestudio.lol" target="_blank" rel="noopener">SCHEME Studio</a></div>
+  <div class="links"><a href="#about">About</a> · <a href="/terms.html">Terms</a> · <a href="/privacy.html">Privacy</a> · <a href="mailto:james@schemestudio.lol">Contact</a> · <a href="https://schemestudio.lol" target="_blank" rel="noopener">SCHEME Studio</a></div>
 </div></footer>
 
 <!-- REVIEW MODAL -->
@@ -382,7 +424,7 @@
 
   async function enterResult(jobId){
     currentJob=jobId; $('tool').style.display='none'; $('result').style.display='block';
-    { const cw=$('compareWrap'); if(cw) cw.style.display='none'; } window.scrollTo({top:0,behavior:'smooth'});
+    { ['compareWrap','howWrap','faqWrap'].forEach(id=>{const e=$(id); if(e) e.style.display='none';}); } window.scrollTo({top:0,behavior:'smooth'});
     let fin; try{ fin=await (await fetch('/api/finalize/'+jobId)).json(); }catch{ $('pmsg').textContent='Could not verify payment.'; return; }
     if(fin.error){ $('pmsg').textContent=fin.error; return; }
     if(!fin.paid){ $('pmsg').textContent='Payment not confirmed. If you were charged, refresh in a moment.'; return; }
