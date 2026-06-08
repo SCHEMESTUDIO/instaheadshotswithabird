@@ -137,7 +137,14 @@
   .cdots button{width:9px;height:9px;border-radius:50%;border:none;background:var(--line);cursor:pointer}
   .cdots button.on{background:var(--ink)}
 
+  .about{padding:52px 0 10px;text-align:center}
+  .about .wrap{max-width:640px}
+  .about h2{font-size:28px;letter-spacing:-.03em;margin:0 0 14px}
+  .about p{font-size:16px;color:#3a3d44;margin:0 0 14px}
+  .about .by{font-size:14px;color:var(--muted)}
   footer{padding:48px 0 40px;text-align:center;color:var(--muted);font-size:13px}
+  footer a{color:var(--muted);text-decoration:underline}
+  footer .links{margin-top:10px;font-size:13px;line-height:2}
   footer .big{font-weight:800;color:var(--ink);font-size:15px;margin-bottom:6px}
   .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:999px;font-size:14px;font-weight:600;opacity:0;transition:.2s;z-index:60}
   .toast.show{opacity:1}
@@ -226,10 +233,20 @@
   </div>
 </section>
 
+<section class="about" id="about">
+  <div class="wrap">
+    <h2>About</h2>
+    <p>Headshot companies were charging $30–60 a pop and pocketing most of it. We thought working professionals deserved a sharp, professional headshot for about the price of a coffee. So we built one for a dollar.</p>
+    <p>Why the bird? Frankly, we can't explain it. We've tried to get it to leave. It won't.</p>
+    <p class="by">InstaHeadshots with a Bird is a project by <a href="https://schemestudio.lol" target="_blank" rel="noopener">SCHEME Studio</a>. Questions, press, or (futile) bird-removal requests: <a href="mailto:james@schemestudios.lol">james@schemestudios.lol</a>.</p>
+  </div>
+</section>
+
 <footer><div class="wrap">
   <div class="big">InstaHeadshots with a Bird 🐦</div>
   A parody. Not affiliated with any other headshot service. We don't store your selfie after generating.<br>
   Your bird is assigned at random and is, regrettably for you, permanent.
+  <div class="links"><a href="#about">About</a> · <a href="/terms.html">Terms</a> · <a href="/privacy.html">Privacy</a> · <a href="mailto:james@schemestudios.lol">Contact</a> · <a href="https://schemestudio.lol" target="_blank" rel="noopener">SCHEME Studio</a></div>
 </div></footer>
 
 <!-- REVIEW MODAL -->
