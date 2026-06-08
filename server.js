@@ -27,7 +27,7 @@ const ADMIN_KEY = process.env.ADMIN_KEY || "";
 const USE_BIRD_REF = process.env.USE_BIRD_REF !== "false"; // use the locked reference image when one exists
 const PROVIDER_NAME = (process.env.PROVIDER || "replicate").toLowerCase();
 const ENHANCE = process.env.ENHANCE !== "false"; // light contrast + sharpen on outputs
-const RESTORE = process.env.RESTORE !== "false" && !!process.env.REPLICATE_API_TOKEN; // CodeFormer face-restore pass
+const RESTORE = process.env.RESTORE === "true" && !!process.env.REPLICATE_API_TOKEN; // OFF by default — was slowing jobs and not improving likeness
 const MIN_IMAGE_DIM = Number(process.env.MIN_IMAGE_DIM || 768); // reject tiny uploads that produce bad results
 const PAYMENTS_ENABLED = !!process.env.STRIPE_SECRET_KEY;
 const FREE_CODES = (process.env.FREE_CODES || "").split(",").map((s) => s.trim().toLowerCase()).filter(Boolean); // beta codes that skip payment
