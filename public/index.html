@@ -94,14 +94,17 @@
   .cell .dl{position:absolute;top:8px;right:8px;width:28px;height:28px;display:none;align-items:center;justify-content:center;background:rgba(255,255,255,.92);border-radius:8px;text-decoration:none;font-size:14px;color:var(--ink)}
   .cell:hover .dl{display:flex}
   .hint{text-align:center;color:var(--muted);font-size:13px;margin:0 0 14px}
-  .sharecard{display:flex;max-width:560px;margin:0 auto;aspect-ratio:1/1;background:var(--ink);color:#fff;border-radius:18px;overflow:hidden;box-shadow:var(--shadow)}
+  .cardstage{display:flex;justify-content:center;overflow:hidden}
+  .sharecard{display:flex;width:560px;height:560px;flex:none;background:var(--ink);color:#fff;border-radius:18px;overflow:hidden;box-shadow:var(--shadow);transform-origin:top center}
   .sharecard #cardImg{width:52%;height:100%;object-fit:cover;background:#222}
-  .sharecard .cardinfo{width:48%;padding:20px;display:flex;flex-direction:column;justify-content:center;gap:5px}
-  .sharecard .ci-emoji{font-size:34px;line-height:1}
-  .sharecard .ci-name{font-size:22px;font-weight:800;letter-spacing:-.02em;line-height:1.05}
-  .sharecard .ci-sci{font-style:italic;color:#b9bdc8;font-size:12px}
-  .sharecard .ci-fact{font-size:13px;color:#e7e9ee;margin-top:6px}
-  .sharecard .ci-brand{margin-top:14px;font-size:12px;font-weight:800;color:var(--brand)}
+  .sharecard .cardinfo{width:48%;padding:26px 22px;display:flex;flex-direction:column;justify-content:center;gap:6px}
+  .sharecard .ci-emoji{font-size:38px;line-height:1}
+  .sharecard .ci-name{font-size:26px;font-weight:800;letter-spacing:-.02em;line-height:1.05}
+  .sharecard .ci-sci{font-style:italic;color:#b9bdc8;font-size:13px}
+  .sharecard .ci-facts{margin:8px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+  .sharecard .ci-facts li{font-size:13px;color:#e7e9ee;line-height:1.3;padding-left:15px;position:relative}
+  .sharecard .ci-facts li::before{content:"🪶";position:absolute;left:0;font-size:10px}
+  .sharecard .ci-brand{margin-top:auto;font-size:12px;font-weight:800;color:var(--brand)}
   .btn{border:1px solid var(--line);background:#fff;border-radius:11px;padding:11px 18px;font-weight:700;cursor:pointer;font-size:14px;text-decoration:none;color:var(--ink)}
   .btn.primary{background:var(--ink);color:#fff;border-color:var(--ink)}
 
@@ -290,9 +293,11 @@
     </div>
     <p class="step-label" style="text-align:center;margin-top:30px">Your shareable Bird ID</p>
     <p class="hint" id="cardhint">Tap any headshot above to feature it on your card.</p>
-    <div class="sharecard" id="sharecard">
-      <img id="cardImg" alt="your headshot" />
-      <div class="cardinfo" id="cardinfo"></div>
+    <div class="cardstage" id="cardstage">
+      <div class="sharecard" id="sharecard">
+        <img id="cardImg" alt="your headshot" />
+        <div class="cardinfo" id="cardinfo"></div>
+      </div>
     </div>
     <div class="res-actions">
       <button class="btn primary" id="copyCard" type="button">📋 Copy card to share</button>
@@ -438,13 +443,23 @@
   // ---- result ----
   function renderCard(b){
     cardBird=b;
+    const facts=((b.facts||[]).slice(0,2).map(f=>`<li>${f}</li>`).join('')) || `<li>${b.blurb||''}</li>`;
     $('cardinfo').innerHTML = `
       <div class="ci-emoji">${b.emoji||'🐦'}</div>
       <div class="ci-name">${b.name}</div>
       <div class="ci-sci">${b.sci||''}</div>
-      <div class="ci-fact">${(b.facts&&b.facts[0])||b.blurb||''}</div>
-      <div class="ci-brand">headshotswithabird.com 🐦</div>`;
+      <ul class="ci-facts">${facts}</ul>
+      <div class="ci-brand">headshotswithabird.com</div>`;
+    setTimeout(fitCard,0);
   }
+  function fitCard(){
+    const stage=$('cardstage'); if(!stage) return;
+    const w=stage.clientWidth; if(!w) return;
+    const s=Math.min(1, w/560);
+    $('sharecard').style.transform = s<1 ? `scale(${s})` : 'none';
+    stage.style.height=(560*s)+'px';
+  }
+  window.addEventListener('resize', fitCard);
   function buildGrid(n){
     const g=$('grid'); g.innerHTML='';
     for(let i=0;i<n;i++){ const c=document.createElement('div'); c.className='cell'; c.id='cell'+i; c.innerHTML='<div class="ph"><div class="spin"></div></div>'; g.appendChild(c); }
@@ -475,25 +490,34 @@
     const m=(cell.id||'').match(/^cell(\d+)$/); if(m) selectCard(+m[1]);
   });
   function dl(blob,name){ const u=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=u; a.download=name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(u),1000); }
-  async function cardCanvas(){ return await html2canvas($('sharecard'),{backgroundColor:null,scale:2,useCORS:true}); }
+  async function fileFromSrc(src,name){ const b=await (await fetch(src)).blob(); return new File([b],name,{type:b.type||'image/jpeg'}); }
+  function canShareFiles(files){ try{ return !!(navigator.canShare && navigator.canShare({files})); }catch{ return false; } }
+  async function cardCanvas(){
+    const el=$('sharecard'), prev=el.style.transform; el.style.transform='none';
+    try{ return await html2canvas(el,{backgroundColor:null,scale:2,useCORS:true,width:560,height:560,windowWidth:560}); }
+    finally{ el.style.transform=prev; fitCard(); }
+  }
+  async function cardBlob(){ const c=await cardCanvas(); return await new Promise(r=>c.toBlob(r,'image/png')); }
   $('copyCard').addEventListener('click', async ()=>{
-    try{ const c=await cardCanvas(); c.toBlob(async (b)=>{
-      try{ await navigator.clipboard.write([new ClipboardItem({'image/png':b})]); toast('Card copied — paste it anywhere'); }
-      catch{ dl(b,'bird-card.png'); toast('Card downloaded'); }
-      maybeReview(featuredSrc);
-    },'image/png'); }catch(e){ toast('Could not build the card'); }
+    let blob; try{ blob=await cardBlob(); }catch{ return toast('Could not build the card'); }
+    const file=new File([blob],'bird-card.png',{type:'image/png'});
+    if(canShareFiles([file])){ try{ await navigator.share({files:[file],title:'My Bird ID'}); return; }catch(e){ if(e&&e.name==='AbortError') return; } }
+    try{ await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]); toast('Card copied — paste it anywhere'); }
+    catch{ dl(blob,'bird-card.png'); toast('Card downloaded'); }
   });
   $('downloadCard').addEventListener('click', async ()=>{
-    try{ const c=await cardCanvas(); c.toBlob(b=>{ dl(b,'bird-card.png'); maybeReview(featuredSrc); },'image/png'); }catch{ toast('Could not build the card'); }
+    let blob; try{ blob=await cardBlob(); }catch{ return toast('Could not build the card'); }
+    const file=new File([blob],'bird-card.png',{type:'image/png'});
+    if(canShareFiles([file])){ try{ await navigator.share({files:[file],title:'Bird card'}); return; }catch(e){ if(e&&e.name==='AbortError') return; } }
+    dl(blob,'bird-card.png');
   });
   $('downloadAll').addEventListener('click', async ()=>{
     const imgs=resultsData.filter(Boolean); if(!imgs.length) return;
-    for(let i=0;i<imgs.length;i++){
-      try{ const r=await fetch(imgs[i].src); dl(await r.blob(), `headshot-${i+1}.jpg`); }
-      catch{ window.open(imgs[i].src,'_blank'); }
-      await new Promise(r=>setTimeout(r,400));
-    }
-    toast('Downloading your 5 headshots'); maybeReview(featuredSrc);
+    const files=[]; for(let i=0;i<imgs.length;i++){ try{ files.push(await fileFromSrc(imgs[i].src,`headshot-${i+1}.jpg`)); }catch{} }
+    if(!files.length) return;
+    if(canShareFiles(files)){ try{ await navigator.share({files,title:'My Headshots with a Bird'}); return; }catch(e){ if(e&&e.name==='AbortError') return; } }
+    for(const f of files){ const u=URL.createObjectURL(f); const a=document.createElement('a'); a.href=u; a.download=f.name; document.body.appendChild(a); a.click(); a.remove(); await new Promise(r=>setTimeout(r,500)); URL.revokeObjectURL(u); }
+    toast('Saved your 5 headshots');
   });
 
   async function enterResult(jobId){
