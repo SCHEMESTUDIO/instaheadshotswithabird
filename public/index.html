@@ -91,20 +91,22 @@
   .res-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:20px}
   .cell img{cursor:pointer}
   .cell.sel{outline:3px solid var(--brand);outline-offset:2px}
-  .cell .dl{position:absolute;top:8px;right:8px;width:28px;height:28px;display:none;align-items:center;justify-content:center;background:rgba(255,255,255,.92);border-radius:8px;text-decoration:none;font-size:14px;color:var(--ink)}
+  .cell .dl{position:absolute;top:8px;right:8px;width:28px;height:28px;display:none;align-items:center;justify-content:center;background:rgba(255,255,255,.92);border:none;cursor:pointer;padding:0;border-radius:8px;font-size:14px;color:var(--ink)}
   .cell:hover .dl{display:flex}
   .hint{text-align:center;color:var(--muted);font-size:13px;margin:0 0 14px}
   .cardstage{display:flex;justify-content:center;overflow:hidden}
-  .sharecard{display:flex;width:560px;height:560px;flex:none;background:var(--ink);color:#fff;border-radius:18px;overflow:hidden;box-shadow:var(--shadow);transform-origin:top center}
-  .sharecard #cardImg{width:52%;height:100%;object-fit:cover;background:#222}
-  .sharecard .cardinfo{width:48%;padding:26px 22px;display:flex;flex-direction:column;justify-content:center;gap:6px}
-  .sharecard .ci-emoji{font-size:38px;line-height:1}
-  .sharecard .ci-name{font-size:26px;font-weight:800;letter-spacing:-.02em;line-height:1.05}
-  .sharecard .ci-sci{font-style:italic;color:#b9bdc8;font-size:13px}
-  .sharecard .ci-facts{margin:8px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
-  .sharecard .ci-facts li{font-size:13px;color:#e7e9ee;line-height:1.3;padding-left:15px;position:relative}
-  .sharecard .ci-facts li::before{content:"🪶";position:absolute;left:0;font-size:10px}
-  .sharecard .ci-brand{margin-top:auto;font-size:12px;font-weight:800;color:var(--brand)}
+  .sharecard{width:400px;height:560px;flex:none;background:var(--brand);border-radius:22px;padding:12px;box-shadow:var(--shadow);transform-origin:top center}
+  .sharecard .pkmn-inner{height:100%;background:#fffdf7;border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px;box-sizing:border-box}
+  .pkmn-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .pkmn-name{font-size:22px;font-weight:800;letter-spacing:-.02em;color:var(--ink);line-height:1.05}
+  .pkmn-badge{font-size:12px;font-weight:800;color:#fff;background:var(--brand);border-radius:999px;padding:4px 10px;white-space:nowrap}
+  .pkmn-art{flex:1;min-height:0;border:4px solid var(--brand);border-radius:10px;overflow:hidden;background:#222}
+  .pkmn-art #cardImg{width:100%;height:100%;object-fit:cover;display:block}
+  .pkmn-sci{font-style:italic;color:var(--muted);font-size:13px;margin:0}
+  .pkmn-facts{margin:0;padding:10px 12px;list-style:none;background:#eafaf4;border:1px solid #bdeade;border-radius:10px;display:flex;flex-direction:column;gap:6px}
+  .pkmn-facts li{font-size:12.5px;color:#26403a;line-height:1.3;padding-left:14px;position:relative}
+  .pkmn-facts li::before{content:"🪶";position:absolute;left:0;font-size:9px}
+  .pkmn-foot{margin-top:auto;text-align:center;font-size:11px;font-weight:800;color:var(--brand)}
   .btn{border:1px solid var(--line);background:#fff;border-radius:11px;padding:11px 18px;font-weight:700;cursor:pointer;font-size:14px;text-decoration:none;color:var(--ink)}
   .btn.primary{background:var(--ink);color:#fff;border-color:var(--ink)}
 
@@ -294,8 +296,13 @@
     <p class="hint" id="cardhint">Tap any headshot above to feature it on your card.</p>
     <div class="cardstage" id="cardstage">
       <div class="sharecard" id="sharecard">
-        <img id="cardImg" alt="your headshot" />
-        <div class="cardinfo" id="cardinfo"></div>
+        <div class="pkmn-inner">
+          <div class="pkmn-head"><span class="pkmn-name" id="cardName"></span><span class="pkmn-badge" id="cardBadge"></span></div>
+          <div class="pkmn-art"><img id="cardImg" alt="your headshot" /></div>
+          <div class="pkmn-sci" id="cardSci"></div>
+          <ul class="pkmn-facts" id="cardFacts"></ul>
+          <div class="pkmn-foot">headshotswithabird.com</div>
+        </div>
       </div>
     </div>
     <div class="res-actions">
@@ -442,19 +449,17 @@
   // ---- result ----
   function renderCard(b){
     cardBird=b;
-    const facts=((b.facts||[]).slice(0,2).map(f=>`<li>${f}</li>`).join('')) || `<li>${b.blurb||''}</li>`;
-    $('cardinfo').innerHTML = `
-      <div class="ci-emoji">${b.emoji||'🐦'}</div>
-      <div class="ci-name">${b.name}</div>
-      <div class="ci-sci">${b.sci||''}</div>
-      <ul class="ci-facts">${facts}</ul>
-      <div class="ci-brand">headshotswithabird.com</div>`;
+    $('cardName').textContent = (b.emoji?b.emoji+' ':'') + b.name;
+    $('cardBadge').textContent = '#'+String(b.assignmentNumber||1).padStart(4,'0');
+    $('cardSci').textContent = b.sci||'';
+    const facts=(b.facts||[]).slice(0,2);
+    $('cardFacts').innerHTML = (facts.length?facts:[b.blurb||'']).map(f=>`<li>${f}</li>`).join('');
     setTimeout(fitCard,0);
   }
   function fitCard(){
     const stage=$('cardstage'); if(!stage) return;
     const w=stage.clientWidth; if(!w) return;
-    const s=Math.min(1, w/560);
+    const s=Math.min(1, w/400);
     $('sharecard').style.transform = s<1 ? `scale(${s})` : 'none';
     stage.style.height=(560*s)+'px';
   }
@@ -474,7 +479,7 @@
     if(r.error){ cell.className='cell failed'; cell.innerHTML=`${r.label}<br>· skipped ·`; return; }
     resultsData[i]={src:r.src,label:r.label,look:r.look};
     cell.innerHTML = `<img src="${r.src}" alt="${r.label}"><span class="lbl">${r.label}</span>
-      <a class="dl" title="Download" href="${r.src}" download="headshot-${r.look||(i+1)}.jpg">⬇</a>`;
+      <button class="dl" type="button" title="Save" data-save="${r.src}" data-name="headshot-${r.look||(i+1)}.jpg">⬇</button>`;
     if(!featuredSrc) selectCard(i);
   }
   function selectCard(i){
@@ -484,16 +489,23 @@
     const cell=$('cell'+i); if(cell) cell.classList.add('sel');
   }
   $('grid').addEventListener('click', e=>{
-    if(e.target.closest('.dl')) return;            // let the download link work
+    const save=e.target.closest('.dl');
+    if(save){ e.stopPropagation(); saveOne(save.dataset.save, save.dataset.name||'headshot.jpg'); return; }
     const cell=e.target.closest('.cell'); if(!cell || cell.classList.contains('dummy') || cell.classList.contains('failed')) return;
     const m=(cell.id||'').match(/^cell(\d+)$/); if(m) selectCard(+m[1]);
   });
+  async function saveOne(src,name){
+    try{ const f=await fileFromSrc(src,name);
+      if(canShareFiles([f])){ try{ await navigator.share({files:[f]}); return; }catch(e){ if(e&&e.name==='AbortError') return; } }
+      dl(await (await fetch(src)).blob(), name);
+    }catch{ window.open(src,'_blank'); }
+  }
   function dl(blob,name){ const u=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=u; a.download=name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(u),1000); }
   async function fileFromSrc(src,name){ const b=await (await fetch(src)).blob(); return new File([b],name,{type:b.type||'image/jpeg'}); }
   function canShareFiles(files){ try{ return !!(navigator.canShare && navigator.canShare({files})); }catch{ return false; } }
   async function cardCanvas(){
     const el=$('sharecard'), prev=el.style.transform; el.style.transform='none';
-    try{ return await html2canvas(el,{backgroundColor:null,scale:2,useCORS:true,width:560,height:560,windowWidth:560}); }
+    try{ return await html2canvas(el,{backgroundColor:null,scale:2,useCORS:true,width:400,height:560,windowWidth:400}); }
     finally{ el.style.transform=prev; fitCard(); }
   }
   async function cardBlob(){ const c=await cardCanvas(); return await new Promise(r=>c.toBlob(r,'image/png')); }

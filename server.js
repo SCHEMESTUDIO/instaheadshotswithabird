@@ -11,6 +11,7 @@ import { hasRef, refPath, refPublicUrl } from "./lib/birdref.js";
 import { imageDimensions } from "./lib/imagesize.js";
 import * as kontextMulti from "./lib/providers/kontext-multi.js";
 import { enhance } from "./lib/postprocess.js";
+import { restoreFace } from "./lib/restore.js";
 import { assignBird, stats } from "./lib/assign.js";
 import { getProvider } from "./lib/providers/index.js";
 import { addReview, listReviews, setApproved, wordCount, MEDIA_DIR } from "./lib/reviews.js";
@@ -26,6 +27,7 @@ const ADMIN_KEY = process.env.ADMIN_KEY || "";
 const USE_BIRD_REF = process.env.USE_BIRD_REF !== "false"; // use the locked reference image when one exists
 const PROVIDER_NAME = (process.env.PROVIDER || "replicate").toLowerCase();
 const ENHANCE = process.env.ENHANCE !== "false"; // light contrast + sharpen on outputs
+const RESTORE = process.env.RESTORE !== "false" && !!process.env.REPLICATE_API_TOKEN; // CodeFormer face-restore pass
 const MIN_IMAGE_DIM = Number(process.env.MIN_IMAGE_DIM || 768); // reject tiny uploads that produce bad results
 const PAYMENTS_ENABLED = !!process.env.STRIPE_SECRET_KEY;
 const FREE_CODES = (process.env.FREE_CODES || "").split(",").map((s) => s.trim().toLowerCase()).filter(Boolean); // beta codes that skip payment
@@ -92,7 +94,9 @@ function withBirdImage(bird) {
 }
 
 async function finalizeImage(src) {
-  if (!ENHANCE || !src) return src;
+  if (!src) return src;
+  if (RESTORE) { try { src = await restoreFace(src); } catch (e) { console.error("[restore]", e.message); } }
+  if (!ENHANCE) return src;
   try {
     const bytes = src.startsWith("data:")
       ? Buffer.from(src.split(",")[1], "base64")
