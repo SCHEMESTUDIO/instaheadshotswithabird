@@ -207,6 +207,11 @@
       each with the same bird on your shoulder.
     </div>
 
+    <input type="email" id="email" placeholder="Your email address (required)" autocomplete="email" required
+      style="display:block;width:100%;margin-top:14px;border:1px solid var(--line);border-radius:11px;padding:11px 14px;font:inherit" />
+    <label style="display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--muted);margin-top:10px;text-align:left">
+      <input type="checkbox" id="optin" /> <span>Email me occasional updates from Headshots with a Bird (optional).</span>
+    </label>
     <input type="text" id="code" placeholder="Have a beta code? Enter it here" autocomplete="off"
       style="display:block;width:100%;margin-top:12px;border:1px solid var(--line);border-radius:11px;padding:11px 14px;font:inherit;text-align:center" />
     <button class="go" id="go" disabled>Continue to payment · $1</button>
@@ -352,7 +357,10 @@
   function toast(t){ const el=$('toast'); el.textContent=t; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),1600); }
 
   // ---- upload (up to 2 photos) ----
-  function refresh(){ $('go').disabled = photos.length<2; renderThumbs(); }
+  const emailOk = () => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(($('email').value||'').trim());
+  function updateGo(){ $('go').disabled = !(photos.length>=2 && emailOk()); }
+  function refresh(){ renderThumbs(); updateGo(); }
+  $('email').addEventListener('input', updateGo);
   function renderThumbs(){
     $('thumbs').innerHTML='';
     photos.forEach((f,i)=>{
@@ -393,6 +401,8 @@
     $('err').style.display='none'; $('go').disabled=true; $('go').textContent='Reserving your bird…';
     try{
       const fd=new FormData(); photos.forEach(f=>fd.append('photos',f));
+      fd.append('email', ($('email').value||'').trim());
+      fd.append('consent', $('optin').checked ? 'true' : 'false');
       const s=await fetch('/api/start',{method:'POST',body:fd}); const sd=await s.json();
       if(!s.ok) throw new Error(sd.error||'Could not start.');
       const c=await fetch('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jobId:sd.jobId, code:($('code').value||'').trim()})});

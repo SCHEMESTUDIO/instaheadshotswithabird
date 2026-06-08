@@ -14,6 +14,7 @@ import { enhance } from "./lib/postprocess.js";
 import { assignBird, stats } from "./lib/assign.js";
 import { getProvider } from "./lib/providers/index.js";
 import { addReview, listReviews, setApproved, wordCount, MEDIA_DIR } from "./lib/reviews.js";
+import { addEmail, listEmails } from "./lib/emails.js";
 
 dotenv.config();
 
@@ -175,9 +176,13 @@ app.post("/api/start", upload.array("photos", 2), async (req, res) => {
         return res.status(400).json({ error: `That photo is ${dim.width}×${dim.height}. Please use at least ${MIN_IMAGE_DIM}×${MIN_IMAGE_DIM} (1024×1024 or larger is best) for sharp results.` });
       }
     }
+    const email = (req.body.email || "").trim();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return res.status(400).json({ error: "Please enter a valid email address." });
+    const consent = req.body.consent === "true";
+    addEmail(email, consent);
     const bird = assignBird();
     const job = {
-      id: randomUUID(), bird,
+      id: randomUUID(), bird, email,
       photos: req.files.map((f) => ({ buffer: f.buffer, mimeType: f.mimetype })),
       paid: false, status: "awaiting_payment",
       total: LOOKS.length, done: 0, results: new Array(LOOKS.length).fill(null),
@@ -203,10 +208,11 @@ app.post("/api/checkout", async (req, res) => {
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
+      customer_email: job.email || undefined, // pre-fill so they don't type it twice
       line_items: [{
         price_data: {
           currency: "usd", unit_amount: PRICE_CENTS,
-          product_data: { name: "InstaHeadshots with a Bird — 5 headshots + your Bird ID" },
+          product_data: { name: "Headshots with a Bird — 5 headshots + your Bird ID" },
         }, quantity: 1,
       }],
       metadata: { jobId: job.id },
@@ -282,6 +288,10 @@ app.post("/api/admin/approve", (req, res) => {
   if (!adminOk(req)) return res.status(401).json({ error: "Unauthorized." });
   try { res.json({ ok: true, review: setApproved(req.body.id, req.body.approved !== false) }); }
   catch (err) { res.status(400).json({ error: err.message }); }
+});
+app.get("/api/admin/emails", (req, res) => {
+  if (!adminOk(req)) return res.status(401).json({ error: "Unauthorized." });
+  res.json(listEmails());
 });
 
 app.get("/api/stats", (_req, res) => res.json(stats()));
