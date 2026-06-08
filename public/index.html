@@ -140,6 +140,12 @@
   .faq summary::after{content:"+";float:right;color:var(--brand);font-weight:800}
   .faq details[open] summary::after{content:"–"}
   .faq details p{margin:0 0 14px;font-size:14px;color:#3a3d44}
+  .showcase{padding:46px 0 10px}
+  .showcase h2{text-align:center;font-size:28px;letter-spacing:-.03em;margin:0 0 6px}
+  .showcase .sub2{text-align:center;color:var(--muted);margin:0 0 22px;font-size:15px}
+  .vids{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:640px){.vids{grid-template-columns:1fr}}
+  .vids video{width:100%;border-radius:16px;border:1px solid var(--line);box-shadow:var(--shadow);display:block;background:#000}
   .reviews{padding:58px 0 20px;display:none}
   .reviews h2{text-align:center;font-size:28px;letter-spacing:-.03em;margin:0 0 4px}
   .reviews .sub2{text-align:center;color:var(--muted);margin:0 0 24px;font-size:15px}
@@ -205,6 +211,17 @@
     <div class="err" id="err"></div>
   </section>
 </div>
+
+<section class="showcase" id="showcaseWrap">
+  <div class="wrap">
+    <h2>See it in action</h2>
+    <p class="sub2">Real headshots. Real birds. Every single time.</p>
+    <div class="vids">
+      <video src="/videos/demo1.mp4" autoplay muted loop playsinline preload="metadata" aria-label="Headshot demo"></video>
+      <video src="/videos/demo2.mp4" autoplay muted loop playsinline preload="metadata" aria-label="Headshot demo"></video>
+    </div>
+  </div>
+</section>
 
 <section class="compare" id="compareWrap">
   <div class="wrap">
@@ -426,7 +443,7 @@
 
   async function enterResult(jobId){
     currentJob=jobId; $('tool').style.display='none'; $('result').style.display='block';
-    { ['compareWrap','howWrap','faqWrap'].forEach(id=>{const e=$(id); if(e) e.style.display='none';}); } window.scrollTo({top:0,behavior:'smooth'});
+    { ['showcaseWrap','compareWrap','howWrap','faqWrap'].forEach(id=>{const e=$(id); if(e) e.style.display='none';}); } window.scrollTo({top:0,behavior:'smooth'});
     let fin; try{ fin=await (await fetch('/api/finalize/'+jobId)).json(); }catch{ $('pmsg').textContent='Could not verify payment.'; return; }
     if(fin.error){ $('pmsg').textContent=fin.error; return; }
     if(!fin.paid){ $('pmsg').textContent='Payment not confirmed. If you were charged, refresh in a moment.'; return; }
