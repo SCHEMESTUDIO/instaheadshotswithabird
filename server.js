@@ -10,6 +10,7 @@ import { LOOKS } from "./lib/looks.js";
 import { hasRef, refPath, refPublicUrl } from "./lib/birdref.js";
 import { imageDimensions } from "./lib/imagesize.js";
 import * as kontextMulti from "./lib/providers/kontext-multi.js";
+import { enhance } from "./lib/postprocess.js";
 import { assignBird, stats } from "./lib/assign.js";
 import { getProvider } from "./lib/providers/index.js";
 import { addReview, listReviews, setApproved, wordCount, MEDIA_DIR } from "./lib/reviews.js";
@@ -22,6 +23,7 @@ const CONCURRENCY = Number(process.env.CONCURRENCY || 1); // serial by default â
 const ADMIN_KEY = process.env.ADMIN_KEY || "";
 const USE_BIRD_REF = process.env.USE_BIRD_REF !== "false"; // use the locked reference image when one exists
 const PROVIDER_NAME = (process.env.PROVIDER || "replicate").toLowerCase();
+const ENHANCE = process.env.ENHANCE !== "false"; // light contrast + sharpen on outputs
 const MIN_IMAGE_DIM = Number(process.env.MIN_IMAGE_DIM || 768); // reject tiny uploads that produce bad results
 const PAYMENTS_ENABLED = !!process.env.STRIPE_SECRET_KEY;
 const stripe = PAYMENTS_ENABLED ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
@@ -86,6 +88,20 @@ function withBirdImage(bird) {
   return { ...bird, image: hasRef(bird.id) ? refPublicUrl(bird.id) : null };
 }
 
+async function finalizeImage(src) {
+  if (!ENHANCE || !src) return src;
+  try {
+    const bytes = src.startsWith("data:")
+      ? Buffer.from(src.split(",")[1], "base64")
+      : Buffer.from(await (await fetch(src)).arrayBuffer());
+    const out = await enhance(bytes);
+    return `data:image/jpeg;base64,${out.toString("base64")}`;
+  } catch (e) {
+    console.error("[enhance]", e.message); // fall back to the original image
+    return src;
+  }
+}
+
 async function generateLook(job, look) {
   const photos = job.photos || [];
   const twoPerson = photos.length >= 2;                              // 2 selfies â†’ better likeness
@@ -109,6 +125,7 @@ async function generateLook(job, look) {
       } else {
         ({ src } = await getProvider().generate({ images: [photos[0]], prompt: buildPrompt(look, job.bird) }));
       }
+      src = await finalizeImage(src);
       return { look: look.id, label: look.label, src };
     } catch (err) {
       lastErr = err;
