@@ -188,7 +188,7 @@
     <label class="drop" id="drop">
       <input type="file" id="file" accept="image/jpeg,image/png,image/heic,image/heif,.heic,.heif" multiple />
       <div class="icon">📸</div>
-      <p>Click to upload or drop your photo(s)</p>
+      <p>Click to select both photos at once, or drag them in</p>
       <small>Two different angles, both clear & front-facing — this is what makes the likeness work · JPG, PNG, or HEIC · 768px+ (1024+ best)</small>
     </label>
     <div class="thumbs" id="thumbs"></div>
@@ -362,10 +362,10 @@
     }
   }
   function showErr(m){ $('err').textContent=m; $('err').style.display='block'; }
-  $('file').addEventListener('change',e=>{ addFiles(e.target.files); e.target.value=''; });
+  $('file').addEventListener('change',e=>{ addFiles(Array.from(e.target.files)); e.target.value=''; });
   ['dragover','dragenter'].forEach(ev=>$('drop').addEventListener(ev,e=>{e.preventDefault();$('drop').classList.add('drag');}));
   ['dragleave','drop'].forEach(ev=>$('drop').addEventListener(ev,e=>{e.preventDefault();$('drop').classList.remove('drag');}));
-  $('drop').addEventListener('drop',e=>addFiles(e.dataTransfer.files));
+  $('drop').addEventListener('drop',e=>addFiles(Array.from(e.dataTransfer.files)));
 
   $('go').addEventListener('click', async ()=>{
     $('err').style.display='none'; $('go').disabled=true; $('go').textContent='Reserving your bird…';
