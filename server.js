@@ -15,6 +15,7 @@ import { assignBird, stats } from "./lib/assign.js";
 import { getProvider } from "./lib/providers/index.js";
 import { addReview, listReviews, setApproved, wordCount, MEDIA_DIR } from "./lib/reviews.js";
 import { addEmail, listEmails } from "./lib/emails.js";
+import { sendHeadshots } from "./lib/mail.js";
 
 dotenv.config();
 
@@ -154,6 +155,9 @@ async function startGeneration(job) {
   }
   await Promise.all(Array.from({ length: Math.min(CONCURRENCY, LOOKS.length) }, worker));
   job.status = job.results.every((r) => r?.error) ? "failed" : "complete";
+  if (job.status === "complete" && job.email) {
+    sendHeadshots({ to: job.email, bird: job.bird, results: job.results }).catch((e) => console.error("[mail]", e.message));
+  }
   job.photos = null; // drop the uploaded selfies once done
 }
 
