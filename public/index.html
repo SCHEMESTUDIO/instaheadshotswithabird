@@ -9,7 +9,7 @@
 <style>
   :root{
     --ink:#0d0f14; --paper:#f7f5ef; --card:#ffffff;
-    --brand:#ff5a3c; --brand-2:#1b6cff; --accent:#ffd23c;
+    --brand:#10a37f; --orange:#ff5a3c; --brand-2:#1b6cff; --accent:#ffd23c;
     --muted:#6b7180; --line:#e6e2d8; --good:#16a34a; --star:#f5a623;
     --shadow:0 10px 40px rgba(13,15,20,.12); --r:18px;
   }
@@ -20,14 +20,14 @@
 
   nav{display:flex;align-items:center;justify-content:space-between;padding:18px 0}
   .logo{font-weight:800;font-size:20px;letter-spacing:-.02em;display:flex;align-items:center;gap:8px;text-decoration:none;color:var(--ink);cursor:pointer}
-  .logo .b{background:var(--ink);color:#fff;border-radius:8px;padding:2px 8px}
+  .logo .b{background:transparent;border:2px solid var(--brand);color:var(--ink);border-radius:8px;padding:2px 7px}
   .pill{font-size:13px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:7px 14px;font-weight:600}
 
   .hero{padding:46px 0 14px;text-align:center}
   .badge{display:inline-flex;gap:8px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:999px;padding:7px 16px;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:20px}
   .badge .dot{width:8px;height:8px;border-radius:50%;background:var(--good)}
   h1{font-size:clamp(36px,6vw,62px);line-height:.99;letter-spacing:-.04em;margin:0 0 14px;font-weight:850}
-  h1 .hl{color:var(--brand);white-space:nowrap}
+  h1 .hl{color:var(--orange);white-space:nowrap}
   .sub{font-size:clamp(16px,2.2vw,20px);color:var(--muted);max-width:620px;margin:0 auto 10px}
   .micro{font-size:14px;color:var(--muted);font-style:italic;max-width:540px;margin:0 auto}
 
@@ -190,7 +190,20 @@
   </header>
 
   <div class="canceled" id="canceled">Payment canceled — no charge made. Your bird is still waiting. 🐦</div>
+</div>
 
+<section class="showcase" id="showcaseWrap">
+  <div class="wrap">
+    <p class="sub2">Real headshots. Real birds. Every single time.</p>
+    <div class="vids">
+      <video src="/videos/demo1.mp4" autoplay muted loop playsinline preload="metadata" aria-label="Headshot demo"></video>
+      <video src="/videos/man.mp4" autoplay muted loop playsinline preload="metadata" aria-label="Headshot demo"></video>
+    </div>
+    <p class="vidnote">Headshots are delivered as static <strong>.jpg</strong> images only. These videos are for illustration and entertainment purposes only.</p>
+  </div>
+</section>
+
+<div class="wrap">
   <section class="tool" id="tool">
     <p class="step-label">Upload 2 selfies</p>
     <label class="drop" id="drop">
@@ -219,18 +232,6 @@
     <div class="err" id="err"></div>
   </section>
 </div>
-
-<section class="showcase" id="showcaseWrap">
-  <div class="wrap">
-    <h2>See it in action</h2>
-    <p class="sub2">Real headshots. Real birds. Every single time.</p>
-    <div class="vids">
-      <video src="/videos/demo1.mp4" autoplay muted loop playsinline preload="metadata" aria-label="Headshot demo"></video>
-      <video src="/videos/demo2.mp4" autoplay muted loop playsinline preload="metadata" aria-label="Headshot demo"></video>
-    </div>
-    <p class="vidnote">Headshots are delivered as static <strong>.jpg</strong> images only. These videos are for illustration and entertainment purposes only.</p>
-  </div>
-</section>
 
 <section class="compare" id="compareWrap">
   <div class="wrap">
@@ -293,7 +294,7 @@
   <div class="wrap">
     <h2>Questions</h2>
     <details><summary>Can I remove the bird?</summary><p>No. There is no button to remove the bird. There never was a button. The bird stays.</p></details>
-    <details><summary>Will it actually look like me?</summary><p>Yes — that's why we ask for two angles. The headshots are AI-generated and occasionally surprising, but a real likeness is the whole point.</p></details>
+    <details><summary>Will it actually look like me?</summary><p>Yes — that's why we ask for two angles. The headshots are AI-generated using multiple inputs to improve quality. A real likeness is the whole point.</p></details>
     <details><summary>What do I get for $1?</summary><p>Five professional headshots across five outfit-and-backdrop looks, each starring the one bird we've paired to you — plus a shareable Bird ID card.</p></details>
     <details><summary>How long does it take?</summary><p>About a minute. No model training, no waiting hours like the other guys.</p></details>
     <details><summary>What photos work best?</summary><p>Two clear, front-facing, well-lit shots from slightly different angles, at least 768px on the short side. JPG, PNG, or HEIC.</p></details>
@@ -428,8 +429,8 @@
     for(let i=0;i<n;i++){ const c=document.createElement('div'); c.className='cell'; c.id='cell'+i; c.innerHTML='<div class="ph"><div class="spin"></div></div>'; g.appendChild(c); }
     // slot 6 — fake-door upsell placeholder (wire to analytics / a real offer later)
     const d=document.createElement('div'); d.className='cell dummy'; d.id='dummyUpsell';
-    d.innerHTML='<div class="di"><span class="plus">＋</span>More looks<small>coming soon</small></div>';
-    d.addEventListener('click',()=>toast('More looks coming soon 🐦'));
+    d.innerHTML='<div class="di"><span class="plus">＋</span>Feature request?<small>Email us</small></div>';
+    d.addEventListener('click',()=>{ window.location.href='mailto:feedback@headshotswithabird.com?subject=Feature%20request%20%E2%80%94%20Headshots%20with%20a%20Bird'; });
     g.appendChild(d);
   }
   function fillCell(i, r){
