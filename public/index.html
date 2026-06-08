@@ -207,6 +207,8 @@
       each with the same bird on your shoulder.
     </div>
 
+    <input type="text" id="code" placeholder="Have a beta code? Enter it here" autocomplete="off"
+      style="display:block;width:100%;margin-top:12px;border:1px solid var(--line);border-radius:11px;padding:11px 14px;font:inherit;text-align:center" />
     <button class="go" id="go" disabled>Continue to payment · $1</button>
     <p class="note">The bird is non-negotiable and appears in all five. 🐦</p>
     <div class="err" id="err"></div>
@@ -393,7 +395,7 @@
       const fd=new FormData(); photos.forEach(f=>fd.append('photos',f));
       const s=await fetch('/api/start',{method:'POST',body:fd}); const sd=await s.json();
       if(!s.ok) throw new Error(sd.error||'Could not start.');
-      const c=await fetch('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jobId:sd.jobId})});
+      const c=await fetch('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jobId:sd.jobId, code:($('code').value||'').trim()})});
       const cd=await c.json(); if(!c.ok) throw new Error(cd.error||'Could not start checkout.');
       window.location = cd.url;
     }catch(err){ $('err').textContent=err.message; $('err').style.display='block'; $('go').disabled=false; $('go').textContent='Continue to payment · $1'; }

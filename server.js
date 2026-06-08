@@ -26,6 +26,7 @@ const PROVIDER_NAME = (process.env.PROVIDER || "replicate").toLowerCase();
 const ENHANCE = process.env.ENHANCE !== "false"; // light contrast + sharpen on outputs
 const MIN_IMAGE_DIM = Number(process.env.MIN_IMAGE_DIM || 768); // reject tiny uploads that produce bad results
 const PAYMENTS_ENABLED = !!process.env.STRIPE_SECRET_KEY;
+const FREE_CODES = (process.env.FREE_CODES || "").split(",").map((s) => s.trim().toLowerCase()).filter(Boolean); // beta codes that skip payment
 const stripe = PAYMENTS_ENABLED ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 
 const app = express();
@@ -193,6 +194,11 @@ app.post("/api/checkout", async (req, res) => {
     const job = jobs.get(req.body.jobId);
     if (!job) return res.status(404).json({ error: "Session expired — please re-upload." });
     const base = baseUrl(req);
+    const code = (req.body.code || "").trim().toLowerCase();
+    if (code && FREE_CODES.includes(code)) { // valid beta code → skip payment
+      job.paid = true;
+      return res.json({ url: `${base}/?job=${job.id}&paid=1&free=1` });
+    }
     if (!PAYMENTS_ENABLED) return res.json({ url: `${base}/?job=${job.id}&paid=1&dev=1` });
 
     const session = await stripe.checkout.sessions.create({
