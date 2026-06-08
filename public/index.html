@@ -487,7 +487,8 @@
   }
   function dl(blob,name){ const u=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=u; a.download=name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(u),1000); }
   async function fileFromSrc(src,name){ const b=await (await fetch(src)).blob(); return new File([b],name,{type:b.type||'image/jpeg'}); }
-  function canShareFiles(files){ try{ return !!(navigator.canShare && navigator.canShare({files})); }catch{ return false; } }
+  const isMobile = ((window.matchMedia && matchMedia('(pointer:coarse)').matches) || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent||'')); // touch devices → share sheet; desktop → file download
+  function canShareFiles(files){ try{ return isMobile && !!(navigator.canShare && navigator.canShare({files})); }catch{ return false; } }
   async function cardCanvas(){
     const el=$('sharecard'), pw=el.style.width, pmw=el.style.maxWidth, ph=el.style.height, par=el.style.aspectRatio;
     el.style.maxWidth='none'; el.style.width='400px'; el.style.aspectRatio='auto'; el.style.height='560px';
