@@ -135,7 +135,7 @@ async function startGeneration(job) {
 // 1) hold upload, assign hidden bird
 app.post("/api/start", upload.array("photos", 2), async (req, res) => {
   try {
-    if (!req.files?.length) return res.status(400).json({ error: "Please upload at least one selfie." });
+    if (!req.files || req.files.length < 2) return res.status(400).json({ error: "Please upload 2 photos — two different angles give the best likeness." });
     // convert HEIC → JPEG, then validate type + resolution (before assigning a bird)
     for (const f of req.files) {
       if (isHeic(f.buffer)) {

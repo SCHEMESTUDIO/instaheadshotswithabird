@@ -145,12 +145,12 @@
   <div class="canceled" id="canceled">Payment canceled — no charge made. Your bird is still waiting. 🐦</div>
 
   <section class="tool" id="tool">
-    <p class="step-label">Upload 1–2 selfies</p>
+    <p class="step-label">Upload 2 selfies</p>
     <label class="drop" id="drop">
       <input type="file" id="file" accept="image/jpeg,image/png,image/heic,image/heif,.heic,.heif" multiple />
       <div class="icon">📸</div>
       <p>Click to upload or drop your photo(s)</p>
-      <small>1 works — add a 2nd angle for better likeness · JPG, PNG, or HEIC · at least 768×768 (1024+ recommended)</small>
+      <small>Two different angles, both clear & front-facing — this is what makes the likeness work · JPG, PNG, or HEIC · 768px+ (1024+ best)</small>
     </label>
     <div class="thumbs" id="thumbs"></div>
     <div class="count" id="count"></div>
@@ -234,7 +234,7 @@
   function toast(t){ const el=$('toast'); el.textContent=t; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),1600); }
 
   // ---- upload (up to 2 photos) ----
-  function refresh(){ $('go').disabled = photos.length<1; renderThumbs(); }
+  function refresh(){ $('go').disabled = photos.length<2; renderThumbs(); }
   function renderThumbs(){
     $('thumbs').innerHTML='';
     photos.forEach((f,i)=>{
@@ -245,7 +245,7 @@
       $('thumbs').appendChild(d);
     });
     const n=photos.length;
-    $('count').textContent = n ? `${n} of ${MAXP} photos${n<2?' · add a 2nd angle for better likeness':''}` : '';
+    $('count').textContent = n>=2 ? '✓ 2 photos ready' : n===1 ? 'Add 1 more — 2 photos required' : '2 photos required';
     $('drop').style.display = n>=MAXP ? 'none' : 'flex';
   }
   function addFiles(list){
