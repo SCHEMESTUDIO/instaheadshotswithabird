@@ -12,6 +12,7 @@ import { imageDimensions } from "./lib/imagesize.js";
 import * as kontextMulti from "./lib/providers/kontext-multi.js";
 import { enhance } from "./lib/postprocess.js";
 import { restoreFace } from "./lib/restore.js";
+import { faceSimilarity } from "./lib/similarity.js";
 import { assignBird, stats } from "./lib/assign.js";
 import { getProvider } from "./lib/providers/index.js";
 import { addReview, listReviews, setApproved, wordCount, MEDIA_DIR } from "./lib/reviews.js";
@@ -29,6 +30,11 @@ const PROVIDER_NAME = (process.env.PROVIDER || "replicate").toLowerCase();
 const ENHANCE = process.env.ENHANCE !== "false"; // light contrast + sharpen on outputs
 const RESTORE = process.env.RESTORE !== "false" && !!process.env.REPLICATE_API_TOKEN; // ON by default; set RESTORE=false to disable. codeformer_fidelity tuned in lib/restore.js
 const MIN_IMAGE_DIM = Number(process.env.MIN_IMAGE_DIM || 768); // reject tiny uploads that produce bad results
+// ---- re-roll quality gate (catches uncanny / wrong-person renders) ----
+const SIMILARITY_GATE = process.env.SIMILARITY_GATE !== "false" && !!process.env.REPLICATE_API_TOKEN; // score each render vs the selfie
+const SIM_THRESHOLD = Number(process.env.SIM_THRESHOLD || 0.5); // below this 0–1 score → re-roll. NEEDS LIVE CALIBRATION (selfie-vs-AI scores lower than two real photos)
+const REROLLS_PER_LOOK = Number(process.env.REROLLS_PER_LOOK || 1); // extra attempts per look beyond the first
+const MAX_REROLLS = Number(process.env.MAX_REROLLS || 3); // global per-job cap so cost stays under the $1 charge
 const PAYMENTS_ENABLED = !!process.env.STRIPE_SECRET_KEY;
 const FREE_CODES = (process.env.FREE_CODES || "").split(",").map((s) => s.trim().toLowerCase()).filter(Boolean); // beta codes that skip payment
 const stripe = PAYMENTS_ENABLED ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
@@ -109,11 +115,11 @@ async function finalizeImage(src) {
   }
 }
 
-async function generateLook(job, look) {
+const dataUri = (img) => (img ? `data:${img.mimeType};base64,${img.buffer.toString("base64")}` : null);
+
+// One raw generation (no finalize). Retries through rate limits; throws if all attempts fail.
+async function rawGenerate(job, look, mode, twoPerson, useRef) {
   const photos = job.photos || [];
-  const twoPerson = photos.length >= 2;                              // 2 selfies → better likeness
-  const useRef = !twoPerson && USE_BIRD_REF && hasRef(job.bird.id);  // else lock the bird via reference image
-  const mode = twoPerson ? "2-photo" : useRef ? "ref" : "single";
   const MAX_ATTEMPTS = 6;
   let lastErr;
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
@@ -132,8 +138,7 @@ async function generateLook(job, look) {
       } else {
         ({ src } = await getProvider().generate({ images: [photos[0]], prompt: buildPrompt(look, job.bird) }));
       }
-      src = await finalizeImage(src);
-      return { look: look.id, label: look.label, src };
+      return src;
     } catch (err) {
       lastErr = err;
       console.error(`[job ${job.id}] ${look.id} try ${attempt} (${mode}): ${err.message}`);
@@ -143,7 +148,50 @@ async function generateLook(job, look) {
       }
     }
   }
-  return { look: look.id, label: look.label, error: lastErr?.message || "Generation failed." };
+  throw lastErr || new Error("Generation failed.");
+}
+
+async function generateLook(job, look) {
+  const photos = job.photos || [];
+  const twoPerson = photos.length >= 2;                              // 2 selfies → better likeness
+  const useRef = !twoPerson && USE_BIRD_REF && hasRef(job.bird.id);  // else lock the bird via reference image
+  const mode = twoPerson ? "2-photo" : useRef ? "ref" : "single";
+  const selfieUrl = dataUri(photos[0]);                              // reference for the similarity gate
+  if (job.rerollsUsed == null) job.rerollsUsed = 0;
+
+  let best = null; // { src, score } — keep the highest-scoring candidate we've seen
+  for (let round = 0; round <= REROLLS_PER_LOOK; round++) {
+    let raw;
+    try {
+      raw = await rawGenerate(job, look, mode, twoPerson, useRef);
+    } catch (err) {
+      if (best) break;                                               // a generation failed but we already have a candidate
+      return { look: look.id, label: look.label, error: err.message || "Generation failed." };
+    }
+
+    // Score this raw render against the selfie (cheap, non-fatal).
+    let score = null;
+    if (SIMILARITY_GATE && selfieUrl) {
+      const sim = await faceSimilarity(selfieUrl, raw);
+      score = sim?.score ?? null;
+      if (sim && sim.faces2 === 0) score = 0;                        // no face detected in output → definitely re-roll
+      if (sim) console.log(`[job ${job.id}] ${look.id} round ${round} score ${score == null ? "n/a" : score.toFixed(3)} (faces ${sim.faces1}/${sim.faces2})`);
+    }
+
+    if (best === null || (score ?? -1) > (best.score ?? -1)) best = { src: raw, score };
+
+    const pass = score == null || score >= SIM_THRESHOLD;            // null = couldn't score → don't block delivery
+    const moreRounds = round < REROLLS_PER_LOOK;
+    const budgetLeft = job.rerollsUsed < MAX_REROLLS;
+    if (pass || !moreRounds || !budgetLeft) break;
+    job.rerollsUsed++;                                               // consume one global re-roll
+    console.log(`[job ${job.id}] ${look.id} re-roll (score < ${SIM_THRESHOLD}); rerolls ${job.rerollsUsed}/${MAX_REROLLS}`);
+  }
+
+  const src = await finalizeImage(best.src);
+  const out = { look: look.id, label: look.label, src };
+  if (best.score != null) out.score = Number(best.score.toFixed(3));
+  return out;
 }
 
 async function startGeneration(job) {
@@ -194,7 +242,7 @@ app.post("/api/start", upload.array("photos", 2), async (req, res) => {
       photos: req.files.map((f) => ({ buffer: f.buffer, mimeType: f.mimetype })),
       paid: false, status: "awaiting_payment",
       total: LOOKS.length, done: 0, results: new Array(LOOKS.length).fill(null),
-      sessionId: null, createdAt: Date.now(),
+      rerollsUsed: 0, sessionId: null, createdAt: Date.now(),
     };
     jobs.set(job.id, job);
     res.json({ jobId: job.id, total: job.total, priceCents: PRICE_CENTS, paymentsEnabled: PAYMENTS_ENABLED });
@@ -220,7 +268,7 @@ app.post("/api/checkout", async (req, res) => {
       line_items: [{
         price_data: {
           currency: "usd", unit_amount: PRICE_CENTS,
-          product_data: { name: "Headshots with a Bird — 5 headshots + your Bird ID" },
+          product_data: { name: "Headshots with a Bird — 3 headshots + your Bird ID" },
         }, quantity: 1,
       }],
       metadata: { jobId: job.id },
@@ -304,7 +352,7 @@ app.get("/api/admin/emails", (req, res) => {
 
 app.get("/api/stats", (_req, res) => res.json(stats()));
 app.get("/healthz", (_req, res) =>
-  res.json({ ok: true, provider: (process.env.PROVIDER || "replicate").toLowerCase(), paymentsEnabled: PAYMENTS_ENABLED, priceCents: PRICE_CENTS, looks: LOOKS.length, ...stats() })
+  res.json({ ok: true, provider: (process.env.PROVIDER || "replicate").toLowerCase(), paymentsEnabled: PAYMENTS_ENABLED, priceCents: PRICE_CENTS, looks: LOOKS.length, gate: SIMILARITY_GATE, simThreshold: SIM_THRESHOLD, maxRerolls: MAX_REROLLS, ...stats() })
 );
 
 const PORT = process.env.PORT || 3000;

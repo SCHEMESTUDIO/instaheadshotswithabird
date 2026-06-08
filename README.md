@@ -1,18 +1,18 @@
 # InstaHeadshots with a Bird 🐦
 
-Upload one selfie → pay **$1** → get **5** professional headshots (5 outfits, 5 backdrops), each
+Upload two selfies → pay **$1** → get **5** professional headshots (5 outfits, 5 backdrops), each
 starring the single bird paired to you, plus a shareable **Bird ID**. The bird cannot be removed.
 After downloading/sharing, users can leave a star review — approved ones feed the homepage carousel.
 
 ## The flow
 
-1. Upload one selfie (no choices to make — everyone gets all 5 looks).
+1. Upload two selfies (no choices to make — everyone gets all 3 looks).
 2. We assign a bird (hidden until paid; no repeats until the 148-bird roster is exhausted).
 3. Stripe Checkout, $1.
-4. On return, payment is verified and 5 headshots generate in parallel (Replicate Flux Kontext).
+4. On return, payment is verified and 3 headshots generate in parallel (Replicate Flux Kontext).
 5. User downloads/shares → prompted for a review (stars + ≤30 words + consent).
 
-The 5 looks (`lib/looks.js`): Blue Suit · Black Tee · Colour Top · Charcoal Half-Zip · Dark Suit.
+The 3 looks (`lib/looks.js`): Black Tee · Dark Suit · White Shirt.
 Outfit per look is fixed; we do **not** detect gender — the editor fits the outfit to the actual photo.
 The bird prompt is injected server-side every call; there's no client control to disable it.
 
@@ -84,7 +84,7 @@ Failed generations auto-retry once; persistent failure tells the user their $1 w
 ```
 server.js              upload → Stripe → verify → generate 5 → reviews + admin
 lib/birds.js           148 birds + Bird ID copy
-lib/looks.js           the 5 looks (outfit + backdrop)
+lib/looks.js           the 3 looks (outfit + backdrop)
 lib/prompt.js          per-look outfit + backdrop + bird → prompt
 lib/assign.js          no-repeat bird allocation (file-backed)
 lib/reviews.js         review storage + featured-image persistence + approval

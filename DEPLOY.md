@@ -108,7 +108,7 @@ You need a GitHub account (github.com). Two ways — pick ONE.
    - CVC: any 3 digits (e.g. 123)
    - Name/ZIP: anything
    Click **Pay.**
-4. You're redirected back. Your **Bird ID** appears and the **5 headshots** generate
+4. You're redirected back. Your **Bird ID** appears and the **3 headshots** generate
    (a few seconds each). If they error, check `REPLICATE_API_TOKEN` in Render → Logs.
 5. Hover any headshot → click **⬇ download** or **↗ share**. A **review** prompt appears.
    Give it stars + a ≤30-word note + submit.
