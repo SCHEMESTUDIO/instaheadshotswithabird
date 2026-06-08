@@ -213,8 +213,8 @@
 <section class="showcase" id="showcaseWrap">
   <div class="wrap">
     <div class="vids">
-      <video src="/videos/demo1.mp4" autoplay muted loop playsinline webkit-playsinline preload="auto" aria-label="Headshot demo"></video>
-      <video src="/videos/man.mp4" autoplay muted loop playsinline webkit-playsinline preload="auto" aria-label="Headshot demo"></video>
+      <video src="/videos/demo1-web.mp4" autoplay muted loop playsinline webkit-playsinline preload="auto" aria-label="Headshot demo"></video>
+      <video src="/videos/man-web.mp4" autoplay muted loop playsinline webkit-playsinline preload="auto" aria-label="Headshot demo"></video>
     </div>
     <p class="vidnote">Headshots are delivered as static <strong>.jpg</strong> images only. These videos are for illustration and entertainment purposes only.</p>
   </div>
@@ -408,22 +408,15 @@
     $('count').textContent = n>=2 ? '✓ 2 photos ready' : n===1 ? 'Add 1 more — 2 photos required' : '2 photos required';
     $('drop').style.display = n>=MAXP ? 'none' : 'flex';
   }
+  function isImageFile(f){ return f && (/^image\//.test(f.type) || /\.(jpe?g|png|heic|heif)$/i.test(f.name||'') || !f.type); }
   function addFiles(list){
     $('err').style.display='none';
     for(const f of list){
       if(photos.length>=MAXP) break;
-      if(isHeicFile(f)){ photos.push(f); refresh(); continue; } // HEIC: can't preview/measure in-browser; converted + checked server-side
-      if(!/^image\/(jpe?g|png)$/.test(f.type)){ showErr('Please use JPG, PNG, or HEIC photos.'); continue; }
-      const url=URL.createObjectURL(f), img=new Image();
-      img.onload=()=>{
-        if(img.naturalWidth<MIN_DIM || img.naturalHeight<MIN_DIM){
-          showErr(`That photo is ${img.naturalWidth}×${img.naturalHeight}. Please use at least ${MIN_DIM}×${MIN_DIM} (1024+ is best) — small photos come out blurry.`);
-        } else if(photos.length<MAXP){ photos.push(f); refresh(); }
-        URL.revokeObjectURL(url);
-      };
-      img.onerror=()=>{ showErr("Couldn't read that image — try a standard JPG or PNG."); URL.revokeObjectURL(url); };
-      img.src=url;
+      if(!isImageFile(f)){ showErr('Please upload JPG, PNG, or HEIC photos.'); continue; }
+      photos.push(f); // format + min-resolution are enforced (and HEIC converted) on the server
     }
+    refresh();
   }
   function showErr(m){ $('err').textContent=m; $('err').style.display='block'; }
   $('file').addEventListener('change',e=>{ addFiles(Array.from(e.target.files)); e.target.value=''; });
@@ -479,7 +472,6 @@
     resultsData[i]={src:r.src,label:r.label,look:r.look};
     cell.innerHTML = `<img src="${r.src}" alt="${r.label}"><span class="lbl">${r.label}</span>
       <button class="dl" type="button" title="Save" data-save="${r.src}" data-name="headshot-${r.look||(i+1)}.jpg">⬇</button>`;
-    if(!featuredSrc) selectCard(i);
   }
   function selectCard(i){
     const r=resultsData[i]; if(!r) return;
@@ -544,6 +536,7 @@
     const tick=async()=>{
       const j=await (await fetch('/api/job/'+jobId)).json();
       (j.results||[]).forEach((r,i)=>{ if(r) fillCell(i,r); });
+      if(!featuredSrc){ const k=resultsData.findIndex(Boolean); if(k>=0) selectCard(k); } // default to the first look, not whichever finished first
       $('bar').style.width=Math.round((j.done/total)*100)+'%';
       if(j.status==='running'||j.status==='generating') setTimeout(tick,2000);
       else { clearInterval(mt); $('pmsg').textContent = j.status==='failed' ? 'Generation failed — your $1 will be refunded.' : '✓ All 5 ready. Same bird, every shot.'; }
@@ -601,6 +594,7 @@
   // nudge mobile browsers to autoplay the (muted, inline) demo videos
   document.querySelectorAll('.vids video').forEach(v=>{ v.muted=true; const p=v.play&&v.play(); if(p&&p.catch) p.catch(()=>{}); });
   document.addEventListener('touchstart', ()=>{ document.querySelectorAll('.vids video').forEach(v=>{ if(v.paused){ v.muted=true; v.play&&v.play().catch(()=>{}); } }); }, {once:true});
+  if('IntersectionObserver' in window){ const vio=new IntersectionObserver((es)=>es.forEach(en=>{ if(en.isIntersecting){ en.target.muted=true; en.target.play&&en.target.play().catch(()=>{}); } }),{threshold:0.2}); document.querySelectorAll('.vids video').forEach(v=>vio.observe(v)); }
 
   const q=new URLSearchParams(location.search);
   if(q.get('paid')==='1' && q.get('job')) enterResult(q.get('job'));
