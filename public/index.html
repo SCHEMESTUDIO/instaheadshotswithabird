@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<title>Headshots with a Bird — 3 headshots, one bird, $1.</title>
+<title>Headshots with a Bird — 5 headshots, one bird, $1.</title>
 <meta name="description" content="Upload one selfie, get 5 professional headshots for $1 — each starring the one bird we've paired to you, plus your own Bird ID." />
 <style>
   :root{
@@ -198,12 +198,12 @@
 <div class="wrap">
   <nav>
     <a class="logo" href="/"><span class="b">Headshots</span><span>🐦</span></a>
-    <span class="pill">$1 · 3 headshots · 1 bird</span>
+    <span class="pill">$1 · 5 headshots · 1 bird</span>
   </nav>
 
   <header class="hero">
-    <h1>Three headshots.<br><span class="hl">One bird. <span style="color:var(--good)">$1.</span></span></h1>
-    <p class="sub">Professional headshots without a photographer. Upload two selfies and get three polished headshots. Plus a bird.</p>
+    <h1>Five headshots.<br><span class="hl">One bird. <span style="color:var(--good)">$1.</span></span></h1>
+    <p class="sub">Professional headshots without a photographer. Upload two selfies and get five polished headshots. Plus a bird.</p>
     <div class="badge"><span class="dot"></span> You don't pick the bird. The bird picks you.</div>
   </header>
 
@@ -233,7 +233,7 @@
     <div class="count" id="count"></div>
 
     <div class="whatsincluded">
-      <b>Your $1 gets all 3 looks:</b> Black Tee · Dark Suit · White Shirt —
+      <b>Your $1 gets all 5 looks:</b> Blue Suit · Black Tee · Colour Top · Charcoal Half-Zip · Dark Suit —
       each with the same bird on your shoulder.
     </div>
 
@@ -278,7 +278,7 @@
     <div class="steps">
       <div class="step"><div class="n">1</div><h3>Upload 2 selfies</h3><p>Two clear, front-facing angles — that's what makes the likeness work.</p></div>
       <div class="step"><div class="n">2</div><h3>Pay $1</h3><p>One dollar, secure checkout via Stripe. No subscription.</p></div>
-      <div class="step"><div class="n">3</div><h3>Get 3 headshots</h3><p>Three professional looks in about a minute — each with your bird, plus your Bird ID.</p></div>
+      <div class="step"><div class="n">3</div><h3>Get 5 headshots</h3><p>Five professional looks in about a minute — each with your bird, plus your Bird ID.</p></div>
     </div>
   </div>
 </section>
@@ -515,7 +515,7 @@
     if(!files.length) return;
     if(canShareFiles(files)){ try{ await navigator.share({files,title:'My Headshots with a Bird'}); return; }catch(e){ if(e&&e.name==='AbortError') return; } }
     for(const f of files){ const u=URL.createObjectURL(f); const a=document.createElement('a'); a.href=u; a.download=f.name; document.body.appendChild(a); a.click(); a.remove(); await new Promise(r=>setTimeout(r,500)); URL.revokeObjectURL(u); }
-    toast('Saved your 3 headshots');
+    toast('Saved your 5 headshots');
   });
 
   async function enterResult(jobId){
