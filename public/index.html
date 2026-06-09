@@ -102,6 +102,9 @@
   .pkmn-badge{font-size:12px;font-weight:800;color:#fff;background:var(--brand);border-radius:999px;padding:4px 10px;white-space:nowrap}
   .pkmn-art{flex:1;min-height:0;border:4px solid var(--brand);border-radius:10px;overflow:hidden;background:#222}
   .pkmn-art #cardImg{width:100%;height:100%;object-fit:cover;display:block}
+  .cardpick{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:14px auto 0;max-width:400px}
+  .cardpick button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 13px;font-size:13px;font-weight:700;cursor:pointer;color:var(--ink);line-height:1}
+  .cardpick button.active{background:var(--brand);color:#fff;border-color:var(--brand)}
   .pkmn-sci{font-style:italic;color:var(--muted);font-size:13px;margin:0}
   .pkmn-facts{margin:0;padding:10px 12px;list-style:none;background:#eafaf4;border:1px solid #bdeade;border-radius:10px;display:flex;flex-direction:column;gap:6px}
   .pkmn-facts li{font-size:12.5px;color:#26403a;line-height:1.3;padding-left:14px;position:relative}
@@ -222,12 +225,12 @@
 
 <div class="wrap">
   <section class="tool" id="tool">
-    <p class="step-label">Upload 2 selfies</p>
+    <p class="step-label">Upload 1–2 selfies</p>
     <label class="drop" id="drop">
       <input type="file" id="file" accept="image/jpeg,image/png,image/heic,image/heif,.heic,.heif" multiple />
       <div class="icon">📸</div>
-      <p>Click to select both photos at once, or drag them in</p>
-      <small>Two different angles, both clear & front-facing — this is what makes the likeness work · JPG, PNG, or HEIC · 768px+ (1024+ best)</small>
+      <p>Click to select your photo(s), or drag them in</p>
+      <small>One clear, front-facing photo works. Two similar headshots can produce better results — but make sure the second matches your hairstyle, facial hair, and accessories, or you can confuse the generator. · JPG, PNG, or HEIC · 768px+ (1024+ best)</small>
     </label>
     <div class="thumbs" id="thumbs"></div>
     <div class="count" id="count"></div>
@@ -292,7 +295,7 @@
       <button class="btn" id="downloadAll" type="button">⬇ Download all 3</button>
     </div>
     <p class="step-label" style="text-align:center;margin-top:30px">Your shareable Bird ID</p>
-    <p class="hint" id="cardhint">Tap any headshot above to feature it on your card.</p>
+    <p class="hint" id="cardhint">Pick which headshot goes on your card:</p>
     <div class="cardstage" id="cardstage">
       <div class="sharecard" id="sharecard">
         <div class="pkmn-inner">
@@ -304,6 +307,7 @@
         </div>
       </div>
     </div>
+    <div class="cardpick" id="cardpick"></div>
     <div class="res-actions">
       <button class="btn primary" id="copyCard" type="button">📋 Copy card to share</button>
       <button class="btn" id="downloadCard" type="button">⬇ Download card</button>
@@ -392,7 +396,7 @@
 
   // ---- upload (up to 2 photos) ----
   const emailOk = () => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(($('email').value||'').trim());
-  function updateGo(){ $('go').disabled = !(photos.length>=2 && emailOk()); }
+  function updateGo(){ $('go').disabled = !(photos.length>=1 && emailOk()); }
   function refresh(){ renderThumbs(); updateGo(); }
   $('email').addEventListener('input', updateGo);
   function renderThumbs(){
@@ -405,7 +409,7 @@
       $('thumbs').appendChild(d);
     });
     const n=photos.length;
-    $('count').textContent = n>=2 ? '✓ 2 photos ready' : n===1 ? 'Add 1 more — 2 photos required' : '2 photos required';
+    $('count').textContent = n>=2 ? '✓ 2 photos ready' : n===1 ? '✓ 1 photo ready — add a 2nd for better results (optional)' : 'Add at least 1 photo (2 recommended)';
     $('drop').style.display = n>=MAXP ? 'none' : 'flex';
   }
   function isImageFile(f){ return f && (/^image\//.test(f.type) || /\.(jpe?g|png|heic|heif)$/i.test(f.name||'') || !f.type); }
@@ -472,6 +476,20 @@
     $('cardImg').src=r.src; featuredSrc=r.src;
     [...$('grid').children].forEach(c=>c.classList.remove('sel'));
     const cell=$('cell'+i); if(cell) cell.classList.add('sel');
+    [...$('cardpick').children].forEach(b=>b.classList.toggle('active', +b.dataset.index===i));
+  }
+  // explicit look-picker buttons under the card (outside #sharecard so they're not in the export)
+  function renderCardPicker(){
+    const wrap=$('cardpick'); if(!wrap) return;
+    wrap.innerHTML='';
+    resultsData.forEach((r,i)=>{
+      if(!r) return;
+      const b=document.createElement('button'); b.type='button';
+      b.textContent=r.label||('Look '+(i+1)); b.dataset.index=i;
+      if(r.src===featuredSrc) b.classList.add('active');
+      b.addEventListener('click',()=>selectCard(i));
+      wrap.appendChild(b);
+    });
   }
   $('grid').addEventListener('click', e=>{
     const save=e.target.closest('.dl');
@@ -532,6 +550,7 @@
     const tick=async()=>{
       const j=await (await fetch('/api/job/'+jobId)).json();
       (j.results||[]).forEach((r,i)=>{ if(r) fillCell(i,r); });
+      renderCardPicker();
       if(!featuredSrc){ const k=resultsData.findIndex(Boolean); if(k>=0) selectCard(k); } // default to the first look, not whichever finished first
       $('bar').style.width=Math.round((j.done/total)*100)+'%';
       if(j.status==='running'||j.status==='generating') setTimeout(tick,2000);

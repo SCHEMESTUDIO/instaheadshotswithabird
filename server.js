@@ -139,7 +139,7 @@ async function startGeneration(job) {
 // 1) hold upload, assign hidden bird
 app.post("/api/start", upload.array("photos", 2), async (req, res) => {
   try {
-    if (!req.files || req.files.length < 2) return res.status(400).json({ error: "Please upload 2 photos — two different angles give the best likeness." });
+    if (!req.files || req.files.length < 1) return res.status(400).json({ error: "Please upload at least one photo." });
     // convert HEIC → JPEG, then validate type + resolution (before assigning a bird)
     for (const f of req.files) {
       if (isHeic(f.buffer)) {
@@ -277,6 +277,19 @@ app.get("/api/stats", (_req, res) => res.json(stats()));
 app.get("/healthz", (_req, res) =>
   res.json({ ok: true, provider: (process.env.PROVIDER || "gemini").toLowerCase(), paymentsEnabled: PAYMENTS_ENABLED, priceCents: PRICE_CENTS, looks: LOOKS.length, ...stats() })
 );
+
+// JSON error handler — keeps the API from ever returning Express's HTML 500 page
+// (which the front-end can't parse as JSON). Catches multer upload errors etc.
+app.use((err, _req, res, _next) => {
+  console.error("[error]", err.code || "", err.message);
+  const tooBig = err.code === "LIMIT_FILE_SIZE";
+  const tooMany = err.code === "LIMIT_FILE_COUNT" || err.code === "LIMIT_UNEXPECTED_FILE";
+  res.status(tooBig || tooMany ? 400 : 500).json({
+    error: tooBig ? "That photo is too large — please use one under 12 MB (export it at a smaller size and try again)."
+      : tooMany ? "Please upload at most 2 photos."
+      : "Something went wrong on our end — please try again.",
+  });
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
