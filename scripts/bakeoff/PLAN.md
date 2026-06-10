@@ -20,17 +20,30 @@ head · head not centred · bird wrong · other. **A render fails if ANY box is 
 
 ## The tests — do them in order
 
-- [ ] **T1 — Baseline.** Prod config exactly (current Gemini model, 2 photos).
-      *Establishes today's failure rate. Everything else is judged against this.*
+- [ ] **T1 — Baseline.** `gemini-2.5-flash-image` (Nano Banana, stable), 2 photos.
+      *Establishes the failure rate of the cheapest viable config. Judged-against by all others.*
+      (Note: the old `-preview` alias was retired by Google on ~2026-06 and 404s — prod
+      default fixed in `lib/providers/gemini.js` the same day.)
 - [ ] **T2 — One photo.** Same model, 1 photo.
       *Settles the 1-vs-2 question with data. Winner's photo count is used from here on.*
-- [ ] **T3 — Newest Gemini model.** Run `node scripts/bakeoff/run.js --list-models`,
-      paste the current image model into `configs.js`, set `photos` to the T1/T2 winner.
-      *Prod default `gemini-2.5-flash-image-preview` may be deprecated.*
+- [ ] **T3 — Nano Banana 2** (`gemini-3.1-flash-image`), T1/T2-winner photo count.
+      *Costs 13pts of margin @ $1 — must visibly beat T1's failure rate to earn it.*
 - [ ] **T4 — Flux Kontext Pro** (Replicate, 1 photo — single-image model).
-      *The cross-vendor identity-preservation benchmark.*
+      *The cross-vendor identity-preservation benchmark. ~$0.08/img → 27% margin @ $1.*
 - [ ] **T5 — Qwen image edit** *(optional — only if T3/T4 both disappoint).*
       Fill the model slug in `configs.js` from replicate.com first.
+- [ ] **T6 — Nano Banana Pro** (`gemini-3-pro-image`) *(optional — $1.99 tier only).*
+      *~$0.134/img → ZERO margin @ $1. Only run if entertaining the $1.99 price; only
+      ship if quality is MAJORLY better than the T1–T3 winner — "slightly better" loses.*
+
+## Margin table (5 images/job, Stripe 2.9% + $0.30) — verify prices on Google's pricing page
+
+| Model | $/img (1K) | Profit @ $1.00 | Profit @ $1.99 |
+|---|---|---|---|
+| gemini-2.5-flash-image (NB1) | ~$0.04 | $0.47 (47%) | $1.43 (72%) |
+| gemini-3.1-flash-image (NB2) | ~$0.067 | $0.34 (34%) | $1.30 (65%) |
+| flux-kontext-pro | ~$0.08 | $0.27 (27%) | $1.23 (62%) |
+| gemini-3-pro-image (NB Pro) | ~$0.134 | ~$0.00 — dead | $0.96 (48%) |
 
 ## Decision rules — agreed up front so we stop on time
 
