@@ -424,7 +424,7 @@
 
 <script>
   const $ = (id) => document.getElementById(id);
-  let photos=[], currentJob=null, reviewShown=false, featuredSrc=null, rating=0, resultsData=[], cardBird=null;
+  let photos=[], currentJob=null, reviewShown=false, featuredSrc=null, rating=0, resultsData=[], cardBird=null, userPicked=false;
   const MAXP=2, MIN_DIM=768;
   const isHeicFile = (f) => /heic|heif/i.test(f.type) || /\.(heic|heif)$/i.test(f.name);
 
@@ -520,6 +520,18 @@
     [...$('grid').children].forEach(c=>c.classList.remove('sel'));
     const cell=$('cell'+i); if(cell) cell.classList.add('sel');
     [...$('cardpick').children].forEach(b=>b.classList.toggle('active', +b.dataset.index===i));
+    postCard(); // keep the server's copy of the card current (rides along in the delivery email)
+  }
+  let cardPostTimer=null;
+  function postCard(){
+    if(!currentJob) return;
+    clearTimeout(cardPostTimer);
+    cardPostTimer=setTimeout(()=>{
+      try{
+        const png=drawCard().toDataURL('image/png');
+        fetch('/api/card',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jobId:currentJob,png})}).catch(()=>{});
+      }catch(e){ /* card image not ready yet — a later pick/completion will retry */ }
+    },1200);
   }
   // explicit look-picker buttons under the card (outside #sharecard so they're not in the export)
   function renderCardPicker(){
@@ -530,7 +542,7 @@
       const b=document.createElement('button'); b.type='button';
       b.textContent=r.label||('Look '+(i+1)); b.dataset.index=i;
       if(r.src===featuredSrc) b.classList.add('active');
-      b.addEventListener('click',()=>selectCard(i));
+      b.addEventListener('click',()=>{ userPicked=true; selectCard(i); });
       wrap.appendChild(b);
     });
   }
@@ -538,7 +550,7 @@
     const save=e.target.closest('.dl');
     if(save){ e.stopPropagation(); saveOne(save.dataset.save, save.dataset.name||'headshot.jpg'); return; }
     const cell=e.target.closest('.cell'); if(!cell || cell.classList.contains('dummy') || cell.classList.contains('failed')) return;
-    const m=(cell.id||'').match(/^cell(\d+)$/); if(m) selectCard(+m[1]);
+    const m=(cell.id||'').match(/^cell(\d+)$/); if(m){ userPicked=true; selectCard(+m[1]); }
   });
   async function saveOne(src,name){
     try{ const f=await fileFromSrc(src,name);
@@ -639,7 +651,7 @@
     let fin; try{ fin=await (await fetch('/api/finalize/'+jobId)).json(); }catch{ $('pmsg').textContent='Could not verify payment.'; return; }
     if(fin.error){ $('pmsg').textContent=fin.error; return; }
     if(!fin.paid){ $('pmsg').textContent='Payment not confirmed. If you were charged, refresh in a moment.'; return; }
-    resultsData=[]; featuredSrc=null; renderCard(fin.bird); buildGrid(fin.total); pollImages(jobId, fin.total);
+    resultsData=[]; featuredSrc=null; userPicked=false; renderCard(fin.bird); buildGrid(fin.total); pollImages(jobId, fin.total);
   }
   const msgs=['Developing your headshots…','Tailoring outfits…','Coaxing the bird onto your shoulder…','Adjusting the lighting…','Almost there…'];
   function pollImages(jobId,total){
@@ -654,7 +666,8 @@
       }
       (j.results||[]).forEach((r,i)=>{ if(r) fillCell(i,r); });
       renderCardPicker();
-      if(!featuredSrc){ const k=resultsData.findIndex(Boolean); if(k>=0) selectCard(k); } // default to the first look, not whichever finished first
+      // default card = look 3 (Navy Polo) once it exists; first success until then; never override a manual pick
+      if(!userPicked){ const k=resultsData[2]?2:resultsData.findIndex(Boolean); if(k>=0&&resultsData[k]&&featuredSrc!==resultsData[k].src) selectCard(k); }
       $('bar').style.width=Math.round((j.done/total)*100)+'%';
       if(j.status==='running'||j.status==='generating'||j.status==='awaiting_payment') setTimeout(tick,2000);
       else { clearInterval(mt); $('pmsg').textContent = j.status==='failed' ? 'Generation failed — your $1 has been refunded automatically.' : '✓ All '+total+' ready. Same bird, every shot.'; }

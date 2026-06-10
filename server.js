@@ -25,6 +25,7 @@ const DAILY_CAP = Number(process.env.DAILY_CAP || 20);
 const CONCURRENCY = Number(process.env.CONCURRENCY || 5);
 const ADMIN_KEY = process.env.ADMIN_KEY || "";
 const MIN_IMAGE_DIM = Number(process.env.MIN_IMAGE_DIM || 768); // reject tiny uploads that produce bad results
+const EMAIL_DELAY_MS = Number(process.env.EMAIL_DELAY_MS || 3 * 60 * 1000); // window for the user's Bird-ID pick to reach the delivery email
 const PAYMENTS_ENABLED = !!process.env.STRIPE_SECRET_KEY;
 const FREE_CODES = (process.env.FREE_CODES || "").split(",").map((s) => s.trim().toLowerCase()).filter(Boolean); // beta codes that skip payment
 const stripe = PAYMENTS_ENABLED ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
@@ -60,7 +61,7 @@ app.post("/api/stripe/webhook", express.raw({ type: "application/json" }), async
   res.json({ received: true });
 });
 
-app.use(express.json());
+app.use(express.json({ limit: "12mb" })); // /api/card uploads the rendered Bird ID PNG (~2-4 MB)
 app.use("/review-media", express.static(MEDIA_DIR));
 app.use(express.static("public"));
 
@@ -160,7 +161,13 @@ async function startGeneration(job) {
   await Promise.all(Array.from({ length: Math.min(CONCURRENCY, LOOKS.length) }, worker));
   job.status = job.results.every((r) => r?.error) ? "failed" : "complete";
   if (job.status === "complete" && job.email) {
-    sendHeadshots({ to: job.email, bird: job.bird, results: job.results }).catch((e) => console.error("[mail]", e.message));
+    // Delay the delivery email so the user's Bird-ID photo pick (made on the
+    // results page, uploaded via /api/card) can ride along. The browser posts
+    // a default card (look 3) on completion, and re-posts if they pick another.
+    setTimeout(() => {
+      sendHeadshots({ to: job.email, bird: job.bird, results: job.results, card: job.cardPng })
+        .catch((e) => console.error("[mail]", e.message));
+    }, EMAIL_DELAY_MS).unref?.();
   }
   if (job.status === "failed") {
     // The UI promises "your $1 will be refunded" on total failure — honor it
@@ -286,6 +293,18 @@ app.get("/api/job/:id", (req, res) => {
     results: job.paid ? job.results : [],
     error: job.error,
   });
+});
+
+// Browser-rendered Bird ID card (PNG data URI) to attach to the delivery email.
+// Posted automatically on completion (default look) and again on a user pick.
+app.post("/api/card", (req, res) => {
+  const job = jobs.get(req.body?.jobId);
+  if (!job || !job.paid) return res.status(404).json({ error: "Job not found." });
+  const png = req.body?.png || "";
+  if (!/^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test(png)) return res.status(400).json({ error: "Expected a PNG data URI." });
+  if (png.length > 8 * 1024 * 1024) return res.status(400).json({ error: "Card too large." });
+  job.cardPng = png;
+  res.json({ ok: true });
 });
 
 // ---- reviews ----
