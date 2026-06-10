@@ -553,7 +553,7 @@
   async function cardCanvas(){
     const el=$('sharecard'), pw=el.style.width, pmw=el.style.maxWidth, ph=el.style.height, par=el.style.aspectRatio;
     el.style.maxWidth='none'; el.style.width='400px'; el.style.aspectRatio='auto'; el.style.height='560px';
-    try{ return await html2canvas(el,{backgroundColor:null,scale:2,useCORS:true,width:400,height:560,windowWidth:400}); }
+    try{ return await html2canvas(el,{backgroundColor:null,scale:3,useCORS:true,width:400,height:560,windowWidth:400}); }
     finally{ el.style.maxWidth=pmw; el.style.width=pw; el.style.height=ph; el.style.aspectRatio=par; }
   }
   async function cardBlob(){ const c=await cardCanvas(); return await new Promise(r=>c.toBlob(r,'image/png')); }
