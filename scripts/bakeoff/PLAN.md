@@ -40,6 +40,15 @@ head · head not centred · bird wrong · other. **A render fails if ANY box is 
 **VERDICT: bake-off closed 2026-06-10.** Prod = NB2 + preserve-expression + 1 photo
 recommended. Reopen by adding a config and rerunning — never by tuning in prod.
 
+## Pro Pack track (post-verdict — $2.99 birdless upsell)
+
+- [ ] **T10 — De-bird edit fidelity.** Feeds 10 finished T7/T8 renders back into NB2
+      with "remove the bird, change NOTHING else." Pass = bird gone, face/outfit/scene
+      untouched. *This is the load-bearing test for the "keep your favorites, minus
+      the bird" promise — if edits drift, the favorites mechanic downgrades to
+      regeneration.* Failure classes on its review page: remnant / face / scene /
+      quality / other. Pass rule: ≤1/10 with any box ticked.
+
 ## Margin table (5 images/job, Stripe 2.9% + $0.30) — verify prices on Google's pricing page
 
 | Model | $/img (1K) | Profit @ $1.00 | Profit @ $1.99 |

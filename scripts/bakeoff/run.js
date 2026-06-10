@@ -109,13 +109,38 @@ async function thumb(buf) {
 const bufferFromSrc = async (src) =>
   src.startsWith("data:") ? Buffer.from(src.split(",")[1], "base64") : Buffer.from(await (await fetch(src)).arrayBuffer());
 
-// ---------- plan + cost gate ----------
-const panel = loadPanel();
-const total = panel.length * LOOKS.length;
+// ---------- debird mode: inputs are renders from earlier tests ----------
+const DEBIRD_PROMPT =
+  "Remove the bird from this photograph completely. Change NOTHING else: keep the person's face, " +
+  "expression, hair, outfit, pose, lighting, background, colour grade and framing EXACTLY as they are. " +
+  "Fill the area where the bird was naturally and seamlessly. Photorealistic, high detail.";
+
+function loadDebirdItems(cfg) {
+  const bySource = cfg.source.map((src) => {
+    const dir = path.join(__dirname, "results", src, "renders");
+    if (!fs.existsSync(dir)) { console.error(`Missing ${dir} — run ${src} first.`); process.exit(1); }
+    return fs.readdirSync(dir).filter((f) => /\.jpg$/i.test(f)).sort()
+      .map((f) => ({ key: `${src}_${f.replace(/\.jpg$/i, "")}`, file: path.join(dir, f) }));
+  });
+  // round-robin across sources for an even spread of faces/looks
+  const items = [];
+  for (let i = 0; items.length < cfg.limit; i++) {
+    let added = false;
+    for (const list of bySource) if (list[i] && items.length < cfg.limit) { items.push(list[i]); added = true; }
+    if (!added) break;
+  }
+  return items;
+}
+
+const isDebird = cfg.mode === "debird";
+const panel = isDebird ? [] : loadPanel();
+const debirdItems = isDebird ? loadDebirdItems(cfg) : [];
+const total = isDebird ? debirdItems.length : panel.length * LOOKS.length;
+
 console.log(`\n──────── bake-off ${cfg.id}: ${cfg.label} ────────`);
 console.log(`  question   ${cfg.question}`);
-console.log(`  provider   ${cfg.provider} · model ${cfg.model} · ${cfg.photos} photo(s)`);
-console.log(`  panel      ${panel.map((p) => p.name).join(", ")}`);
+console.log(`  provider   ${cfg.provider} · model ${cfg.model}${isDebird ? " · EDIT mode" : ` · ${cfg.photos} photo(s)`}`);
+console.log(`  inputs     ${isDebird ? `${total} renders from ${cfg.source.join("+")}` : panel.map((p) => p.name).join(", ")}`);
 console.log(`  renders    ${total}  (~$${(total * cfg.genCost).toFixed(2)})`);
 console.log(`──────────────────────────────────────────────\n`);
 if (!GO) { console.log("Dry run. Add --yes to spend the above and generate.\n"); process.exit(0); }
@@ -133,6 +158,35 @@ fs.mkdirSync(RENDERS, { recursive: true });
 const rows = [];
 let n = 0;
 const t0 = Date.now();
+
+if (isDebird) {
+  for (const item of debirdItems) {
+    n++;
+    try {
+      const orig = { buffer: fs.readFileSync(item.file), mimeType: "image/jpeg" };
+      const t = Date.now();
+      let src;
+      try {
+        ({ src } = await provider.generate({ images: [orig], prompt: DEBIRD_PROMPT }));
+      } catch (e) {
+        console.warn(`        retrying after: ${e.message.slice(0, 80)}`);
+        await new Promise((r) => setTimeout(r, 5000));
+        ({ src } = await provider.generate({ images: [orig], prompt: DEBIRD_PROMPT }));
+      }
+      const ms = Date.now() - t;
+      const buf = await bufferFromSrc(src);
+      fs.mkdirSync(RENDERS, { recursive: true });
+      fs.writeFileSync(path.join(RENDERS, `${item.key}.jpg`), buf);
+      rows.push({ key: item.key, face: item.key, look: "de-bird edit", ms,
+                  selfieThumb: await thumb(orig.buffer), renderThumb: await thumb(buf) });
+      console.log(`[${n}/${total}] ${item.key}  ${(ms / 1000).toFixed(1)}s`);
+    } catch (e) {
+      rows.push({ key: item.key, face: item.key, look: "de-bird edit", error: e.message });
+      console.warn(`[${n}/${total}] ${item.key}  FAILED: ${e.message}`);
+    }
+  }
+}
+
 for (const id of panel) {
   const photos = id.photos.slice(0, cfg.photos);
   const bird = pickBird(id.name);
@@ -181,7 +235,8 @@ console.log(`Open and tick:  ${path.join(OUT, "review.html")}\n`);
 
 // ---------- self-contained review page ----------
 function buildReview(rows, meta) {
-  const FAILS = [
+  // configs may override the failure classes (e.g. debird mode); default = generation classes
+  const FAILS = cfg.fails || [
     ["gender", "Gender swap"],
     ["hair", "Wrong hair / extra hair"],
     ["composite", "Pasted-on / composited head"],
@@ -189,6 +244,8 @@ function buildReview(rows, meta) {
     ["bird", "Bird missing, doubled or wrong"],
     ["other", "Other embarrassment"],
   ];
+  const leftLabel = isDebird ? "original" : "reference";
+  const rightLabel = isDebird ? "edited (bird removed)" : "render";
   return `<!doctype html><meta charset="utf-8"><title>Bake-off ${meta.test} review</title>
 <style>
 body{font:15px/1.45 system-ui;margin:24px;background:#fafaf7;color:#222}
@@ -207,8 +264,8 @@ button{margin-top:8px;padding:6px 12px;border-radius:6px;border:0;background:#2d
 <div id="summary"></div>
 ${rows.map((r) => `
 <div class="row" data-key="${r.key}">
-  <img src="${r.selfieThumb}" title="reference — click for full size" onclick="window.open(this.src)">
-  <img src="${r.renderThumb}" title="render — click for full size" onclick="window.open('renders/${r.key}.jpg')">
+  <img src="${r.selfieThumb}" title="${leftLabel} — click for full size" onclick="window.open(this.src)">
+  <img src="${r.renderThumb}" title="${rightLabel} — click for full size" onclick="window.open('renders/${r.key}.jpg')">
   <div>
     <div class="meta">${r.face} · ${r.look} · ${(r.ms / 1000).toFixed(1)}s</div>
     ${FAILS.map(([k, lbl]) => `<label><input type="checkbox" data-fail="${k}"> ${lbl}</label>`).join("")}

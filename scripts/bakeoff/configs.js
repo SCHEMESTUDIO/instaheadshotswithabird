@@ -80,6 +80,26 @@ export const CONFIGS = [
     genCost: 0.067,
   },
   {
+    id: "T10",
+    label: "De-bird edit fidelity (Pro Pack favorites mechanic)",
+    question: "Does 'remove the bird, change nothing else' preserve the face/outfit/scene, or does NB2 repaint?",
+    provider: "gemini",
+    model: "gemini-3.1-flash-image",
+    mode: "debird",          // input = renders from previous tests, not the face panel
+    source: ["T7", "T8"],    // pulls finished renders from these results dirs (round-robin)
+    limit: 10,               // 10 edits ≈ $0.67
+    photos: 1,
+    genCost: 0.067,
+    // review page failure classes for this mode:
+    fails: [
+      ["remnant", "Bird not fully removed / artifacts left"],
+      ["face", "Face changed vs original"],
+      ["scene", "Outfit, background or lighting changed"],
+      ["quality", "Quality loss (softness, weird fill)"],
+      ["other", "Other"],
+    ],
+  },
+  {
     id: "T5",
     label: "Qwen image edit (optional)",
     question: "Is the open-model option competitive on quality and price?",
