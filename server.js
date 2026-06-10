@@ -12,6 +12,7 @@ import { assignBird, stats } from "./lib/assign.js";
 import { getProvider } from "./lib/providers/index.js";
 import { addReview, listReviews, setApproved, wordCount, MEDIA_DIR } from "./lib/reviews.js";
 import { addEmail, listEmails } from "./lib/emails.js";
+import { addProInterest, proInterestCount, listProInterest } from "./lib/prodoor.js";
 import { sendHeadshots } from "./lib/mail.js";
 
 dotenv.config();
@@ -276,9 +277,21 @@ app.get("/api/admin/emails", (req, res) => {
   res.json(listEmails());
 });
 
+// ---- Pro Pack fake door: log demand for the birdless $2.99 upsell ----
+app.post("/api/pro-interest", (req, res) => {
+  const job = jobs.get(req.body?.jobId);
+  const n = addProInterest({ jobId: req.body?.jobId, email: job?.email || null });
+  console.log(`[pro-door] click #${n} (job ${req.body?.jobId || "?"})`); // visible in Render logs
+  res.json({ ok: true });
+});
+app.get("/api/admin/pro-interest", (req, res) => {
+  if (!adminOk(req)) return res.status(401).json({ error: "Unauthorized." });
+  res.json(listProInterest());
+});
+
 app.get("/api/stats", (_req, res) => res.json(stats()));
 app.get("/healthz", (_req, res) =>
-  res.json({ ok: true, provider: (process.env.PROVIDER || "gemini").toLowerCase(), paymentsEnabled: PAYMENTS_ENABLED, priceCents: PRICE_CENTS, looks: LOOKS.length, ...stats() })
+  res.json({ ok: true, provider: (process.env.PROVIDER || "gemini").toLowerCase(), paymentsEnabled: PAYMENTS_ENABLED, priceCents: PRICE_CENTS, looks: LOOKS.length, proInterest: proInterestCount(), ...stats() })
 );
 
 // JSON error handler — keeps the API from ever returning Express's HTML 500 page

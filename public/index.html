@@ -456,10 +456,16 @@
   function buildGrid(n){
     const g=$('grid'); g.innerHTML='';
     for(let i=0;i<n;i++){ const c=document.createElement('div'); c.className='cell'; c.id='cell'+i; c.innerHTML='<div class="ph"><div class="spin"></div></div>'; g.appendChild(c); }
-    // slot 6 — fake-door upsell placeholder (wire to analytics / a real offer later)
-    const d=document.createElement('div'); d.className='cell dummy'; d.id='dummyUpsell';
-    d.innerHTML='<div class="di"><span class="plus">＋</span>Feature request?<small>Email us</small></div>';
-    d.addEventListener('click',()=>{ window.location.href='mailto:feedback@headshotswithabird.com?subject=Feature%20request%20%E2%80%94%20Headshots%20with%20a%20Bird'; });
+    // slot 6 — Pro Pack FAKE DOOR: measures demand for the birdless upsell
+    // before it's built. Clicks log to /api/pro-interest (email captured
+    // server-side from the job). See scripts/bakeoff/PLAN.md, Pro Pack track.
+    const d=document.createElement('div'); d.className='cell dummy'; d.id='proDoor';
+    d.innerHTML='<div class="di"><span class="plus">✨</span>Want them without the bird?<small>10 premium headshots · $2.99</small></div>';
+    d.addEventListener('click',async()=>{
+      if(d.dataset.clicked) return; d.dataset.clicked='1';
+      d.innerHTML='<div class="di"><span class="plus">✓</span>Coming this week<small>We&rsquo;ll email you when it&rsquo;s live — no charge today</small></div>';
+      try{ await fetch('/api/pro-interest',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jobId:currentJob})}); }catch{}
+    });
     g.appendChild(d);
   }
   function fillCell(i, r){

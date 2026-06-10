@@ -20,33 +20,21 @@ head · head not centred · bird wrong · other. **A render fails if ANY box is 
 
 ## The tests — do them in order
 
-- [x] **T1 — Baseline.** NB1, 2 photos → **16/20 DEAD** (composite-dominated).
-- [x] **T2 — One photo.** NB1, 1 photo → **12/17 DEAD**, but composites halved.
-      On a weak model, photo count only trades composite (2-photo) for uncanny (1-photo).
-- [x] **T3 — Nano Banana 2**, 1 photo → **11/20 DEAD**, but composite SOLVED.
-      James traced uncanny to the model SWITCHING expression vs the reference → T7.
-- [x] **T7 — NB2 + preserve-expression prompt** → ★ **1/20 — WINNER, SHIPPED 2026-06-10**
-      (prompt baked into lib/prompt.js, default model gemini-3.1-flash-image,
-      CONCURRENCY 5). Uncanny 8→0, hair 3→0.
-- [x] **T8 — Prod config + 2 photos** → **5/20 DEAD** (minor uncanny + hair drift =
-      reference-disagreement blending). But peaks were the best of all tests — the
-      2-photo high-ceiling mode is worth revisiting IF a user-triggered re-roll ships
-      to mop up the fatter tail. Site copy flipped to recommend ONE photo (2026-06-10).
-- [ ] **T4 — Flux Kontext Pro** *(not run — winner found first; optional curiosity).*
-- [ ] **T5 — Qwen image edit** *(optional — only if a future model search reopens).*
-- [ ] **T6 — Nano Banana Pro** *(optional — only if a ~$1.99+ tier is on the table:
-      ~$0.134/img → zero margin @ $1; ship only if MAJORLY better than T7).*
-
-**VERDICT: bake-off closed 2026-06-10.** Prod = NB2 + preserve-expression + 1 photo
-recommended. Reopen by adding a config and rerunning — never by tuning in prod.
-
-## Pro Pack track (post-verdict — $2.99 birdless upsell)
-
-- [x] **T10 — De-bird edit fidelity.** → ★ **0/10 PASS, 8.8s/edit.** "Remove the
-      bird, change nothing else" holds perfectly on NB2: no remnants, no face drift,
-      no scene drift. The Pro Pack's "keep your favorites exactly, minus the bird"
-      promise is TRUE and is the fastest operation in the whole pipeline.
-      Next gate before building the full flow: fake-door tile to measure demand.
+- [ ] **T1 — Baseline.** `gemini-2.5-flash-image` (Nano Banana, stable), 2 photos.
+      *Establishes the failure rate of the cheapest viable config. Judged-against by all others.*
+      (Note: the old `-preview` alias was retired by Google on ~2026-06 and 404s — prod
+      default fixed in `lib/providers/gemini.js` the same day.)
+- [ ] **T2 — One photo.** Same model, 1 photo.
+      *Settles the 1-vs-2 question with data. Winner's photo count is used from here on.*
+- [ ] **T3 — Nano Banana 2** (`gemini-3.1-flash-image`), T1/T2-winner photo count.
+      *Costs 13pts of margin @ $1 — must visibly beat T1's failure rate to earn it.*
+- [ ] **T4 — Flux Kontext Pro** (Replicate, 1 photo — single-image model).
+      *The cross-vendor identity-preservation benchmark. ~$0.08/img → 27% margin @ $1.*
+- [ ] **T5 — Qwen image edit** *(optional — only if T3/T4 both disappoint).*
+      Fill the model slug in `configs.js` from replicate.com first.
+- [ ] **T6 — Nano Banana Pro** (`gemini-3-pro-image`) *(optional — $1.99 tier only).*
+      *~$0.134/img → ZERO margin @ $1. Only run if entertaining the $1.99 price; only
+      ship if quality is MAJORLY better than the T1–T3 winner — "slightly better" loses.*
 
 ## Margin table (5 images/job, Stripe 2.9% + $0.30) — verify prices on Google's pricing page
 
@@ -75,6 +63,7 @@ recommended. Reopen by adding a config and rerunning — never by tuning in prod
 | T3 | gemini-3.1-flash-image | 1 | 11/20 | other:8 hair:3 | 9.2s |
 | T7 | gemini-3.1-flash-image | 1 | 1/20 | composite:1 | 15.7s |
 | T8 | gemini-3.1-flash-image | 2 | 5/20 | hair:1 other:3 composite:1 | 10.3s |
+| T10 | gemini-3.1-flash-image | 1 | 0/10 | none | 8.8s |
 
 ## Notes
 
