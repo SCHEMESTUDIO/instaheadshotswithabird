@@ -42,12 +42,11 @@ recommended. Reopen by adding a config and rerunning — never by tuning in prod
 
 ## Pro Pack track (post-verdict — $2.99 birdless upsell)
 
-- [ ] **T10 — De-bird edit fidelity.** Feeds 10 finished T7/T8 renders back into NB2
-      with "remove the bird, change NOTHING else." Pass = bird gone, face/outfit/scene
-      untouched. *This is the load-bearing test for the "keep your favorites, minus
-      the bird" promise — if edits drift, the favorites mechanic downgrades to
-      regeneration.* Failure classes on its review page: remnant / face / scene /
-      quality / other. Pass rule: ≤1/10 with any box ticked.
+- [x] **T10 — De-bird edit fidelity.** → ★ **0/10 PASS, 8.8s/edit.** "Remove the
+      bird, change nothing else" holds perfectly on NB2: no remnants, no face drift,
+      no scene drift. The Pro Pack's "keep your favorites exactly, minus the bird"
+      promise is TRUE and is the fastest operation in the whole pipeline.
+      Next gate before building the full flow: fake-door tile to measure demand.
 
 ## Margin table (5 images/job, Stripe 2.9% + $0.30) — verify prices on Google's pricing page
 
