@@ -86,7 +86,7 @@ const pickBird = (name) => {
 
 async function thumb(buf) {
   const img = await Jimp.read(buf);
-  img.scaleToFit(448, 448).quality(80);
+  img.scaleToFit(820, 820).quality(82);
   return img.getBase64Async(Jimp.MIME_JPEG);
 }
 const bufferFromSrc = async (src) =>
@@ -125,7 +125,15 @@ for (const id of panel) {
     const tag = `${id.name} × ${look.id}`;
     try {
       const t = Date.now();
-      const { src } = await provider.generate({ images: photos, prompt: buildTwoPersonPrompt(look, bird) });
+      let src;
+      try {
+        ({ src } = await provider.generate({ images: photos, prompt: buildTwoPersonPrompt(look, bird) }));
+      } catch (e) {
+        // one retry for transient capacity blips ("high demand" etc.)
+        console.warn(`        retrying after: ${e.message.slice(0, 80)}`);
+        await new Promise((r) => setTimeout(r, 5000));
+        ({ src } = await provider.generate({ images: photos, prompt: buildTwoPersonPrompt(look, bird) }));
+      }
       const ms = Date.now() - t;
       const buf = await bufferFromSrc(src);
       const file = `${id.name}_${look.id}.jpg`;
@@ -168,8 +176,8 @@ function buildReview(rows, meta) {
 <style>
 body{font:15px/1.45 system-ui;margin:24px;background:#fafaf7;color:#222}
 h1{font-size:20px} .sub{color:#666;margin-bottom:18px}
-.row{display:flex;gap:14px;align-items:flex-start;background:#fff;border:1px solid #e4e4de;border-radius:10px;padding:12px;margin-bottom:12px}
-.row img{width:200px;border-radius:8px;display:block}
+.row{display:flex;gap:14px;align-items:flex-start;background:#fff;border:1px solid #e4e4de;border-radius:10px;padding:12px;margin-bottom:12px;flex-wrap:wrap}
+.row img{width:400px;max-width:44vw;border-radius:8px;display:block;cursor:zoom-in}
 .row.bad{border-color:#d33;background:#fff6f6}
 .meta{font-weight:600;margin-bottom:6px}
 label{display:block;margin:2px 0;cursor:pointer;white-space:nowrap}
@@ -182,8 +190,8 @@ button{margin-top:8px;padding:6px 12px;border-radius:6px;border:0;background:#2d
 <div id="summary"></div>
 ${rows.map((r) => `
 <div class="row" data-key="${r.key}">
-  <img src="${r.selfieThumb}" title="reference">
-  <img src="${r.renderThumb}" title="render">
+  <img src="${r.selfieThumb}" title="reference — click for full size" onclick="window.open(this.src)">
+  <img src="${r.renderThumb}" title="render — click for full size" onclick="window.open('renders/${r.key}.jpg')">
   <div>
     <div class="meta">${r.face} · ${r.look} · ${(r.ms / 1000).toFixed(1)}s</div>
     ${FAILS.map(([k, lbl]) => `<label><input type="checkbox" data-fail="${k}"> ${lbl}</label>`).join("")}

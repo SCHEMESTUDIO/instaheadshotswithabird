@@ -20,12 +20,14 @@ head · head not centred · bird wrong · other. **A render fails if ANY box is 
 
 ## The tests — do them in order
 
-- [ ] **T1 — Baseline.** `gemini-2.5-flash-image` (Nano Banana, stable), 2 photos.
+- [x] **T1 — Baseline.** `gemini-2.5-flash-image` (Nano Banana, stable), 2 photos.
       *Establishes the failure rate of the cheapest viable config. Judged-against by all others.*
       (Note: the old `-preview` alias was retired by Google on ~2026-06 and 404s — prod
       default fixed in `lib/providers/gemini.js` the same day.)
-- [ ] **T2 — One photo.** Same model, 1 photo.
+- [x] **T2 — One photo.** Same model, 1 photo.
       *Settles the 1-vs-2 question with data. Winner's photo count is used from here on.*
+      → **1 photo won** (composites 6/17 vs 13/20). Both T1 and T2 are DEAD per rule 1;
+      failure modes are (a) pasted-on composite head, (b) uncanny likeness. T3+ run 1-photo.
 - [ ] **T3 — Nano Banana 2** (`gemini-3.1-flash-image`), T1/T2-winner photo count.
       *Costs 13pts of margin @ $1 — must visibly beat T1's failure rate to earn it.*
 - [ ] **T4 — Flux Kontext Pro** (Replicate, 1 photo — single-image model).
@@ -58,8 +60,8 @@ head · head not centred · bird wrong · other. **A render fails if ANY box is 
 
 | Test | Model | Photos | Failed/Total | By class | Avg s/render |
 |---|---|---|---|---|---|
-<!-- paste copied rows here -->
-
+| T1 | gemini-2.5-flash-image | 2 | 16/20 | composite:13 other:3 | 10.9s |
+| T2 | gemini-2.5-flash-image | 1 | 12/17 | composite:6 other:6 | 9.7s |
 ## Notes
 
 - Panel: 4 real faces in `scripts/calibrate/realfaces/` (2 photos each). Same panel,

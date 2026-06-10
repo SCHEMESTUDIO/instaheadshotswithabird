@@ -30,8 +30,7 @@ export const CONFIGS = [
     question: "Does NB2 cut failures enough to give up 13pts of margin @ $1?",
     provider: "gemini",
     model: "gemini-3.1-flash-image", // ~$0.067/img → 34% margin @ $1, 65% @ $1.99
-    // Set to whichever photo count won T1 vs T2 before running.
-    photos: 2,
+    photos: 1, // T2 beat T1: composites halved with one photo (6/17 vs 13/20)
     genCost: 0.067,
   },
   {
@@ -40,7 +39,8 @@ export const CONFIGS = [
     question: "Is quality MAJORLY better, enough to justify raising price to $1.99?",
     provider: "gemini",
     model: "gemini-3-pro-image", // ~$0.134/img → ~0% margin @ $1 (DEAD), 48% @ $1.99
-    photos: 2,
+    photos: 1, // T2 winner
+
     genCost: 0.134,
   },
   {
