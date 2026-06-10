@@ -206,7 +206,7 @@
 
   <header class="hero">
     <h1>Five headshots.<br><span class="hl">One bird. <span style="color:var(--good)">$1.</span></span></h1>
-    <p class="sub">Professional headshots without a photographer. Upload two selfies and get five polished headshots. Plus a bird.</p>
+    <p class="sub">Professional headshots without a photographer. Upload one selfie and get five polished headshots. Plus a bird.</p>
     <div class="badge"><span class="dot"></span> You don't pick the bird. The bird picks you.</div>
   </header>
 
@@ -230,7 +230,7 @@
       <input type="file" id="file" accept="image/jpeg,image/png,image/heic,image/heif,.heic,.heif" multiple />
       <div class="icon">📸</div>
       <p>Click to select your photo(s), or drag them in</p>
-      <small>One clear, front-facing photo works. Two similar headshots can produce better results — but make sure the second matches your hairstyle, facial hair, and accessories, or you can confuse the generator. · JPG, PNG, or HEIC · 768px+ (1024+ best)</small>
+      <small>One clear, front-facing photo is all we need — in our testing, one great photo beats two. (A second is accepted, but only if it closely matches the first: same hairstyle, facial hair, expression.) · JPG, PNG, or HEIC · 768px+ (1024+ best)</small>
     </label>
     <div class="thumbs" id="thumbs"></div>
     <div class="count" id="count"></div>
@@ -278,7 +278,7 @@
   <div class="wrap">
     <h2>How it works</h2>
     <div class="steps">
-      <div class="step"><div class="n">1</div><h3>Upload 2 selfies</h3><p>Two clear, front-facing angles — that's what makes the likeness work.</p></div>
+      <div class="step"><div class="n">1</div><h3>Upload a selfie</h3><p>One clear, front-facing, well-lit photo — that's all the likeness needs.</p></div>
       <div class="step"><div class="n">2</div><h3>Pay $1</h3><p>One dollar, secure checkout via Stripe. No subscription.</p></div>
       <div class="step"><div class="n">3</div><h3>Get 5 headshots</h3><p>Five professional looks in about a minute — each with your bird, plus your Bird ID.</p></div>
     </div>
@@ -330,10 +330,10 @@
   <div class="wrap">
     <h2>Questions</h2>
     <details><summary>Can I remove the bird?</summary><p>No. There is no button to remove the bird. There never was a button. The bird stays.</p></details>
-    <details><summary>Will it actually look like me?</summary><p>Yes — that's why we ask for two angles. The headshots are AI-generated using multiple inputs to improve quality. A real likeness is the whole point.</p></details>
+    <details><summary>Will it actually look like me?</summary><p>Yes — the headshots are AI-generated from your photo, and we keep your exact expression rather than inventing one. A real likeness is the whole point.</p></details>
     <details><summary>What do I get for $1?</summary><p>Five professional headshots across five outfit-and-backdrop looks, each starring the one bird we've paired to you — plus a shareable Bird ID card.</p></details>
     <details><summary>How long does it take?</summary><p>About a minute. No model training, no waiting hours like the other guys.</p></details>
-    <details><summary>What photos work best?</summary><p>Two clear, front-facing, well-lit shots from slightly different angles, at least 768px on the short side. JPG, PNG, or HEIC.</p></details>
+    <details><summary>What photos work best?</summary><p>One clear, front-facing, well-lit shot, at least 768px on the short side. JPG, PNG, or HEIC. Tip: your headshots will carry the same expression as your photo — so pick one where you look how you'd like your headshot to look.</p></details>
     <details><summary>Do you keep my photos?</summary><p>No. Your uploads are used to generate your headshots and then discarded — we don't store them. See our <a href="/privacy.html">Privacy Policy</a>.</p></details>
     <details><summary>Can I choose my bird?</summary><p>No. The bird chooses you. There are 148 species; you get exactly one.</p></details>
     <details><summary>Refunds?</summary><p>If we fail to deliver your headshots, you're refunded. Otherwise all sales — and all birds — are final.</p></details>
@@ -408,7 +408,7 @@
       $('thumbs').appendChild(d);
     });
     const n=photos.length;
-    $('count').textContent = n>=2 ? '✓ 2 photos ready' : n===1 ? '✓ 1 photo ready — add a 2nd for better results (optional)' : 'Add at least 1 photo (2 recommended)';
+    $('count').textContent = n>=2 ? '✓ 2 photos ready (tip: one great photo usually works best)' : n===1 ? '✓ Ready — one great photo is all we need' : 'Add 1 clear, front-facing photo';
     $('drop').style.display = n>=MAXP ? 'none' : 'flex';
   }
   function isImageFile(f){ return f && (/^image\//.test(f.type) || /\.(jpe?g|png|heic|heif)$/i.test(f.name||'') || !f.type); }

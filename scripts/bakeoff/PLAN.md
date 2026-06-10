@@ -20,25 +20,25 @@ head · head not centred · bird wrong · other. **A render fails if ANY box is 
 
 ## The tests — do them in order
 
-- [x] **T1 — Baseline.** `gemini-2.5-flash-image` (Nano Banana, stable), 2 photos.
-      → 16/20 DEAD. Composite-dominated (13).
-- [x] **T2 — One photo.** Same model, 1 photo.
-      → 12/17 DEAD, but **1 photo won** (composites halved). Failure modes: composite
-      head vs uncanny likeness — photo count only trades one for the other on NB1.
-- [x] **T3 — Nano Banana 2** (`gemini-3.1-flash-image`), 1 photo.
-      → 11/20, composite SOLVED (re-renders its copies). Uncanny (8) traced by James
-      to the model SWITCHING expression vs the reference → testable hypothesis → T7.
-- [x] **T7 — NB2 + preserve-expression prompt.** ★ **WINNER — 1/20 (composite:1).**
-      Uncanny 8→0, hair 3→0 once the prompt stopped inviting invented expressions.
-      **SHIPPED 2026-06-10:** prompt baked into `lib/prompt.js`, default model →
-      `gemini-3.1-flash-image` in `lib/providers/gemini.js`, `CONCURRENCY` default → 5
-      (15.7s/render serial would break the one-minute promise; parallel ≈ 20s/job).
-- [ ] **T4 — Flux Kontext Pro** (Replicate, 1 photo — single-image model).
-      *Not run — winner found first. Optional curiosity.*
+- [x] **T1 — Baseline.** NB1, 2 photos → **16/20 DEAD** (composite-dominated).
+- [x] **T2 — One photo.** NB1, 1 photo → **12/17 DEAD**, but composites halved.
+      On a weak model, photo count only trades composite (2-photo) for uncanny (1-photo).
+- [x] **T3 — Nano Banana 2**, 1 photo → **11/20 DEAD**, but composite SOLVED.
+      James traced uncanny to the model SWITCHING expression vs the reference → T7.
+- [x] **T7 — NB2 + preserve-expression prompt** → ★ **1/20 — WINNER, SHIPPED 2026-06-10**
+      (prompt baked into lib/prompt.js, default model gemini-3.1-flash-image,
+      CONCURRENCY 5). Uncanny 8→0, hair 3→0.
+- [x] **T8 — Prod config + 2 photos** → **5/20 DEAD** (minor uncanny + hair drift =
+      reference-disagreement blending). But peaks were the best of all tests — the
+      2-photo high-ceiling mode is worth revisiting IF a user-triggered re-roll ships
+      to mop up the fatter tail. Site copy flipped to recommend ONE photo (2026-06-10).
+- [ ] **T4 — Flux Kontext Pro** *(not run — winner found first; optional curiosity).*
 - [ ] **T5 — Qwen image edit** *(optional — only if a future model search reopens).*
-- [ ] **T6 — Nano Banana Pro** (`gemini-3-pro-image`) *(optional — $1.99 tier only).*
-      *~$0.134/img → ZERO margin @ $1. Only run if entertaining the $1.99 price; only
-      ship if quality is MAJORLY better than the T1–T3 winner — "slightly better" loses.*
+- [ ] **T6 — Nano Banana Pro** *(optional — only if a ~$1.99+ tier is on the table:
+      ~$0.134/img → zero margin @ $1; ship only if MAJORLY better than T7).*
+
+**VERDICT: bake-off closed 2026-06-10.** Prod = NB2 + preserve-expression + 1 photo
+recommended. Reopen by adding a config and rerunning — never by tuning in prod.
 
 ## Margin table (5 images/job, Stripe 2.9% + $0.30) — verify prices on Google's pricing page
 
@@ -66,6 +66,7 @@ head · head not centred · bird wrong · other. **A render fails if ANY box is 
 | T2 | gemini-2.5-flash-image | 1 | 12/17 | composite:6 other:6 | 9.7s |
 | T3 | gemini-3.1-flash-image | 1 | 11/20 | other:8 hair:3 | 9.2s |
 | T7 | gemini-3.1-flash-image | 1 | 1/20 | composite:1 | 15.7s |
+| T8 | gemini-3.1-flash-image | 2 | 5/20 | hair:1 other:3 composite:1 | 10.3s |
 
 ## Notes
 
