@@ -1,28 +1,41 @@
 # Render Blueprint — deploys the app on a persistent-Node web service.
 # In Render: New → Blueprint → pick this repo. It reads this file.
 # After it deploys, set the secret env vars (marked sync:false) in the dashboard.
+#
+# NOTE: this file matches the LIVE prod config (Gemini provider). If you
+# redeploy via Blueprint, confirm the dashboard env vars still win / match.
 services:
   - type: web
     name: instaheadshotswithabird
     runtime: node
-    plan: free                 # free = ephemeral disk (reviews + bird-count reset on restart).
+    plan: free                 # free = ephemeral disk (reviews, emails, pro-interest & bird-count RESET on every deploy/restart — see disk note below)
     buildCommand: npm install
     startCommand: npm start
     healthCheckPath: /healthz
     autoDeploy: true
     envVars:
       - key: PROVIDER
-        value: replicate
-      - key: REPLICATE_API_TOKEN
+        value: gemini          # prod provider since 2026-06-10 (NB2 bake-off winner)
+      - key: GEMINI_API_KEY
         sync: false            # paste in dashboard
+      - key: REPLICATE_API_TOKEN
+        sync: false            # optional fallback provider only
       - key: STRIPE_SECRET_KEY
-        sync: false            # use your sk_test_... key for test mode
+        sync: false            # sk_live_... for real beta, sk_test_... for testing
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false            # whsec_... — strongly recommended; without it every webhook costs an extra Stripe API round-trip to verify
+      - key: RESEND_API_KEY
+        sync: false            # REQUIRED for beta: email delivery is the user's permanent copy
+      - key: EMAIL_FROM
+        value: Headshots with a Bird <noreply@headshotswithabird.com>
+      - key: FREE_CODES
+        sync: false            # comma-separated beta codes that skip payment
       - key: ADMIN_KEY
         sync: false            # any random string, for approving reviews
       - key: PUBLIC_URL
-        sync: false            # set to your https://<service>.onrender.com URL after first deploy
+        value: https://headshotswithabird.com
 
-# ── To keep reviews + bird-uniqueness across restarts (recommended for real beta) ──
+# ── To keep reviews + emails + bird-uniqueness across restarts (recommended before beta) ──
 # 1) change plan above to:  plan: starter
 # 2) add this env var under envVars:
 #      - key: DATA_DIR

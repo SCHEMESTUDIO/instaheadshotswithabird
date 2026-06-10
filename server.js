@@ -34,7 +34,7 @@ app.set("trust proxy", true); // honor x-forwarded-proto so Stripe redirect URLs
 const upload = multer({ limits: { fileSize: 12 * 1024 * 1024, files: 2 } });
 
 // ---- Stripe webhook (raw body) BEFORE express.json ----
-app.post("/api/stripe/webhook", express.raw({ type: "application/json" }), (req, res) => {
+app.post("/api/stripe/webhook", express.raw({ type: "application/json" }), async (req, res) => {
   if (!PAYMENTS_ENABLED) return res.json({ ok: true, skipped: true });
   let event = req.body;
   const secret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -43,7 +43,18 @@ app.post("/api/stripe/webhook", express.raw({ type: "application/json" }), (req,
     else event = JSON.parse(req.body.toString());
   } catch (err) { return res.status(400).send(`Webhook error: ${err.message}`); }
   if (event.type === "checkout.session.completed") {
-    const job = jobs.get(event.data.object?.metadata?.jobId);
+    let session = event.data?.object;
+    if (!secret) {
+      // Unsigned payloads can be forged (free-generation bypass) — confirm the
+      // session with Stripe before trusting it. Set STRIPE_WEBHOOK_SECRET to
+      // skip this round-trip.
+      try {
+        if (!session?.id) throw new Error("no session id");
+        session = await stripe.checkout.sessions.retrieve(session.id);
+      } catch { return res.status(400).send("Unverifiable webhook payload"); }
+      if (session.payment_status !== "paid") return res.json({ received: true });
+    }
+    const job = jobs.get(session?.metadata?.jobId);
     if (job && !job.paid) { job.paid = true; startGeneration(job); }
   }
   res.json({ received: true });
@@ -66,11 +77,24 @@ function peek(ip) { if (Date.now() > resetAt) { counts.clear(); resetAt = nextMi
 function bump(ip) { counts.set(ip, (counts.get(ip) || 0) + 1); }
 
 // ---- in-memory job store ----
+// Purge rules: never drop a job mid-generation; unpaid jobs live 45 min
+// (Stripe checkout below is capped at ~31 min, so the job outlives the
+// payment window); paid jobs live 2 h so the success link keeps working
+// for a while — the email delivery is the permanent copy.
 const jobs = new Map();
 setInterval(() => {
-  const cutoff = Date.now() - 30 * 60 * 1000;
-  for (const [id, j] of jobs) if (j.createdAt < cutoff) jobs.delete(id);
+  const now = Date.now();
+  for (const [id, j] of jobs) {
+    if (j.status === "generating") continue;
+    const age = now - j.createdAt;
+    if (!j.paid && age > 45 * 60 * 1000) jobs.delete(id);
+    else if (j.paid && age > 2 * 60 * 60 * 1000) jobs.delete(id);
+  }
 }, 5 * 60 * 1000).unref?.();
+
+function clientIp(req) {
+  return req.headers["x-forwarded-for"]?.split(",")[0]?.trim() || req.ip;
+}
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 function throttleWaitMs(msg) {
@@ -124,6 +148,7 @@ async function generateLook(job, look) {
 async function startGeneration(job) {
   if (job.status === "generating" || job.status === "complete") return;
   job.status = "generating";
+  if (job.ip) bump(job.ip); // count against the daily cap when generation actually starts
   let cursor = 0;
   async function worker() {
     while (cursor < LOOKS.length) {
@@ -137,13 +162,31 @@ async function startGeneration(job) {
   if (job.status === "complete" && job.email) {
     sendHeadshots({ to: job.email, bird: job.bird, results: job.results }).catch((e) => console.error("[mail]", e.message));
   }
+  if (job.status === "failed") {
+    // The UI promises "your $1 will be refunded" on total failure — honor it
+    // automatically so nobody has to remember. Free-code jobs have no session.
+    refundJob(job).catch((e) => console.error(`[refund] job ${job.id}:`, e.message));
+  }
   job.photos = null; // drop the uploaded selfies once done
+}
+
+async function refundJob(job) {
+  if (!PAYMENTS_ENABLED || !job.sessionId || job.refunded) return;
+  const s = await stripe.checkout.sessions.retrieve(job.sessionId);
+  if (s.payment_status !== "paid" || !s.payment_intent) return;
+  const pi = typeof s.payment_intent === "string" ? s.payment_intent : s.payment_intent.id;
+  await stripe.refunds.create({ payment_intent: pi });
+  job.refunded = true;
+  console.log(`[refund] job ${job.id}: refunded ${pi} (all ${LOOKS.length} looks failed)`);
 }
 
 // 1) hold upload, assign hidden bird
 app.post("/api/start", upload.array("photos", 2), async (req, res) => {
   try {
     if (!req.files || req.files.length < 1) return res.status(400).json({ error: "Please upload at least one photo." });
+    // enforce the daily cap BEFORE payment, not after — never charge someone we'll refuse
+    const ip = clientIp(req);
+    if (peek(ip) >= DAILY_CAP) return res.status(429).json({ error: "Daily limit reached — try again tomorrow." });
     // convert HEIC → JPEG, then validate type + resolution (before assigning a bird)
     for (const f of req.files) {
       if (isHeic(f.buffer)) {
@@ -165,7 +208,7 @@ app.post("/api/start", upload.array("photos", 2), async (req, res) => {
     addEmail(email, consent);
     const bird = assignBird();
     const job = {
-      id: randomUUID(), bird, email,
+      id: randomUUID(), bird, email, ip,
       photos: req.files.map((f) => ({ buffer: f.buffer, mimeType: f.mimetype })),
       paid: false, status: "awaiting_payment",
       total: LOOKS.length, done: 0, results: new Array(LOOKS.length).fill(null),
@@ -183,14 +226,21 @@ app.post("/api/checkout", async (req, res) => {
     if (!job) return res.status(404).json({ error: "Session expired — please re-upload." });
     const base = baseUrl(req);
     const code = (req.body.code || "").trim().toLowerCase();
-    if (code && FREE_CODES.includes(code)) { // valid beta code → skip payment
-      job.paid = true;
-      return res.json({ url: `${base}/?job=${job.id}&paid=1&free=1` });
+    if (code) {
+      if (FREE_CODES.includes(code)) { // valid beta code → skip payment
+        job.paid = true;
+        return res.json({ url: `${base}/?job=${job.id}&paid=1&free=1` });
+      }
+      // A typo'd code must NOT silently fall through to a $1 charge.
+      return res.status(400).json({ error: "That beta code isn't valid — double-check it, or clear the field to pay $1." });
     }
     if (!PAYMENTS_ENABLED) return res.json({ url: `${base}/?job=${job.id}&paid=1&dev=1` });
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
+      // keep the payment window inside the job's 45-min lifetime so nobody can
+      // pay for a job the server has already purged (Stripe minimum is 30 min)
+      expires_at: Math.floor(Date.now() / 1000) + 31 * 60,
       customer_email: job.email || undefined, // pre-fill so they don't type it twice
       line_items: [{
         price_data: {
@@ -220,11 +270,8 @@ app.get("/api/finalize/:jobId", async (req, res) => {
       }
     }
     if (!job.paid) return res.json({ paid: false });
-    const ip = req.headers["x-forwarded-for"]?.split(",")[0]?.trim() || req.ip;
-    if (job.status === "awaiting_payment") {
-      if (peek(ip) >= DAILY_CAP) return res.status(429).json({ error: "Daily limit reached — try again tomorrow." });
-      bump(ip); startGeneration(job);
-    }
+    // cap was already enforced (pre-payment) in /api/start; bump happens in startGeneration
+    if (job.status === "awaiting_payment") startGeneration(job);
     res.json({ paid: true, bird: withBirdImage(job.bird), status: job.status, total: job.total });
   } catch (err) { console.error("[finalize]", err); res.status(500).json({ error: err.message }); }
 });
@@ -248,8 +295,10 @@ app.post("/api/review", async (req, res) => {
     if (wordCount(text) > 30) return res.status(400).json({ error: "Reviews are limited to 30 words." });
     const job = jobs.get(jobId);
     const bird = job?.bird || null;
-    // prefer a server-known image; fall back to the src the client was viewing
-    let src = featuredSrc || null;
+    // ONLY persist an image the server itself generated for this job. Anything
+    // else would let an anonymous POST host arbitrary images on our domain
+    // (or make the server fetch attacker-chosen URLs).
+    let src = null;
     if (job?.results?.length) {
       const ok = job.results.find((r) => r && r.src && (!featuredSrc || r.src === featuredSrc));
       if (ok) src = ok.src;
@@ -291,8 +340,23 @@ app.get("/api/admin/pro-interest", (req, res) => {
 
 app.get("/api/stats", (_req, res) => res.json(stats()));
 app.get("/healthz", (_req, res) =>
-  res.json({ ok: true, provider: (process.env.PROVIDER || "gemini").toLowerCase(), paymentsEnabled: PAYMENTS_ENABLED, priceCents: PRICE_CENTS, looks: LOOKS.length, proInterest: proInterestCount(), ...stats() })
+  res.json({
+    ok: true, provider: (process.env.PROVIDER || "gemini").toLowerCase(),
+    paymentsEnabled: PAYMENTS_ENABLED, priceCents: PRICE_CENTS, looks: LOOKS.length,
+    // config sanity flags — verify these say true before sharing with testers
+    emailEnabled: !!process.env.RESEND_API_KEY,
+    webhookSecretSet: !!process.env.STRIPE_WEBHOOK_SECRET,
+    freeCodes: FREE_CODES.length,
+    adminEnabled: !!ADMIN_KEY,
+    proInterest: proInterestCount(), ...stats(),
+  })
 );
+
+// Unknown paths: send humans home, give APIs a JSON 404 (never Express's HTML page)
+app.use((req, res) => {
+  if (req.path.startsWith("/api/")) return res.status(404).json({ error: "Not found." });
+  res.redirect("/");
+});
 
 // JSON error handler — keeps the API from ever returning Express's HTML 500 page
 // (which the front-end can't parse as JSON). Catches multer upload errors etc.

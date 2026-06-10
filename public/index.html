@@ -7,6 +7,23 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <title>Headshots with a Bird — 5 headshots, one bird, $1.</title>
 <meta name="description" content="Upload one selfie, get 5 professional headshots for $1 — each starring the one bird we've paired to you, plus your own Bird ID." />
+<link rel="canonical" href="https://headshotswithabird.com/" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<meta name="theme-color" content="#f7f5ef" />
+<!-- Social sharing (LinkedIn, Reddit, Slack, iMessage all read Open Graph) -->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Headshots with a Bird" />
+<meta property="og:title" content="Five headshots. One bird. $1." />
+<meta property="og:description" content="Upload one selfie, get 5 professional headshots in about a minute — each starring the one bird we've paired to you." />
+<meta property="og:url" content="https://headshotswithabird.com/" />
+<meta property="og:image" content="https://headshotswithabird.com/og.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="Five professional headshots. One bird. One dollar." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Five headshots. One bird. $1." />
+<meta name="twitter:description" content="Upload one selfie, get 5 professional headshots in about a minute — each with the one bird we've paired to you." />
+<meta name="twitter:image" content="https://headshotswithabird.com/og.png" />
 <style>
   :root{
     --ink:#0d0f14; --paper:#f7f5ef; --card:#ffffff;
@@ -412,6 +429,7 @@
   const isHeicFile = (f) => /heic|heif/i.test(f.type) || /\.(heic|heif)$/i.test(f.name);
 
   function toast(t){ const el=$('toast'); el.textContent=t; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),1600); }
+  const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
   // ---- upload (up to 2 photos) ----
   const emailOk = () => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(($('email').value||'').trim());
@@ -572,14 +590,20 @@
   const msgs=['Developing your headshots…','Tailoring outfits…','Coaxing the bird onto your shoulder…','Adjusting the lighting…','Almost there…'];
   function pollImages(jobId,total){
     let mi=0; const mt=setInterval(()=>$('pmsg').textContent = $('bar').style.width==='100%'?'✓ All '+total+' ready. Same bird, every shot.':msgs[mi=(mi+1)%msgs.length],2200);
+    let fails=0;
     const tick=async()=>{
-      const j=await (await fetch('/api/job/'+jobId)).json();
+      let j;
+      try{ const res=await fetch('/api/job/'+jobId); j=await res.json(); if(!res.ok) throw new Error(j.error||'poll'); fails=0; }
+      catch{ // transient network blip / phone lock — keep trying instead of freezing the spinner
+        if(++fails<=15) return setTimeout(tick,3000);
+        clearInterval(mt); $('pmsg').textContent='Connection lost — your headshots are still being made and will be emailed to you. Refresh to keep watching.'; return;
+      }
       (j.results||[]).forEach((r,i)=>{ if(r) fillCell(i,r); });
       renderCardPicker();
       if(!featuredSrc){ const k=resultsData.findIndex(Boolean); if(k>=0) selectCard(k); } // default to the first look, not whichever finished first
       $('bar').style.width=Math.round((j.done/total)*100)+'%';
-      if(j.status==='running'||j.status==='generating') setTimeout(tick,2000);
-      else { clearInterval(mt); $('pmsg').textContent = j.status==='failed' ? 'Generation failed — your $1 will be refunded.' : '✓ All '+total+' ready. Same bird, every shot.'; }
+      if(j.status==='running'||j.status==='generating'||j.status==='awaiting_payment') setTimeout(tick,2000);
+      else { clearInterval(mt); $('pmsg').textContent = j.status==='failed' ? 'Generation failed — your $1 has been refunded automatically.' : '✓ All '+total+' ready. Same bird, every shot.'; }
     };
     tick();
   }
@@ -613,14 +637,15 @@
     let list=[]; try{ list=await (await fetch('/api/reviews')).json(); }catch{}
     if(!list.length) return;
     $('reviews').style.display='block';
+    const stars=n=>{ n=Math.max(1,Math.min(5,Math.round(+n)||1)); return '★'.repeat(n)+'☆'.repeat(5-n); };
     $('track').innerHTML = list.map(r=>`
       <div class="rcard">
-        ${r.media?`<img src="${r.media}" alt="headshot by ${r.name}">`:''}
+        ${r.media?`<img src="${esc(r.media)}" alt="headshot by ${esc(r.name)}">`:''}
         <div class="rbody">
-          <div class="rstars">${'★'.repeat(r.stars)}${'☆'.repeat(5-r.stars)}</div>
-          <div class="rtext">“${r.text}”</div>
-          <div class="rwho">${r.name}</div>
-          ${r.birdName?`<div class="rbird">Paired with ${r.birdEmoji||''} ${r.birdName}</div>`:''}
+          <div class="rstars">${stars(r.stars)}</div>
+          <div class="rtext">“${esc(r.text)}”</div>
+          <div class="rwho">${esc(r.name)}</div>
+          ${r.birdName?`<div class="rbird">Paired with ${esc(r.birdEmoji||'')} ${esc(r.birdName)}</div>`:''}
         </div>
       </div>`).join('');
     $('cdots').innerHTML = list.map((_,i)=>`<button data-i="${i}" class="${i===0?'on':''}"></button>`).join('');
