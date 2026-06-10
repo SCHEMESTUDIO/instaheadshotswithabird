@@ -550,11 +550,65 @@
   async function fileFromSrc(src,name){ const b=await (await fetch(src)).blob(); return new File([b],name,{type:b.type||'image/jpeg'}); }
   const isMobile = ((window.matchMedia && matchMedia('(pointer:coarse)').matches) || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent||'')); // touch devices → share sheet; desktop → file download
   function canShareFiles(files){ try{ return isMobile && !!(navigator.canShare && navigator.canShare({files})); }catch{ return false; } }
+  // Card export: drawn directly on a 4x canvas from the FULL-RES headshot.
+  // html2canvas (kept as fallback) rasterizes the DOM at CSS pixel size, which
+  // softened both photo and text — the "card looks compressed" bug.
+  function rr(ctx,x,y,w,h,r){ ctx.beginPath(); if(ctx.roundRect){ ctx.roundRect(x,y,w,h,r); } else { ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); } }
+  function wrapLines(ctx,text,maxW){ const words=String(text).split(/\s+/); const lines=[]; let cur=''; for(const w of words){ const t=cur?cur+' '+w:w; if(ctx.measureText(t).width>maxW&&cur){ lines.push(cur); cur=w; } else cur=t; } if(cur) lines.push(cur); return lines; }
+  function drawCard(){
+    const S=4, W=400, H=560, b=cardBird||{};
+    const img=$('cardImg');
+    if(!img||!img.naturalWidth) throw new Error('card image not loaded');
+    const c=document.createElement('canvas'); c.width=W*S; c.height=H*S;
+    const ctx=c.getContext('2d'); ctx.scale(S,S);
+    ctx.imageSmoothingEnabled=true; ctx.imageSmoothingQuality='high';
+    const F=(w,s,it)=>`${it?'italic ':''}${w} ${s}px Inter,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif`;
+    ctx.fillStyle='#10a37f'; rr(ctx,0,0,W,H,22); ctx.fill();
+    ctx.fillStyle='#fffdf7'; rr(ctx,12,12,W-24,H-24,14); ctx.fill();
+    const x0=26, x1=W-26, cw=x1-x0;
+    ctx.textBaseline='middle';
+    ctx.font=F(800,12); const bt='#'+String(b.assignmentNumber||1).padStart(4,'0');
+    const bw=ctx.measureText(bt).width+20;
+    ctx.fillStyle='#10a37f'; rr(ctx,x1-bw,26,bw,22,11); ctx.fill();
+    ctx.fillStyle='#fff'; ctx.fillText(bt,x1-bw+10,37.5);
+    const name=(b.emoji?b.emoji+' ':'')+(b.name||'');
+    let fs=22; ctx.font=F(800,fs);
+    while(fs>13 && ctx.measureText(name).width > cw-bw-10){ fs--; ctx.font=F(800,fs); }
+    ctx.fillStyle='#0d0f14'; ctx.fillText(name,x0,37.5);
+    const facts=((b.facts&&b.facts.length?b.facts:[b.blurb||'']).slice(0,2));
+    ctx.font=F(400,12.5);
+    const factLines=facts.map(f=>wrapLines(ctx,f,cw-24-14));
+    const nLines=factLines.reduce((a,l)=>a+l.length,0);
+    const factsH=20+nLines*17+(facts.length-1)*6;
+    const footY=H-34, sciH=18, gap=10;
+    const factsY=footY-10-factsH;
+    const sciY=factsY-gap-sciH;
+    const artY=58, artH=sciY-gap-artY, artW=cw;
+    ctx.fillStyle='#10a37f'; rr(ctx,x0,artY,artW,artH,10); ctx.fill();
+    ctx.save(); rr(ctx,x0+4,artY+4,artW-8,artH-8,7); ctx.clip();
+    const iw=img.naturalWidth, ih=img.naturalHeight, bw2=artW-8, bh=artH-8;
+    const k=Math.max(bw2/iw,bh/ih), sw=bw2/k, sh=bh/k;
+    ctx.drawImage(img,(iw-sw)/2,(ih-sh)/2,sw,sh,x0+4,artY+4,bw2,bh);
+    ctx.restore();
+    ctx.font=F(400,13,true); ctx.fillStyle='#6b7180'; ctx.fillText(b.sci||'',x0,sciY+9);
+    ctx.fillStyle='#eafaf4'; rr(ctx,x0,factsY,cw,factsH,10); ctx.fill();
+    ctx.strokeStyle='#bdeade'; ctx.lineWidth=1; rr(ctx,x0,factsY,cw,factsH,10); ctx.stroke();
+    ctx.fillStyle='#26403a'; ctx.font=F(400,12.5);
+    let ly=factsY+18;
+    factLines.forEach(lines=>{ lines.forEach((ln,i)=>{ if(i===0){ ctx.font=F(400,9); ctx.fillText('🪶',x0+12,ly+1); ctx.font=F(400,12.5);} ctx.fillText(ln,x0+26,ly); ly+=17; }); ly+=6; });
+    ctx.font=F(800,11); ctx.fillStyle='#10a37f'; ctx.textAlign='center';
+    ctx.fillText('headshotswithabird.com',W/2,footY);
+    ctx.textAlign='left';
+    return c;
+  }
   async function cardCanvas(){
-    const el=$('sharecard'), pw=el.style.width, pmw=el.style.maxWidth, ph=el.style.height, par=el.style.aspectRatio;
-    el.style.maxWidth='none'; el.style.width='400px'; el.style.aspectRatio='auto'; el.style.height='560px';
-    try{ return await html2canvas(el,{backgroundColor:null,scale:3,useCORS:true,width:400,height:560,windowWidth:400}); }
-    finally{ el.style.maxWidth=pmw; el.style.width=pw; el.style.height=ph; el.style.aspectRatio=par; }
+    try{ return drawCard(); }
+    catch(e){ console.error('drawCard failed, falling back to html2canvas:', e);
+      const el=$('sharecard'), pw=el.style.width, pmw=el.style.maxWidth, ph=el.style.height, par=el.style.aspectRatio;
+      el.style.maxWidth='none'; el.style.width='400px'; el.style.aspectRatio='auto'; el.style.height='560px';
+      try{ return await html2canvas(el,{backgroundColor:null,scale:3,useCORS:true,width:400,height:560,windowWidth:400}); }
+      finally{ el.style.maxWidth=pmw; el.style.width=pw; el.style.height=ph; el.style.aspectRatio=par; }
+    }
   }
   async function cardBlob(){ const c=await cardCanvas(); return await new Promise(r=>c.toBlob(r,'image/png')); }
   $('copyCard').addEventListener('click', async ()=>{
