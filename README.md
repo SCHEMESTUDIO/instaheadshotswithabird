@@ -1,12 +1,13 @@
 # InstaHeadshots with a Bird 🐦
 
-Upload two selfies → pay **$1** → get **5** professional headshots (5 outfits, 5 backdrops), each
+Upload one selfie → pay **$1** → get **5** professional headshots (5 outfits, 5 backdrops), each
 starring the single bird paired to you, plus a shareable **Bird ID**. The bird cannot be removed.
 After downloading/sharing, users can leave a star review — approved ones feed the homepage carousel.
 
 ## The flow
 
-1. Upload one or two selfies (no choices to make — everyone gets all 5 looks).
+1. Upload one selfie — one great photo beats two (bake-off T7 vs T8: 1/20 vs 5/20
+   failures). A second is accepted but must closely match the first.
 2. We assign a bird (hidden until paid; no repeats until the 148-bird roster is exhausted).
 3. Stripe Checkout, $1.
 4. On return, payment is verified and 5 headshots generate in parallel (Gemini; set PROVIDER=replicate for the Flux Kontext fallback).
