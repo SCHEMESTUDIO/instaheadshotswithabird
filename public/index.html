@@ -189,6 +189,18 @@
   .about h2{font-size:28px;letter-spacing:-.03em;margin:0 0 14px}
   .about p{font-size:16px;color:#3a3d44;margin:0 0 14px}
   .about .by{font-size:14px;color:var(--muted)}
+  /* SCHEME Studio block — a stamp, not a disclaimer */
+  .studio{display:inline-block;margin:30px auto 8px;padding:20px 36px 18px;background:var(--card);
+    border:3px solid var(--ink);border-radius:16px;box-shadow:7px 7px 0 var(--brand);
+    transform:rotate(-1.2deg);transition:transform .15s ease,box-shadow .15s ease}
+  .studio:hover{transform:rotate(0deg) scale(1.02);box-shadow:9px 9px 0 var(--brand)}
+  .studio-label{font-size:11px;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+  .studio-name{display:block;font-size:34px;font-weight:900;letter-spacing:.04em;color:var(--ink);
+    text-decoration:none;line-height:1.1}
+  .studio-name:hover{color:var(--brand)}
+  .studio-contact{font-size:13px;color:var(--muted);margin-top:10px;line-height:1.6}
+  .studio-contact a{color:var(--brand);font-weight:600;text-decoration:none}
+  @media(max-width:560px){.studio{padding:16px 22px 14px}.studio-name{font-size:26px}}
   footer{padding:48px 0 40px;text-align:center;color:var(--muted);font-size:13px}
   footer a{color:var(--muted);text-decoration:underline}
   footer .links{margin-top:10px;font-size:13px;line-height:2}
@@ -329,13 +341,17 @@
 <section class="faq" id="faqWrap">
   <div class="wrap">
     <h2>Questions</h2>
-    <details><summary>Can I remove the bird?</summary><p>No. There is no button to remove the bird. There never was a button. The bird stays.</p></details>
+    <details><summary>Can I remove the bird?</summary><p>No. There is no button to remove the bird. There never was a button. The bird stays. (However — and we say this through gritted teeth — see "Can I get them without the bird?" below.)</p></details>
+    <details><summary>Can I get them without the bird?</summary><p>We're building a Pro option: 10 premium, completely birdless headshots for $2.99. It's coming soon — after your headshots are ready, you'll see a tile on your results page; tap it and we'll email you the moment it's live. To be clear, your $1 headshots keep the bird. The bird is load-bearing.</p></details>
     <details><summary>Will it actually look like me?</summary><p>Yes — the headshots are AI-generated from your photo, and we keep your exact expression rather than inventing one. A real likeness is the whole point.</p></details>
     <details><summary>What do I get for $1?</summary><p>Five professional headshots across five outfit-and-backdrop looks, each starring the one bird we've paired to you — plus a shareable Bird ID card.</p></details>
     <details><summary>How long does it take?</summary><p>About a minute. No model training, no waiting hours like the other guys.</p></details>
     <details><summary>What photos work best?</summary><p>One clear, front-facing, well-lit shot, at least 768px on the short side. JPG, PNG, or HEIC. Tip: your headshots will carry the same expression as your photo — so pick one where you look how you'd like your headshot to look.</p></details>
     <details><summary>Do you keep my photos?</summary><p>No. Your uploads are used to generate your headshots and then discarded — we don't store them. See our <a href="/privacy.html">Privacy Policy</a>.</p></details>
     <details><summary>Can I choose my bird?</summary><p>No. The bird chooses you. There are 148 species; you get exactly one.</p></details>
+    <details><summary>Why is my bird ENORMOUS?</summary><p>Because it's enormous in real life. Our 148 species include ostriches, condors, an emperor penguin, and a wandering albatross with a 3.5-metre wingspan. Small birds perch on your shoulder. Birds that physics forbids from perching stand behind you at true scale, face proudly over your shoulder. We could have shrunk them. We chose truth.</p></details>
+    <details><summary>Why only one photo? Other services want 10+.</summary><p>Because we tested it. One great photo beat two in our trials, and it beats making you dig up twelve. Services demanding 10+ selfies are training a custom model, which is why they take hours and cost $30+. We do something smarter, faster, and one dollar-er.</p></details>
+    <details><summary>Why is it so cheap?</summary><p>Because it's cheap to make and we're not pretending otherwise. Your five headshots cost us about 40 cents to generate — honestly, the payment processor takes a bigger cut than the AI does. We charge $1 because that covers it. That's the whole business model.</p></details>
     <details><summary>Refunds?</summary><p>If we fail to deliver your headshots, you're refunded. Otherwise all sales — and all birds — are final.</p></details>
   </div>
 </section>
@@ -343,9 +359,13 @@
 <section class="about" id="about">
   <div class="wrap">
     <h2>About</h2>
-    <p>We noticed AI headshot companies were charging 100x markup on a simple $1 API call and pocketing the rest. We decided to create an alternative that can rival their quality for much, much less. So we built it in 2 days, and it only costs one dollar.</p>
-    <p>Why the bird? Frankly we're just as confused as you. Frontier AI models still struggle with specialised cognitive tasks. You see, to them, the notion of "thinking" is merely predicting patterns in data — in our case pixels. Our bot generates incredible headshots quickly, and at a cost, but always with a bird. We just decided to go with it. Long live bird bot.</p>
-    <p class="by">Headshots with a Bird is a project by <a href="https://schemestudio.lol" target="_blank" rel="noopener">SCHEME Studio</a>. Questions, press, or (futile) bird-removal requests: <a href="mailto:james@schemestudio.lol">james@schemestudio.lol</a>.</p>
+    <p>AI headshot companies are charging huge markup on simple $1 API calls. We decided to create an alternative that can rival their quality for much, much less. So we built it in 2 days, and it only costs one dollar.</p>
+    <p>Why the bird? Frankly we're just as confused as you. Frontier AI models struggle with specialised cognitive tasks. Our bot generates incredible headshots quickly and at low cost, but always with a bird. We just decided to go with it. Long live bird bot.</p>
+    <div class="studio">
+      <div class="studio-label">A production of</div>
+      <a class="studio-name" href="https://schemestudio.lol" target="_blank" rel="noopener">SCHEME&nbsp;STUDIO</a>
+      <div class="studio-contact">Questions, press, or (futile) bird-removal requests:<br><a href="mailto:james@schemestudio.lol">james@schemestudio.lol</a></div>
+    </div>
   </div>
 </section>
 
