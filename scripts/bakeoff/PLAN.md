@@ -20,16 +20,22 @@ head · head not centred · bird wrong · other. **A render fails if ANY box is 
 
 ## The tests — do them in order
 
-- [x] **T1 — Baseline.** `gemini-2.5-flash-image` (Nano Banana, stable), 2 photos.
+- [ ] **T1 — Baseline.** `gemini-2.5-flash-image` (Nano Banana, stable), 2 photos.
       *Establishes the failure rate of the cheapest viable config. Judged-against by all others.*
       (Note: the old `-preview` alias was retired by Google on ~2026-06 and 404s — prod
       default fixed in `lib/providers/gemini.js` the same day.)
-- [x] **T2 — One photo.** Same model, 1 photo.
+- [ ] **T2 — One photo.** Same model, 1 photo.
       *Settles the 1-vs-2 question with data. Winner's photo count is used from here on.*
-      → **1 photo won** (composites 6/17 vs 13/20). Both T1 and T2 are DEAD per rule 1;
-      failure modes are (a) pasted-on composite head, (b) uncanny likeness. T3+ run 1-photo.
-- [ ] **T3 — Nano Banana 2** (`gemini-3.1-flash-image`), T1/T2-winner photo count.
+- [x] **T3 — Nano Banana 2** (`gemini-3.1-flash-image`), 1 photo.
       *Costs 13pts of margin @ $1 — must visibly beat T1's failure rate to earn it.*
+      → 11/20, but composite SOLVED (re-renders + re-lights its copies). Remaining
+      failures concentrate in uncanny (8), which James traced to the model
+      SWITCHING expression vs the reference. Hair: 3. Still dead per rule 1 — but
+      the uncanny mechanism is now a testable prompt hypothesis → T7.
+- [ ] **T7 — NB2 + preserve-expression prompt** (same model/photos as T3; the ONLY
+      change is the prompt pins expression to the reference instead of inviting a
+      new one). *If ≤2/20, we have a shippable winner: ship prompt change +
+      `GEMINI_MODEL=gemini-3.1-flash-image`, and T4/T5 become optional curiosity.*
 - [ ] **T4 — Flux Kontext Pro** (Replicate, 1 photo — single-image model).
       *The cross-vendor identity-preservation benchmark. ~$0.08/img → 27% margin @ $1.*
 - [ ] **T5 — Qwen image edit** *(optional — only if T3/T4 both disappoint).*
@@ -62,6 +68,7 @@ head · head not centred · bird wrong · other. **A render fails if ANY box is 
 |---|---|---|---|---|---|
 | T1 | gemini-2.5-flash-image | 2 | 16/20 | composite:13 other:3 | 10.9s |
 | T2 | gemini-2.5-flash-image | 1 | 12/17 | composite:6 other:6 | 9.7s |
+| T3 | gemini-3.1-flash-image | 1 | 11/20 | other:8 hair:3 | 9.2s |
 ## Notes
 
 - Panel: 4 real faces in `scripts/calibrate/realfaces/` (2 photos each). Same panel,

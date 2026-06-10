@@ -30,6 +30,23 @@ import { buildTwoPersonPrompt } from "../../lib/prompt.js";
 import { getBird, BIRD_IDS } from "../../lib/birds.js";
 import { CONFIGS } from "./configs.js";
 
+// Prompt variants under test. "preserve-expression" swaps the line that
+// invites the model to invent a new expression (the T3 uncanny mechanism)
+// for one that pins it to the reference.
+function applyPromptMod(prompt, mod) {
+  if (!mod) return prompt;
+  if (mod === "preserve-expression") {
+    const out = prompt.replace(
+      "a natural, relaxed expression.",
+      "keep the person's facial expression EXACTLY as in the reference photo — if they are smiling, the same smile; if not, do NOT add one. Never invent a new expression."
+    );
+    if (out === prompt) console.warn("WARN: preserve-expression anchor not found in prompt — appending instead.");
+    return out !== prompt ? out
+      : prompt + " IMPORTANT: keep the person's facial expression EXACTLY as in the reference photo; never invent a new expression.";
+  }
+  throw new Error(`Unknown promptMod: ${mod}`);
+}
+
 dotenv.config();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PANEL_DIR = path.join(__dirname, "..", "calibrate", "realfaces");
@@ -127,12 +144,12 @@ for (const id of panel) {
       const t = Date.now();
       let src;
       try {
-        ({ src } = await provider.generate({ images: photos, prompt: buildTwoPersonPrompt(look, bird) }));
+        ({ src } = await provider.generate({ images: photos, prompt: applyPromptMod(buildTwoPersonPrompt(look, bird), cfg.promptMod) }));
       } catch (e) {
         // one retry for transient capacity blips ("high demand" etc.)
         console.warn(`        retrying after: ${e.message.slice(0, 80)}`);
         await new Promise((r) => setTimeout(r, 5000));
-        ({ src } = await provider.generate({ images: photos, prompt: buildTwoPersonPrompt(look, bird) }));
+        ({ src } = await provider.generate({ images: photos, prompt: applyPromptMod(buildTwoPersonPrompt(look, bird), cfg.promptMod) }));
       }
       const ms = Date.now() - t;
       const buf = await bufferFromSrc(src);

@@ -53,6 +53,18 @@ export const CONFIGS = [
     genCost: 0.08,
   },
   {
+    id: "T7",
+    label: "NB2 + preserve-expression prompt",
+    question: "Does pinning the expression to the reference kill the uncanny failures?",
+    provider: "gemini",
+    model: "gemini-3.1-flash-image",
+    photos: 1,
+    // James's T3 observation: uncanny strongly correlates with the model
+    // SWITCHING expression (smile <-> no smile). This variant forbids that.
+    promptMod: "preserve-expression",
+    genCost: 0.067,
+  },
+  {
     id: "T5",
     label: "Qwen image edit (optional)",
     question: "Is the open-model option competitive on quality and price?",
