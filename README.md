@@ -66,8 +66,12 @@ Or just edit `data/reviews.json` and set `"approved": true`.
 |---|---|
 | Revenue | **$1.00** |
 | Stripe (2.9% + $0.30) | −$0.329 |
-| Replicate (5 images @ $0.04) | −$0.200 |
-| **Net profit / sale** | **≈ $0.47 (47%)** |
+| Gemini NB2 (5 images @ ~$0.067) | −$0.335 |
+| **Net profit / sale** | **≈ $0.34 (34%)** |
+
+Model is `gemini-3.1-flash-image` (Nano Banana 2) — bake-off winner at 1/20
+embarrassing failures vs 12–16/20 for the cheaper `gemini-2.5-flash-image`
+(see `scripts/bakeoff/PLAN.md`). The 13pts of margin buy the quality.
 
 Stripe's $0.30 flat fee is still the biggest single cost. Levers: raise price, or cut to fewer images.
 Failed generations auto-retry once; persistent failure tells the user their $1 will be refunded.

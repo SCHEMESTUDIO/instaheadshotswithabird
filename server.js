@@ -18,7 +18,10 @@ dotenv.config();
 
 const PRICE_CENTS = Number(process.env.PRICE_CENTS || 100);
 const DAILY_CAP = Number(process.env.DAILY_CAP || 20);
-const CONCURRENCY = Number(process.env.CONCURRENCY || 1); // serial by default — respects Replicate's low-credit burst limit. Raise once credit > $5.
+// 5-way parallel: NB2 averages ~16s/render (T7), so serial = ~80s and breaks the
+// "about a minute" promise; parallel ≈ 20s. The old serial default was only a
+// Replicate low-credit constraint — set CONCURRENCY=1 if ever back on Replicate.
+const CONCURRENCY = Number(process.env.CONCURRENCY || 5);
 const ADMIN_KEY = process.env.ADMIN_KEY || "";
 const MIN_IMAGE_DIM = Number(process.env.MIN_IMAGE_DIM || 768); // reject tiny uploads that produce bad results
 const PAYMENTS_ENABLED = !!process.env.STRIPE_SECRET_KEY;

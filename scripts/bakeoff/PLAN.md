@@ -20,26 +20,22 @@ head · head not centred · bird wrong · other. **A render fails if ANY box is 
 
 ## The tests — do them in order
 
-- [ ] **T1 — Baseline.** `gemini-2.5-flash-image` (Nano Banana, stable), 2 photos.
-      *Establishes the failure rate of the cheapest viable config. Judged-against by all others.*
-      (Note: the old `-preview` alias was retired by Google on ~2026-06 and 404s — prod
-      default fixed in `lib/providers/gemini.js` the same day.)
-- [ ] **T2 — One photo.** Same model, 1 photo.
-      *Settles the 1-vs-2 question with data. Winner's photo count is used from here on.*
+- [x] **T1 — Baseline.** `gemini-2.5-flash-image` (Nano Banana, stable), 2 photos.
+      → 16/20 DEAD. Composite-dominated (13).
+- [x] **T2 — One photo.** Same model, 1 photo.
+      → 12/17 DEAD, but **1 photo won** (composites halved). Failure modes: composite
+      head vs uncanny likeness — photo count only trades one for the other on NB1.
 - [x] **T3 — Nano Banana 2** (`gemini-3.1-flash-image`), 1 photo.
-      *Costs 13pts of margin @ $1 — must visibly beat T1's failure rate to earn it.*
-      → 11/20, but composite SOLVED (re-renders + re-lights its copies). Remaining
-      failures concentrate in uncanny (8), which James traced to the model
-      SWITCHING expression vs the reference. Hair: 3. Still dead per rule 1 — but
-      the uncanny mechanism is now a testable prompt hypothesis → T7.
-- [ ] **T7 — NB2 + preserve-expression prompt** (same model/photos as T3; the ONLY
-      change is the prompt pins expression to the reference instead of inviting a
-      new one). *If ≤2/20, we have a shippable winner: ship prompt change +
-      `GEMINI_MODEL=gemini-3.1-flash-image`, and T4/T5 become optional curiosity.*
+      → 11/20, composite SOLVED (re-renders its copies). Uncanny (8) traced by James
+      to the model SWITCHING expression vs the reference → testable hypothesis → T7.
+- [x] **T7 — NB2 + preserve-expression prompt.** ★ **WINNER — 1/20 (composite:1).**
+      Uncanny 8→0, hair 3→0 once the prompt stopped inviting invented expressions.
+      **SHIPPED 2026-06-10:** prompt baked into `lib/prompt.js`, default model →
+      `gemini-3.1-flash-image` in `lib/providers/gemini.js`, `CONCURRENCY` default → 5
+      (15.7s/render serial would break the one-minute promise; parallel ≈ 20s/job).
 - [ ] **T4 — Flux Kontext Pro** (Replicate, 1 photo — single-image model).
-      *The cross-vendor identity-preservation benchmark. ~$0.08/img → 27% margin @ $1.*
-- [ ] **T5 — Qwen image edit** *(optional — only if T3/T4 both disappoint).*
-      Fill the model slug in `configs.js` from replicate.com first.
+      *Not run — winner found first. Optional curiosity.*
+- [ ] **T5 — Qwen image edit** *(optional — only if a future model search reopens).*
 - [ ] **T6 — Nano Banana Pro** (`gemini-3-pro-image`) *(optional — $1.99 tier only).*
       *~$0.134/img → ZERO margin @ $1. Only run if entertaining the $1.99 price; only
       ship if quality is MAJORLY better than the T1–T3 winner — "slightly better" loses.*
@@ -69,6 +65,8 @@ head · head not centred · bird wrong · other. **A render fails if ANY box is 
 | T1 | gemini-2.5-flash-image | 2 | 16/20 | composite:13 other:3 | 10.9s |
 | T2 | gemini-2.5-flash-image | 1 | 12/17 | composite:6 other:6 | 9.7s |
 | T3 | gemini-3.1-flash-image | 1 | 11/20 | other:8 hair:3 | 9.2s |
+| T7 | gemini-3.1-flash-image | 1 | 1/20 | composite:1 | 15.7s |
+
 ## Notes
 
 - Panel: 4 real faces in `scripts/calibrate/realfaces/` (2 photos each). Same panel,

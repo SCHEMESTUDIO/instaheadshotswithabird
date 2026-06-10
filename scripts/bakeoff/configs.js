@@ -53,6 +53,10 @@ export const CONFIGS = [
     genCost: 0.08,
   },
   {
+    // ★ WINNER — 1/20 failures. SHIPPED 2026-06-10: preserve-expression is now
+    // baked into lib/prompt.js and gemini-3.1-flash-image is the prod default,
+    // so promptMod is redundant for future runs (it will warn + append).
+    // New tests should compare against the current prod prompt with no mod.
     id: "T7",
     label: "NB2 + preserve-expression prompt",
     question: "Does pinning the expression to the reference kill the uncanny failures?",
