@@ -236,8 +236,7 @@
     <div class="count" id="count"></div>
 
     <div class="whatsincluded">
-      <b>Your $1 gets all 5 looks:</b> Blue Suit · Black Tee · Colour Top · Charcoal Half-Zip · Dark Suit —
-      each with the same bird on your shoulder.
+      <b>5 different looks for only $1</b> — each with the same bird on your shoulder.
     </div>
 
     <input type="email" id="email" placeholder="Your email address (required)" autocomplete="email" required
@@ -248,7 +247,7 @@
     <input type="text" id="code" name="beta-code" placeholder="Have a beta code? Enter it here" autocomplete="off" autocorrect="off" autocapitalize="off" readonly onfocus="this.removeAttribute('readonly')"
       style="display:block;width:100%;margin-top:12px;border:1px solid var(--line);border-radius:11px;padding:11px 14px;font:inherit;text-align:center" />
     <button class="go" id="go" disabled>Continue to payment · $1</button>
-    <p class="note">The bird is non-negotiable and appears in all three. 🐦</p>
+    <p class="note">The bird is non-negotiable and appears in all five. 🐦</p>
     <div class="err" id="err"></div>
   </section>
 </div>
@@ -292,7 +291,7 @@
     <p class="pmsg" id="pmsg">Starting up…</p>
     <div class="grid" id="grid"></div>
     <div class="res-actions" style="margin-top:14px">
-      <button class="btn" id="downloadAll" type="button">⬇ Download all 3</button>
+      <button class="btn" id="downloadAll" type="button">⬇ Download all 5</button>
     </div>
     <p class="step-label" style="text-align:center;margin-top:30px">Your shareable Bird ID</p>
     <p class="hint" id="cardhint">Pick which headshot goes on your card:</p>
@@ -332,7 +331,7 @@
     <h2>Questions</h2>
     <details><summary>Can I remove the bird?</summary><p>No. There is no button to remove the bird. There never was a button. The bird stays.</p></details>
     <details><summary>Will it actually look like me?</summary><p>Yes — that's why we ask for two angles. The headshots are AI-generated using multiple inputs to improve quality. A real likeness is the whole point.</p></details>
-    <details><summary>What do I get for $1?</summary><p>Three professional headshots across three outfit-and-backdrop looks, each starring the one bird we've paired to you — plus a shareable Bird ID card.</p></details>
+    <details><summary>What do I get for $1?</summary><p>Five professional headshots across five outfit-and-backdrop looks, each starring the one bird we've paired to you — plus a shareable Bird ID card.</p></details>
     <details><summary>How long does it take?</summary><p>About a minute. No model training, no waiting hours like the other guys.</p></details>
     <details><summary>What photos work best?</summary><p>Two clear, front-facing, well-lit shots from slightly different angles, at least 768px on the short side. JPG, PNG, or HEIC.</p></details>
     <details><summary>Do you keep my photos?</summary><p>No. Your uploads are used to generate your headshots and then discarded — we don't store them. See our <a href="/privacy.html">Privacy Policy</a>.</p></details>
@@ -546,7 +545,7 @@
   }
   const msgs=['Developing your headshots…','Tailoring outfits…','Coaxing the bird onto your shoulder…','Adjusting the lighting…','Almost there…'];
   function pollImages(jobId,total){
-    let mi=0; const mt=setInterval(()=>$('pmsg').textContent = $('bar').style.width==='100%'?'✓ All 3 ready. Same bird, every shot.':msgs[mi=(mi+1)%msgs.length],2200);
+    let mi=0; const mt=setInterval(()=>$('pmsg').textContent = $('bar').style.width==='100%'?'✓ All '+total+' ready. Same bird, every shot.':msgs[mi=(mi+1)%msgs.length],2200);
     const tick=async()=>{
       const j=await (await fetch('/api/job/'+jobId)).json();
       (j.results||[]).forEach((r,i)=>{ if(r) fillCell(i,r); });
@@ -554,7 +553,7 @@
       if(!featuredSrc){ const k=resultsData.findIndex(Boolean); if(k>=0) selectCard(k); } // default to the first look, not whichever finished first
       $('bar').style.width=Math.round((j.done/total)*100)+'%';
       if(j.status==='running'||j.status==='generating') setTimeout(tick,2000);
-      else { clearInterval(mt); $('pmsg').textContent = j.status==='failed' ? 'Generation failed — your $1 will be refunded.' : '✓ All 3 ready. Same bird, every shot.'; }
+      else { clearInterval(mt); $('pmsg').textContent = j.status==='failed' ? 'Generation failed — your $1 will be refunded.' : '✓ All '+total+' ready. Same bird, every shot.'; }
     };
     tick();
   }

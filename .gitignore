@@ -7,3 +7,12 @@ node_modules/
 data/*
 !data/.gitkeep
 .env*
+
+# calibration data: never commit real faces or renders
+scripts/calibrate/out*/
+scripts/calibrate/realfaces/**/*.jpg
+scripts/calibrate/realfaces/**/*.JPG
+scripts/calibrate/realfaces/**/*.jpeg
+scripts/calibrate/realfaces/**/*.JPEG
+scripts/calibrate/realfaces/**/*.png
+scripts/calibrate/realfaces/**/*.heic

@@ -1,0 +1,23 @@
+Drop your real test photos here, one subfolder per person.
+
+  realfaces/
+    alice/
+      1.jpg        ← two different angles of the same person = best (matches production)
+      2.jpg
+    bob/
+      front.jpg    ← a single photo is fine too; it just uses the 1-photo path
+    you/
+      a.jpg
+      b.jpg
+
+Then run (from the project root):
+
+  node scripts/calibrate/gen.js --faces-dir scripts/calibrate/realfaces --samples 2 --yes
+
+Notes:
+- 2 photos per person → the harness fuses both (Flux kontext-multi), exactly like your
+  live product. 1 photo → single-photo path (slightly lower likeness).
+- The gate scores each render against the FIRST photo in the folder.
+- jpg/png only. At least 768x768 (1024+ is better), same as the real uploader.
+- You can mix real people here with a synthetic batch — just run gen.js twice into
+  different --out folders, or label them in separate passes.
