@@ -258,8 +258,8 @@
     <label class="drop" id="drop">
       <input type="file" id="file" accept="image/jpeg,image/png,image/heic,image/heif,.heic,.heif" multiple />
       <div class="icon">📸</div>
-      <p>Click to select your photo(s), or drag them in</p>
-      <small>One clear, front-facing photo is all we need — in our testing, one great photo beats two. (A second is accepted, but only if it closely matches the first: same hairstyle, facial hair, expression.) · JPG, PNG, or HEIC · 768px+ (1024+ best)</small>
+      <p>Tap or drag a selfie here</p>
+      <small>One clear, front-facing photo is all we need.<br>JPG, PNG, or HEIC &middot; at least 768px &middot; 1024px+ is best</small>
     </label>
     <div class="thumbs" id="thumbs"></div>
     <div class="count" id="count"></div>
@@ -446,7 +446,7 @@
       $('thumbs').appendChild(d);
     });
     const n=photos.length;
-    $('count').textContent = n>=2 ? '✓ 2 photos ready (tip: one great photo usually works best)' : n===1 ? '✓ Ready — one great photo is all we need' : 'Add 1 clear, front-facing photo';
+    $('count').textContent = n>=2 ? '✓ 2 photos — make sure they match: same hairstyle, facial hair, expression' : n===1 ? '✓ Ready' : '';
     $('drop').style.display = n>=MAXP ? 'none' : 'flex';
   }
   function isImageFile(f){ return f && (/^image\//.test(f.type) || /\.(jpe?g|png|heic|heif)$/i.test(f.name||'') || !f.type); }
