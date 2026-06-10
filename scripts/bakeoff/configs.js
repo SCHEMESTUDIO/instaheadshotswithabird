@@ -69,6 +69,17 @@ export const CONFIGS = [
     genCost: 0.067,
   },
   {
+    id: "T8",
+    label: "Prod config + 2 photos",
+    question: "Does a second photo help or hurt on NB2 + preserve-expression? (Site copy currently recommends 2 — untested combo.)",
+    provider: "gemini",
+    model: "gemini-3.1-flash-image",
+    photos: 2,
+    // No promptMod: preserve-expression is baked into lib/prompt.js since
+    // 2026-06-10, so this runs the LIVE prod prompt exactly.
+    genCost: 0.067,
+  },
+  {
     id: "T5",
     label: "Qwen image edit (optional)",
     question: "Is the open-model option competitive on quality and price?",
