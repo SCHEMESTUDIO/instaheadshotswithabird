@@ -342,6 +342,9 @@ app.get("/api/stats", (_req, res) => res.json(stats()));
 app.get("/healthz", (_req, res) =>
   res.json({
     ok: true, provider: (process.env.PROVIDER || "gemini").toLowerCase(),
+    // resolved model — catches a stale GEMINI_MODEL env var silently overriding
+    // the bake-off winner (this exact bug cost a real user run on 2026-06-10)
+    model: process.env.GEMINI_MODEL || "gemini-3.1-flash-image (default)",
     paymentsEnabled: PAYMENTS_ENABLED, priceCents: PRICE_CENTS, looks: LOOKS.length,
     // config sanity flags — verify these say true before sharing with testers
     emailEnabled: !!process.env.RESEND_API_KEY,
