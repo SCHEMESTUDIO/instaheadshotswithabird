@@ -16,3 +16,4 @@ scripts/calibrate/realfaces/**/*.jpeg
 scripts/calibrate/realfaces/**/*.JPEG
 scripts/calibrate/realfaces/**/*.png
 scripts/calibrate/realfaces/**/*.heic
+scripts/bakeoff/results/

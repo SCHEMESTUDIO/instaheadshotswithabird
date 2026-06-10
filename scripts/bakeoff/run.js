@@ -1,0 +1,220 @@
+// ============================================================
+//  BAKE-OFF RUNNER — one test per invocation, ~20 renders, ~$1.
+//
+//  Runs ONE config from configs.js across the fixed face panel
+//  (scripts/calibrate/realfaces: one subfolder per person) × all
+//  5 production looks, through the REAL production code paths
+//  (lib/prompt.js + lib/providers). No scoring, no gates, no
+//  re-rolls: it saves renders, records latency, and bakes a
+//  self-contained review.html where you tick failure boxes.
+//  Human eyeballs are the metric; the page does the counting.
+//
+//  Usage:
+//    node scripts/bakeoff/run.js T1            # print plan + cost, do nothing
+//    node scripts/bakeoff/run.js T1 --yes      # actually run (~$1)
+//    node scripts/bakeoff/run.js --list-models # list Gemini image models (for T3)
+//
+//  Output: scripts/bakeoff/results/<testId>/
+//    renders/*.jpg   manifest.json   review.html  ← open & tick
+//
+//  NEVER COMMITTED: results/ is gitignored (real faces).
+// ============================================================
+
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import dotenv from "dotenv";
+import Jimp from "jimp";
+import { LOOKS } from "../../lib/looks.js";
+import { buildTwoPersonPrompt } from "../../lib/prompt.js";
+import { getBird, BIRD_IDS } from "../../lib/birds.js";
+import { CONFIGS } from "./configs.js";
+
+dotenv.config();
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const PANEL_DIR = path.join(__dirname, "..", "calibrate", "realfaces");
+
+// ---------- list-models helper (find the current Gemini image model for T3) ----------
+if (process.argv.includes("--list-models")) {
+  const key = process.env.GEMINI_API_KEY;
+  if (!key) { console.error("GEMINI_API_KEY not set in .env"); process.exit(1); }
+  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${key}&pageSize=200`);
+  const data = await res.json();
+  if (!res.ok) { console.error("Gemini error:", data.error?.message || res.statusText); process.exit(1); }
+  const models = (data.models || []).filter((m) => /image/i.test(m.name + " " + (m.description || "")));
+  console.log("\nGemini models mentioning 'image':\n");
+  for (const m of models) console.log(`  ${m.name.replace("models/", "")}  —  ${m.displayName || ""}`);
+  console.log("\nPaste the right one into configs.js → T3.model\n");
+  process.exit(0);
+}
+
+// ---------- pick config ----------
+const testId = process.argv[2];
+const GO = process.argv.includes("--yes");
+const cfg = CONFIGS.find((c) => c.id === testId);
+if (!cfg) {
+  console.error(`Usage: node scripts/bakeoff/run.js <testId> [--yes]\nTests: ${CONFIGS.map((c) => c.id).join(", ")} (see PLAN.md)`);
+  process.exit(1);
+}
+if (cfg.model === "FILL_ME_IN") {
+  console.error(`${cfg.id} has model: FILL_ME_IN — edit scripts/bakeoff/configs.js first (see the comment there).`);
+  process.exit(1);
+}
+
+// ---------- load the panel ----------
+const readImg = (p) => ({ buffer: fs.readFileSync(p), mimeType: /\.png$/i.test(p) ? "image/png" : "image/jpeg" });
+function loadPanel() {
+  const ids = fs.readdirSync(PANEL_DIR, { withFileTypes: true })
+    .filter((e) => e.isDirectory())
+    .map((d) => {
+      const photos = fs.readdirSync(path.join(PANEL_DIR, d.name))
+        .filter((f) => /\.(jpe?g|png)$/i.test(f)).sort().slice(0, 2)
+        .map((f) => readImg(path.join(PANEL_DIR, d.name, f)));
+      return { name: d.name, photos };
+    })
+    .filter((i) => i.photos.length);
+  if (!ids.length) throw new Error(`No face panel found in ${PANEL_DIR}`);
+  return ids;
+}
+
+// Deterministic bird per identity so bird choice never differs between tests.
+const pickBird = (name) => {
+  let h = 0;
+  for (const ch of name) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return getBird(BIRD_IDS[h % BIRD_IDS.length]);
+};
+
+async function thumb(buf) {
+  const img = await Jimp.read(buf);
+  img.scaleToFit(448, 448).quality(80);
+  return img.getBase64Async(Jimp.MIME_JPEG);
+}
+const bufferFromSrc = async (src) =>
+  src.startsWith("data:") ? Buffer.from(src.split(",")[1], "base64") : Buffer.from(await (await fetch(src)).arrayBuffer());
+
+// ---------- plan + cost gate ----------
+const panel = loadPanel();
+const total = panel.length * LOOKS.length;
+console.log(`\n──────── bake-off ${cfg.id}: ${cfg.label} ────────`);
+console.log(`  question   ${cfg.question}`);
+console.log(`  provider   ${cfg.provider} · model ${cfg.model} · ${cfg.photos} photo(s)`);
+console.log(`  panel      ${panel.map((p) => p.name).join(", ")}`);
+console.log(`  renders    ${total}  (~$${(total * cfg.genCost).toFixed(2)})`);
+console.log(`──────────────────────────────────────────────\n`);
+if (!GO) { console.log("Dry run. Add --yes to spend the above and generate.\n"); process.exit(0); }
+
+// ---------- load provider AFTER setting env (providers read env at import) ----------
+if (cfg.provider === "gemini") process.env.GEMINI_MODEL = cfg.model;
+else process.env.REPLICATE_MODEL = cfg.model;
+const provider = await import(`../../lib/providers/${cfg.provider}.js`);
+
+// ---------- run ----------
+const OUT = path.join(__dirname, "results", cfg.id);
+const RENDERS = path.join(OUT, "renders");
+fs.mkdirSync(RENDERS, { recursive: true });
+
+const rows = [];
+let n = 0;
+const t0 = Date.now();
+for (const id of panel) {
+  const photos = id.photos.slice(0, cfg.photos);
+  const bird = pickBird(id.name);
+  const selfieThumb = await thumb(photos[0].buffer);
+  for (const look of LOOKS) {
+    n++;
+    const tag = `${id.name} × ${look.id}`;
+    try {
+      const t = Date.now();
+      const { src } = await provider.generate({ images: photos, prompt: buildTwoPersonPrompt(look, bird) });
+      const ms = Date.now() - t;
+      const buf = await bufferFromSrc(src);
+      const file = `${id.name}_${look.id}.jpg`;
+      fs.writeFileSync(path.join(RENDERS, file), buf);
+      rows.push({ key: `${id.name}_${look.id}`, face: id.name, look: look.label, ms,
+                  selfieThumb, renderThumb: await thumb(buf) });
+      console.log(`[${n}/${total}] ${tag}  ${(ms / 1000).toFixed(1)}s`);
+    } catch (e) {
+      rows.push({ key: `${id.name}_${look.id}`, face: id.name, look: look.label, error: e.message });
+      console.warn(`[${n}/${total}] ${tag}  FAILED: ${e.message}`);
+    }
+  }
+}
+
+// ---------- manifest + review page ----------
+const ok = rows.filter((r) => !r.error);
+const meta = {
+  test: cfg.id, label: cfg.label, provider: cfg.provider, model: cfg.model, photos: cfg.photos,
+  createdAt: new Date().toISOString(), renders: ok.length, errors: rows.length - ok.length,
+  avgSeconds: ok.length ? +(ok.reduce((s, r) => s + r.ms, 0) / ok.length / 1000).toFixed(1) : null,
+};
+fs.writeFileSync(path.join(OUT, "manifest.json"),
+  JSON.stringify({ ...meta, rows: rows.map(({ selfieThumb, renderThumb, ...r }) => r) }, null, 2));
+fs.writeFileSync(path.join(OUT, "review.html"), buildReview(ok, meta));
+
+console.log(`\nDone in ${((Date.now() - t0) / 60000).toFixed(1)} min · avg ${meta.avgSeconds}s/render · ${meta.errors} errors`);
+console.log(`Open and tick:  ${path.join(OUT, "review.html")}\n`);
+
+// ---------- self-contained review page ----------
+function buildReview(rows, meta) {
+  const FAILS = [
+    ["gender", "Gender swap"],
+    ["hair", "Wrong hair / extra hair"],
+    ["composite", "Pasted-on / composited head"],
+    ["framing", "Head not centred / bad crop"],
+    ["bird", "Bird missing, doubled or wrong"],
+    ["other", "Other embarrassment"],
+  ];
+  return `<!doctype html><meta charset="utf-8"><title>Bake-off ${meta.test} review</title>
+<style>
+body{font:15px/1.45 system-ui;margin:24px;background:#fafaf7;color:#222}
+h1{font-size:20px} .sub{color:#666;margin-bottom:18px}
+.row{display:flex;gap:14px;align-items:flex-start;background:#fff;border:1px solid #e4e4de;border-radius:10px;padding:12px;margin-bottom:12px}
+.row img{width:200px;border-radius:8px;display:block}
+.row.bad{border-color:#d33;background:#fff6f6}
+.meta{font-weight:600;margin-bottom:6px}
+label{display:block;margin:2px 0;cursor:pointer;white-space:nowrap}
+#summary{position:sticky;top:0;background:#0f3d2e;color:#fff;padding:12px 16px;border-radius:10px;margin-bottom:20px}
+#summary b{font-size:18px}
+button{margin-top:8px;padding:6px 12px;border-radius:6px;border:0;background:#2dbd85;color:#fff;font-weight:600;cursor:pointer}
+</style>
+<h1>${meta.test} — ${meta.label}</h1>
+<div class="sub">${meta.provider} · ${meta.model} · ${meta.photos} photo(s) · avg ${meta.avgSeconds}s/render · ${meta.renders} renders, ${meta.errors} errors</div>
+<div id="summary"></div>
+${rows.map((r) => `
+<div class="row" data-key="${r.key}">
+  <img src="${r.selfieThumb}" title="reference">
+  <img src="${r.renderThumb}" title="render">
+  <div>
+    <div class="meta">${r.face} · ${r.look} · ${(r.ms / 1000).toFixed(1)}s</div>
+    ${FAILS.map(([k, lbl]) => `<label><input type="checkbox" data-fail="${k}"> ${lbl}</label>`).join("")}
+  </div>
+</div>`).join("")}
+<script>
+const KEY='bakeoff-${meta.test}', FAILS=${JSON.stringify(FAILS.map(([k]) => k))};
+const state=JSON.parse(localStorage.getItem(KEY)||'{}');
+document.querySelectorAll('.row').forEach(row=>{
+  const k=row.dataset.key;
+  row.querySelectorAll('input').forEach(cb=>{
+    cb.checked=!!(state[k]||{})[cb.dataset.fail];
+    cb.onchange=()=>{state[k]=state[k]||{};state[k][cb.dataset.fail]=cb.checked;
+      localStorage.setItem(KEY,JSON.stringify(state));refresh();};
+  });
+});
+function refresh(){
+  let failed=0;const byClass={};
+  document.querySelectorAll('.row').forEach(row=>{
+    const any=[...row.querySelectorAll('input')].some(c=>c.checked);
+    row.classList.toggle('bad',any); if(any)failed++;
+    row.querySelectorAll('input').forEach(c=>{if(c.checked)byClass[c.dataset.fail]=(byClass[c.dataset.fail]||0)+1;});
+  });
+  const total=document.querySelectorAll('.row').length;
+  const detail=Object.entries(byClass).map(([k,v])=>k+':'+v).join(' ')||'none';
+  document.getElementById('summary').innerHTML=
+    '<b>'+failed+' / '+total+' renders with an embarrassing failure</b><br>By class: '+detail+
+    '<br><button onclick="copyRow()">Copy scoreboard row for PLAN.md</button>';
+  window.__row='| ${meta.test} | ${meta.model} | ${meta.photos} | '+failed+'/'+total+' | '+detail+' | ${meta.avgSeconds}s |';
+}
+function copyRow(){navigator.clipboard.writeText(window.__row);}
+refresh();
+</script>`;
+}
