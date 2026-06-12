@@ -19,6 +19,15 @@ dotenv.config();
 
 const PRICE_CENTS = Number(process.env.PRICE_CENTS || 100);
 const DAILY_CAP = Number(process.env.DAILY_CAP || 20);
+// Global (all-IPs) daily job cap. Gemini Tier 1 allows 1,000 requests/day on
+// the image model; a job is 5 calls + retries, so ~170 jobs/day stays safely
+// under it. Enforced BEFORE payment so a viral day fails politely at upload
+// instead of charging users and auto-refunding when the API quota runs dry.
+const GLOBAL_DAILY_CAP = Number(process.env.GLOBAL_DAILY_CAP || 170);
+// Max simultaneous Gemini calls across ALL jobs (per-job CONCURRENCY below
+// only bounds one job). 15 in-flight ≈ 3 jobs at full parallelism; at ~16s
+// per render that's ~56 requests/min, comfortably under the 100 RPM limit.
+const GLOBAL_CONCURRENCY = Number(process.env.GLOBAL_CONCURRENCY || 15);
 // 5-way parallel: NB2 averages ~16s/render (T7), so serial = ~80s and breaks the
 // "about a minute" promise; parallel ≈ 20s. The old serial default was only a
 // Replicate low-credit constraint — set CONCURRENCY=1 if ever back on Replicate.
@@ -70,12 +79,27 @@ function baseUrl(req) {
   return `${req.protocol}://${req.get("host")}`;
 }
 
-// ---- per-IP daily cap on actual generations ----
+// ---- daily caps on actual generations (per-IP + global) ----
 const counts = new Map();
+let globalCount = 0;
 let resetAt = nextMidnight();
 function nextMidnight() { const d = new Date(); d.setHours(24, 0, 0, 0); return d.getTime(); }
-function peek(ip) { if (Date.now() > resetAt) { counts.clear(); resetAt = nextMidnight(); } return counts.get(ip) || 0; }
-function bump(ip) { counts.set(ip, (counts.get(ip) || 0) + 1); }
+function rollover() { if (Date.now() > resetAt) { counts.clear(); globalCount = 0; resetAt = nextMidnight(); } }
+function peek(ip) { rollover(); return counts.get(ip) || 0; }
+function peekGlobal() { rollover(); return globalCount; }
+function bump(ip) { counts.set(ip, (counts.get(ip) || 0) + 1); globalCount++; }
+
+// ---- global concurrency gate on Gemini calls ----
+// Jobs paid during a burst all call startGeneration at once; without this,
+// N simultaneous jobs fire N×CONCURRENCY requests in the same second and
+// trip the per-minute rate limit, burning retry budget on self-inflicted 429s.
+let inFlight = 0;
+const waiters = [];
+async function withSlot(fn) {
+  while (inFlight >= GLOBAL_CONCURRENCY) await new Promise((r) => waiters.push(r));
+  inFlight++;
+  try { return await fn(); } finally { inFlight--; waiters.shift()?.(); }
+}
 
 // ---- in-memory job store ----
 // Purge rules: never drop a job mid-generation; unpaid jobs live 45 min
@@ -123,14 +147,22 @@ async function rawGenerate(job, look) {
   let lastErr;
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     try {
-      const { src } = await getProvider().generate({ images: photos, prompt: buildTwoPersonPrompt(look, job.bird) });
+      // hold a global slot only while the request is actually in flight —
+      // never while sleeping out a backoff
+      const { src } = await withSlot(() =>
+        getProvider().generate({ images: photos, prompt: buildTwoPersonPrompt(look, job.bird) })
+      );
       return src;
     } catch (err) {
       lastErr = err;
       console.error(`[job ${job.id}] ${look.id} try ${attempt}: ${err.message}`);
       if (attempt < MAX_ATTEMPTS) {
-        const throttled = /throttle|rate/i.test(err.message || "");
-        await sleep(throttled ? throttleWaitMs(err.message) : 2500); // wait out rate limits before retrying
+        const throttled = err.status === 429 || /throttle|rate/i.test(err.message || "");
+        // prefer the API's own Retry-After/RetryInfo hint over our guesses
+        const wait = err.retryAfterMs ? err.retryAfterMs + 1000
+          : throttled ? throttleWaitMs(err.message)
+          : 2500;
+        await sleep(wait);
       }
     }
   }
@@ -191,9 +223,13 @@ async function refundJob(job) {
 app.post("/api/start", upload.array("photos", 2), async (req, res) => {
   try {
     if (!req.files || req.files.length < 1) return res.status(400).json({ error: "Please upload at least one photo." });
-    // enforce the daily cap BEFORE payment, not after — never charge someone we'll refuse
+    // enforce the daily caps BEFORE payment, not after — never charge someone we'll refuse
     const ip = clientIp(req);
     if (peek(ip) >= DAILY_CAP) return res.status(429).json({ error: "Daily limit reached — try again tomorrow." });
+    if (peekGlobal() >= GLOBAL_DAILY_CAP) {
+      console.warn(`[cap] global daily cap hit (${GLOBAL_DAILY_CAP}) — refusing new jobs until midnight`);
+      return res.status(429).json({ error: "We're at capacity today — the bird needs to rest. Please come back tomorrow!" });
+    }
     // convert HEIC → JPEG, then validate type + resolution (before assigning a bird)
     for (const f of req.files) {
       if (isHeic(f.buffer)) {
@@ -370,6 +406,9 @@ app.get("/healthz", (_req, res) =>
     webhookSecretSet: !!process.env.STRIPE_WEBHOOK_SECRET,
     freeCodes: FREE_CODES.length,
     adminEnabled: !!ADMIN_KEY,
+    // spike-protection counters (Gemini Tier 1: 100 RPM, 1K requests/day)
+    jobsToday: peekGlobal(), globalDailyCap: GLOBAL_DAILY_CAP,
+    geminiInFlight: inFlight, globalConcurrency: GLOBAL_CONCURRENCY,
     proInterest: proInterestCount(), ...stats(),
   })
 );
