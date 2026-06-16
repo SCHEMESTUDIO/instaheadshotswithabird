@@ -264,8 +264,27 @@
     <div class="thumbs" id="thumbs"></div>
     <div class="count" id="count"></div>
 
-    <div class="whatsincluded">
-      <b>5 different looks for only $1</b> — each with the same bird on your shoulder.
+    <style>
+      .tierpick{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}
+      .tieropt{position:relative;border:1.5px solid var(--line);background:#fff;border-radius:12px;padding:14px 8px 11px;cursor:pointer;text-align:center;display:flex;flex-direction:column;gap:3px;font:inherit;color:var(--ink);transition:.12s}
+      .tieropt:hover{border-color:#c9c4b7}
+      .tieropt.active{border-color:var(--brand);box-shadow:0 0 0 3px rgba(16,163,127,.12)}
+      .tieropt .tt{font-weight:800;font-size:14px}
+      .tieropt .tp{font-weight:900;font-size:21px;color:var(--brand);line-height:1}
+      .tieropt .td{font-size:11px;color:var(--muted);line-height:1.25}
+      .tieropt .tbadge{position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:var(--brand);color:#fff;font-size:9px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:2px 8px;border-radius:999px;white-space:nowrap}
+      @media(max-width:480px){.tieropt .td{display:none}.tieropt{padding:11px 6px}}
+    </style>
+    <div class="tierpick" id="tierpick" role="radiogroup" aria-label="Choose your pack">
+      <button type="button" class="tieropt active" data-tier="basic" aria-pressed="true">
+        <span class="tt">5 looks</span><span class="tp">$1</span><span class="td">1 bird in every shot</span>
+      </button>
+      <button type="button" class="tieropt" data-tier="full" aria-pressed="false">
+        <span class="tbadge">Popular</span><span class="tt">15 looks</span><span class="tp">$3</span><span class="td">3× the variety · bird in every shot</span>
+      </button>
+      <button type="button" class="tieropt" data-tier="aviary" aria-pressed="false">
+        <span class="tt">30 images</span><span class="tp">$10</span><span class="td">15 looks + 15 birdless</span>
+      </button>
     </div>
 
     <input type="email" id="email" placeholder="Your email address (required)" autocomplete="email" required
@@ -276,7 +295,7 @@
     <input type="text" id="code" name="beta-code" placeholder="Have a beta code? Enter it here" autocomplete="off" autocorrect="off" autocapitalize="off" readonly onfocus="this.removeAttribute('readonly')"
       style="display:block;width:100%;margin-top:12px;border:1px solid var(--line);border-radius:11px;padding:11px 14px;font:inherit;text-align:center" />
     <button class="go" id="go" disabled>Continue to payment · $1</button>
-    <p class="note">The bird is non-negotiable and appears in all five. 🐦</p>
+    <p class="note" id="goNote">The bird is non-negotiable and appears in every shot. 🐦</p>
     <div class="err" id="err"></div>
   </section>
 </div>
@@ -308,8 +327,8 @@
     <h2>How it works</h2>
     <div class="steps">
       <div class="step"><div class="n">1</div><h3>Upload a selfie</h3><p>One clear, front-facing, well-lit photo — that's all the likeness needs.</p></div>
-      <div class="step"><div class="n">2</div><h3>Pay $1</h3><p>One dollar, secure checkout via Stripe. No subscription.</p></div>
-      <div class="step"><div class="n">3</div><h3>Get 5 headshots</h3><p>Five professional looks in about a minute — each with your bird, plus your Bird ID.</p></div>
+      <div class="step"><div class="n">2</div><h3>Pick a pack</h3><p>5 looks for $1, 15 for $3, or 30 for $10 — secure checkout via Stripe. No subscription.</p></div>
+      <div class="step"><div class="n">3</div><h3>Get your headshots</h3><p>Your professional looks in about a minute — each with your bird, plus your Bird ID.</p></div>
     </div>
   </div>
 </section>
@@ -320,7 +339,7 @@
     <p class="pmsg" id="pmsg">Starting up…</p>
     <div class="grid" id="grid"></div>
     <div class="res-actions" style="margin-top:14px">
-      <button class="btn" id="downloadAll" type="button">⬇ Download all 5</button>
+      <button class="btn" id="downloadAll" type="button">⬇ Download all</button>
     </div>
     <p class="step-label" style="text-align:center;margin-top:30px">Your shareable Bird ID</p>
     <p class="hint" id="cardhint">Pick which headshot goes on your card:</p>
@@ -358,8 +377,8 @@
 <section class="faq" id="faqWrap">
   <div class="wrap">
     <h2>Questions</h2>
-    <details><summary>Can I remove the bird?</summary><p>No. There is no button to remove the bird. There never was a button. The bird stays. (However — and we say this through gritted teeth — see "Can I get them without the bird?" below.)</p></details>
-    <details><summary>Can I get them without the bird?</summary><p>We're building a Pro option: 10 premium, completely birdless headshots for $2.99. It's coming soon — after your headshots are ready, you'll see a tile on your results page; tap it and we'll email you the moment it's live. To be clear, your $1 headshots keep the bird. The bird is load-bearing.</p></details>
+    <details><summary>Can I remove the bird?</summary><p>Not on the $1 or $3 packs — there's no button, there never was a button, the bird stays. The one exception is the $10 Whole Aviary pack (see below), and we say that through gritted teeth.</p></details>
+    <details><summary>Can I get them without the bird?</summary><p>Yes — but only on the $10 Whole Aviary pack. It gives you all 15 looks with your bird <em>and</em> the same 15 with the bird removed (30 images total). The $1 and $3 packs keep the bird in every shot. The bird is load-bearing.</p></details>
     <details><summary>Will it actually look like me?</summary><p>Yes — the headshots are AI-generated from your photo, and we keep your exact expression rather than inventing one. A real likeness is the whole point.</p></details>
     <details><summary>What do I get for $1?</summary><p>Five professional headshots across five outfit-and-backdrop looks, each starring the one bird we've paired to you — plus a shareable Bird ID card.</p></details>
     <details><summary>How long does it take?</summary><p>About a minute. No model training, no waiting hours like the other guys.</p></details>
@@ -436,6 +455,24 @@
   function updateGo(){ $('go').disabled = !(photos.length>=1 && emailOk()); }
   function refresh(){ renderThumbs(); updateGo(); }
   $('email').addEventListener('input', updateGo);
+
+  // ---- tier selection (must match server TIERS in server.js) ----
+  const TIER_PRICE={basic:1,full:3,aviary:10};
+  const TIER_NOTE={
+    basic:'The bird is non-negotiable and appears in every shot. 🐦',
+    full:'The bird appears in all 15 looks. 🐦',
+    aviary:'15 with your bird, 15 birdless — 30 images total. 🐦',
+  };
+  let selectedTier='basic';
+  function goLabel(){ return 'Continue to payment · $'+TIER_PRICE[selectedTier]; }
+  function selectTier(t){
+    if(!TIER_PRICE[t]) t='basic';
+    selectedTier=t;
+    document.querySelectorAll('#tierpick .tieropt').forEach(b=>{const on=b.dataset.tier===t;b.classList.toggle('active',on);b.setAttribute('aria-pressed',on?'true':'false');});
+    const note=$('goNote'); if(note) note.textContent=TIER_NOTE[t];
+    if($('go').dataset.busy!=='1') $('go').textContent=goLabel();
+  }
+  $('tierpick').addEventListener('click',e=>{ const b=e.target.closest('.tieropt'); if(b) selectTier(b.dataset.tier); });
   function renderThumbs(){
     $('thumbs').innerHTML='';
     photos.forEach((f,i)=>{
@@ -466,17 +503,18 @@
   $('drop').addEventListener('drop',e=>addFiles(Array.from(e.dataTransfer.files)));
 
   $('go').addEventListener('click', async ()=>{
-    $('err').style.display='none'; $('go').disabled=true; $('go').textContent='Reserving your bird…';
+    $('err').style.display='none'; $('go').disabled=true; $('go').dataset.busy='1'; $('go').textContent='Reserving your bird…';
     try{
       const fd=new FormData(); photos.forEach(f=>fd.append('photos',f));
       fd.append('email', ($('email').value||'').trim());
       fd.append('consent', $('optin').checked ? 'true' : 'false');
+      fd.append('tier', selectedTier);
       const s=await fetch('/api/start',{method:'POST',body:fd}); const sd=await s.json();
       if(!s.ok) throw new Error(sd.error||'Could not start.');
       const c=await fetch('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jobId:sd.jobId, code:($('code').value||'').trim()})});
       const cd=await c.json(); if(!c.ok) throw new Error(cd.error||'Could not start checkout.');
       window.location = cd.url;
-    }catch(err){ const m=/load failed|failed to fetch|networkerror/i.test(err.message||'')?'Upload failed — check your connection and try again (large photos can take a moment).':(err.message||'Something went wrong.'); $('err').textContent=m; $('err').style.display='block'; $('go').disabled=false; $('go').textContent='Continue to payment · $1'; }
+    }catch(err){ const m=/load failed|failed to fetch|networkerror/i.test(err.message||'')?'Upload failed — check your connection and try again (large photos can take a moment).':(err.message||'Something went wrong.'); $('err').textContent=m; $('err').style.display='block'; $('go').disabled=false; $('go').dataset.busy=''; $('go').textContent=goLabel(); }
   });
 
   // ---- result ----
@@ -494,17 +532,8 @@
   function buildGrid(n){
     const g=$('grid'); g.innerHTML='';
     for(let i=0;i<n;i++){ const c=document.createElement('div'); c.className='cell'; c.id='cell'+i; c.innerHTML='<div class="ph"><div class="spin"></div></div>'; g.appendChild(c); }
-    // slot 6 — Pro Pack FAKE DOOR: measures demand for the birdless upsell
-    // before it's built. Clicks log to /api/pro-interest (email captured
-    // server-side from the job). See scripts/bakeoff/PLAN.md, Pro Pack track.
-    const d=document.createElement('div'); d.className='cell dummy'; d.id='proDoor';
-    d.innerHTML='<div class="di"><span class="plus">✨</span>Want them without the bird?<small>10 premium headshots · $2.99</small></div>';
-    d.addEventListener('click',async()=>{
-      if(d.dataset.clicked) return; d.dataset.clicked='1';
-      d.innerHTML='<div class="di"><span class="plus">✓</span>Coming this week<small>We&rsquo;ll email you when it&rsquo;s live — no charge today</small></div>';
-      try{ await fetch('/api/pro-interest',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jobId:currentJob})}); }catch{}
-    });
-    g.appendChild(d);
+    // (The birdless "Pro Pack" fake door was removed — birdless is now a real
+    //  product, the $10 Whole Aviary tier picked at checkout.)
   }
   function fillCell(i, r){
     const cell=document.getElementById('cell'+i); if(!cell || cell.dataset.filled) return;
@@ -642,7 +671,7 @@
     if(!files.length) return;
     if(canShareFiles(files)){ try{ await navigator.share({files,title:'My Headshots with a Bird'}); return; }catch(e){ if(e&&e.name==='AbortError') return; } }
     for(const f of files){ const u=URL.createObjectURL(f); const a=document.createElement('a'); a.href=u; a.download=f.name; document.body.appendChild(a); a.click(); a.remove(); await new Promise(r=>setTimeout(r,500)); URL.revokeObjectURL(u); }
-    toast('Saved your 5 headshots');
+    toast('Saved your '+files.length+' headshot'+(files.length===1?'':'s'));
   });
 
   async function enterResult(jobId){
@@ -670,7 +699,8 @@
       if(!userPicked){ const k=resultsData[2]?2:resultsData.findIndex(Boolean); if(k>=0&&resultsData[k]&&featuredSrc!==resultsData[k].src) selectCard(k); }
       $('bar').style.width=Math.round((j.done/total)*100)+'%';
       if(j.status==='running'||j.status==='generating'||j.status==='awaiting_payment') setTimeout(tick,2000);
-      else { clearInterval(mt); $('pmsg').textContent = j.status==='failed' ? 'Generation failed — your $1 has been refunded automatically.' : '✓ All '+total+' ready. Same bird, every shot.'; }
+      else { clearInterval(mt); $('pmsg').textContent = j.status==='failed' ? 'Generation failed — your $1 has been refunded automatically.' : '✓ All '+total+' ready. Same bird, every shot.';
+        const got=resultsData.filter(Boolean).length, da=$('downloadAll'); if(da&&got) da.textContent='⬇ Download all '+got; }
     };
     tick();
   }

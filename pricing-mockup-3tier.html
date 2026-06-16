@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<!--
+  HWAB — 3-tier pricing section MOCKUP (concept, 2026-06-16)
+  Drop-in concept for the landing page. Brand tokens match public/index.html.
+  Tiers: $1 / 5 looks · $3 / 15 looks · $10 / 30 images (15 + birdless 15).
+  Competitor anchor: $35+ standard, $59+ premium (illustrative, see footnote).
+  NOTE: needs 10 more looks+backdrops in lib/looks.js (5 → 15) to back $3/$10.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>HWAB — Pricing mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --ink:#0d0f14; --paper:#f7f5ef; --card:#ffffff;
+    --brand:#10a37f; --orange:#ff5a3c; --brand-2:#1b6cff; --accent:#ffd23c;
+    --muted:#6b7180; --line:#e6e2d8; --good:#16a34a; --star:#f5a623;
+    --shadow:0 10px 40px rgba(13,15,20,.12); --r:18px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
+    background:var(--paper);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1080px;margin:0 auto;padding:56px 20px 72px}
+  .head{text-align:center;max-width:640px;margin:0 auto 40px}
+  .eyebrow{display:inline-block;font-weight:800;font-size:12px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--brand);background:rgba(16,163,127,.1);padding:6px 12px;border-radius:999px;margin-bottom:16px}
+  .head h2{font-size:clamp(28px,5vw,42px);font-weight:900;letter-spacing:-.02em;line-height:1.08}
+  .head h2 .hl{color:var(--brand)}
+  .head p{color:var(--muted);font-size:17px;margin-top:14px}
+
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;align-items:stretch}
+  @media(max-width:860px){.grid{grid-template-columns:1fr;max-width:420px;margin:0 auto}}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:28px 24px 26px;
+    display:flex;flex-direction:column;position:relative;box-shadow:var(--shadow)}
+  .card.feature{border:2px solid var(--brand);box-shadow:0 16px 50px rgba(16,163,127,.22)}
+  @media(min-width:861px){.card.feature{transform:scale(1.04)}}
+  .card.premium{border:2px solid var(--orange)}
+
+  .ribbon{position:absolute;top:-13px;left:50%;transform:translateX(-50%);white-space:nowrap;
+    font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#fff;
+    padding:6px 14px;border-radius:999px}
+  .ribbon.green{background:var(--brand)}
+  .ribbon.orange{background:var(--orange)}
+
+  .tier{font-size:14px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+  .tier .em{color:var(--ink)}
+  .priceRow{display:flex;align-items:baseline;gap:8px;margin:10px 0 2px}
+  .price{font-size:48px;font-weight:900;letter-spacing:-.03em}
+  .price .cur{font-size:26px;vertical-align:super;font-weight:800}
+  .once{font-size:13px;color:var(--muted);font-weight:600}
+  .count{font-size:15px;font-weight:700;color:var(--ink);margin-top:2px}
+
+  .saveLine{display:flex;align-items:center;gap:8px;margin:14px 0 18px;flex-wrap:wrap}
+  .was{color:var(--muted);text-decoration:line-through;font-weight:600;font-size:14px}
+  .savebadge{background:var(--accent);color:#3a2e00;font-weight:800;font-size:12px;
+    padding:4px 10px;border-radius:999px}
+
+  ul.benefits{list-style:none;display:flex;flex-direction:column;gap:11px;margin:4px 0 24px}
+  ul.benefits li{display:flex;gap:10px;font-size:14.5px;align-items:flex-start}
+  ul.benefits li .ic{flex:none;width:18px;height:18px;border-radius:50%;background:rgba(22,163,74,.12);
+    color:var(--good);font-size:11px;font-weight:900;display:grid;place-items:center;margin-top:2px}
+  ul.benefits li.bird{font-weight:700}
+  ul.benefits li.bird .ic{background:rgba(255,210,60,.25);color:#9a7400}
+  ul.benefits li.soon{color:var(--muted)}
+  ul.benefits li.soon .ic{background:#eee;color:var(--muted)}
+  ul.benefits li .soontag{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;
+    background:#eee;color:var(--muted);padding:1px 6px;border-radius:5px;margin-left:6px}
+
+  .cta{margin-top:auto;display:block;text-align:center;text-decoration:none;border-radius:12px;
+    padding:14px 18px;font-weight:800;font-size:15px;border:1.5px solid var(--ink);color:var(--ink);background:#fff;transition:.15s}
+  .cta:hover{transform:translateY(-1px)}
+  .cta.primary{background:var(--ink);color:#fff}
+  .cta.brand{background:var(--brand);color:#fff;border-color:var(--brand)}
+  .cta.orange{background:var(--orange);color:#fff;border-color:var(--orange)}
+
+  .foot{text-align:center;color:var(--muted);font-size:12.5px;margin-top:34px;max-width:680px;margin-left:auto;margin-right:auto}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="head">
+    <span class="eyebrow">One selfie · ready in ~a minute · no subscription</span>
+    <h2>Pick your pack. <span class="hl">Keep the bird.</span></h2>
+    <p>Professional headshots without a photographer — each starring the one bird we've paired to you. Pro studios charge $35+ for a pack like this. We don't.</p>
+  </div>
+
+  <div class="grid">
+
+    <!-- $1 BASIC -->
+    <div class="card">
+      <div class="tier"><span class="em">The Original</span></div>
+      <div class="priceRow"><div class="price"><span class="cur">$</span>1</div><div class="once">one-time</div></div>
+      <div class="count">5 headshots</div>
+      <div class="saveLine"><span class="was">$35+ elsewhere</span><span class="savebadge">Save 97%</span></div>
+      <ul class="benefits">
+        <li><span class="ic">✓</span>5 professional looks — 5 outfits, 5 backdrops</li>
+        <li><span class="ic">✓</span>Generated from a single selfie</li>
+        <li><span class="ic">✓</span>Shareable Bird ID card</li>
+        <li><span class="ic">✓</span>Ready in about a minute</li>
+        <li class="bird"><span class="ic">🐦</span>Includes a bird (non-negotiable)</li>
+      </ul>
+      <a class="cta primary" href="#">Get 5 for $1</a>
+    </div>
+
+    <!-- $3 FULL SET -->
+    <div class="card feature">
+      <span class="ribbon green">Most popular</span>
+      <div class="tier"><span class="em">The Full Set</span></div>
+      <div class="priceRow"><div class="price"><span class="cur">$</span>3</div><div class="once">one-time</div></div>
+      <div class="count">15 headshots</div>
+      <div class="saveLine"><span class="was">$35+ elsewhere</span><span class="savebadge">Save 91%</span></div>
+      <ul class="benefits">
+        <li><span class="ic">✓</span>15 professional looks — 15 outfits, 15 backdrops</li>
+        <li><span class="ic">✓</span>3× the variety for your profiles, CV &amp; socials</li>
+        <li><span class="ic">✓</span>Generated from a single selfie</li>
+        <li><span class="ic">✓</span>Shareable Bird ID card</li>
+        <li class="bird"><span class="ic">🐦</span>Includes a bird (in all 15)</li>
+      </ul>
+      <a class="cta brand" href="#">Get 15 for $3</a>
+    </div>
+
+    <!-- $10 WHOLE AVIARY -->
+    <div class="card premium">
+      <span class="ribbon orange">Bird optional</span>
+      <div class="tier"><span class="em">The Whole Aviary</span></div>
+      <div class="priceRow"><div class="price"><span class="cur">$</span>10</div><div class="once">one-time</div></div>
+      <div class="count">30 images (15 + 15 birdless)</div>
+      <div class="saveLine"><span class="was">$59+ premium packs</span><span class="savebadge">Save 83%</span></div>
+      <ul class="benefits">
+        <li><span class="ic">✓</span>All 15 looks <b>with</b> your bird</li>
+        <li><span class="ic">✓</span>The same 15 looks <b>birdless</b> — 30 images total</li>
+        <li><span class="ic">✓</span>The only way to get the birdless set</li>
+        <li class="soon"><span class="ic">★</span>Choose your bird<span class="soontag">Soon</span></li>
+        <li class="bird"><span class="ic">🐦</span>Includes a bird… then politely shows it the door</li>
+      </ul>
+      <a class="cta orange" href="#">Get 30 for $10</a>
+    </div>
+
+  </div>
+
+  <p class="foot">Price comparisons are illustrative of typical AI headshot packages — standard packs commonly start around $35, premium/birdless-style packs around $59. All plans are one-time payments. No subscriptions, ever. 🐦</p>
+
+</div>
+</body>
+</html>
