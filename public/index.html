@@ -322,6 +322,97 @@
   </div>
 </section>
 
+<section class="plans" id="plansWrap">
+  <div class="wrap">
+    <style>
+      #plansWrap .pp-head{text-align:center;max-width:620px;margin:0 auto 30px}
+      #plansWrap .pp-head h2{font-size:clamp(26px,5vw,38px);font-weight:900;letter-spacing:-.02em;line-height:1.1}
+      #plansWrap .pp-head h2 .hl{color:var(--brand)}
+      #plansWrap .pp-head p{color:var(--muted);font-size:16px;margin-top:12px}
+      #plansWrap .pp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;align-items:stretch;max-width:980px;margin:0 auto}
+      @media(max-width:820px){#plansWrap .pp-grid{grid-template-columns:1fr;max-width:420px}}
+      #plansWrap .pp-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:26px 22px 24px;display:flex;flex-direction:column;position:relative;box-shadow:var(--shadow)}
+      #plansWrap .pp-card--feature{border:2px solid var(--brand);box-shadow:0 16px 46px rgba(16,163,127,.2)}
+      @media(min-width:821px){#plansWrap .pp-card--feature{transform:scale(1.04)}}
+      #plansWrap .pp-card--premium{border:2px solid var(--orange)}
+      #plansWrap .pp-ribbon{position:absolute;top:-12px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:#fff;padding:5px 13px;border-radius:999px}
+      #plansWrap .pp-ribbon.green{background:var(--brand)} #plansWrap .pp-ribbon.orange{background:var(--orange)}
+      #plansWrap .pp-tier{font-size:14px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;color:var(--ink)}
+      #plansWrap .pp-priceRow{display:flex;align-items:baseline;gap:7px;margin:8px 0 2px}
+      #plansWrap .pp-price{font-size:44px;font-weight:900;letter-spacing:-.03em;line-height:1}
+      #plansWrap .pp-price .cur{font-size:24px;vertical-align:super;font-weight:800}
+      #plansWrap .pp-once{font-size:12px;color:var(--muted);font-weight:600}
+      #plansWrap .pp-count{font-size:15px;font-weight:700;color:var(--ink);margin-top:2px}
+      #plansWrap .pp-save{display:flex;align-items:center;gap:8px;margin:13px 0 16px;flex-wrap:wrap}
+      #plansWrap .pp-was{color:var(--muted);text-decoration:line-through;font-weight:600;font-size:13px}
+      #plansWrap .pp-savebadge{background:var(--accent);color:#3a2e00;font-weight:800;font-size:12px;padding:4px 10px;border-radius:999px}
+      #plansWrap .pp-benefits{list-style:none;display:flex;flex-direction:column;gap:10px;margin:2px 0 22px;padding:0}
+      #plansWrap .pp-benefits li{display:flex;gap:10px;font-size:14px;align-items:flex-start;text-align:left}
+      #plansWrap .pp-benefits li .ic{flex:none;width:18px;height:18px;border-radius:50%;background:rgba(22,163,74,.12);color:var(--good);font-size:11px;font-weight:900;display:grid;place-items:center;margin-top:1px}
+      #plansWrap .pp-benefits li.bird{font-weight:700} #plansWrap .pp-benefits li.bird .ic{background:rgba(255,210,60,.25);color:#9a7400}
+      #plansWrap .pp-benefits li.soon{color:var(--muted)} #plansWrap .pp-benefits li.soon .ic{background:#eee;color:var(--muted)}
+      #plansWrap .pp-benefits li .soontag{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;background:#eee;color:var(--muted);padding:1px 6px;border-radius:5px;margin-left:6px}
+      #plansWrap .pp-cta{margin-top:auto;display:block;width:100%;text-align:center;border-radius:12px;padding:13px 16px;font-weight:800;font-size:15px;border:1.5px solid var(--ink);color:var(--ink);background:#fff;cursor:pointer;font-family:inherit;transition:.15s}
+      #plansWrap .pp-cta:hover{transform:translateY(-1px)}
+      #plansWrap .pp-cta.brand{background:var(--brand);color:#fff;border-color:var(--brand)}
+      #plansWrap .pp-cta.orange{background:var(--orange);color:#fff;border-color:var(--orange)}
+      #plansWrap .pp-foot{text-align:center;color:var(--muted);font-size:12.5px;margin:28px auto 0;max-width:640px}
+    </style>
+
+    <div class="pp-head">
+      <h2>Pick your pack. <span class="hl">Keep the bird.</span></h2>
+      <p>Pro studios charge $35+ for a pack like this. Same one selfie, ready in about a minute — choose how many looks you want.</p>
+    </div>
+
+    <div class="pp-grid">
+      <div class="pp-card">
+        <div class="pp-tier">The Original</div>
+        <div class="pp-priceRow"><div class="pp-price"><span class="cur">$</span>1</div><div class="pp-once">one-time</div></div>
+        <div class="pp-count">5 headshots</div>
+        <div class="pp-save"><span class="pp-was">$35+ elsewhere</span><span class="pp-savebadge">Save 97%</span></div>
+        <ul class="pp-benefits">
+          <li><span class="ic">✓</span>5 professional looks — 5 outfits, 5 backdrops</li>
+          <li><span class="ic">✓</span>Generated from a single selfie</li>
+          <li><span class="ic">✓</span>Shareable Bird ID card</li>
+          <li class="bird"><span class="ic">🐦</span>Includes a bird (non-negotiable)</li>
+        </ul>
+        <button type="button" class="pp-cta" data-tier="basic">Get 5 for $1</button>
+      </div>
+
+      <div class="pp-card pp-card--feature">
+        <span class="pp-ribbon green">Most popular</span>
+        <div class="pp-tier">The Full Set</div>
+        <div class="pp-priceRow"><div class="pp-price"><span class="cur">$</span>3</div><div class="pp-once">one-time</div></div>
+        <div class="pp-count">15 headshots</div>
+        <div class="pp-save"><span class="pp-was">$35+ elsewhere</span><span class="pp-savebadge">Save 91%</span></div>
+        <ul class="pp-benefits">
+          <li><span class="ic">✓</span>15 professional looks — 15 outfits, 15 backdrops</li>
+          <li><span class="ic">✓</span>3× the variety for profiles, CV &amp; socials</li>
+          <li><span class="ic">✓</span>Shareable Bird ID card</li>
+          <li class="bird"><span class="ic">🐦</span>Includes a bird (in all 15)</li>
+        </ul>
+        <button type="button" class="pp-cta brand" data-tier="full">Get 15 for $3</button>
+      </div>
+
+      <div class="pp-card pp-card--premium">
+        <span class="pp-ribbon orange">Bird optional</span>
+        <div class="pp-tier">The Whole Aviary</div>
+        <div class="pp-priceRow"><div class="pp-price"><span class="cur">$</span>10</div><div class="pp-once">one-time</div></div>
+        <div class="pp-count">30 images (15 + 15 birdless)</div>
+        <div class="pp-save"><span class="pp-was">$59+ premium packs</span><span class="pp-savebadge">Save 83%</span></div>
+        <ul class="pp-benefits">
+          <li><span class="ic">✓</span>All 15 looks <b>with</b> your bird</li>
+          <li><span class="ic">✓</span>The same 15 looks <b>birdless</b> — 30 total</li>
+          <li class="soon"><span class="ic">★</span>Choose your bird<span class="soontag">Soon</span></li>
+          <li class="bird"><span class="ic">🐦</span>Includes a bird… then shows it the door</li>
+        </ul>
+        <button type="button" class="pp-cta orange" data-tier="aviary">Get 30 for $10</button>
+      </div>
+    </div>
+    <p class="pp-foot">Comparisons are illustrative of typical AI headshot packages — standard packs from ~$35, premium/birdless from ~$59. One-time payments, no subscriptions. 🐦</p>
+  </div>
+</section>
+
 <section class="how" id="howWrap">
   <div class="wrap">
     <h2>How it works</h2>
@@ -473,6 +564,9 @@
     if($('go').dataset.busy!=='1') $('go').textContent=goLabel();
   }
   $('tierpick').addEventListener('click',e=>{ const b=e.target.closest('.tieropt'); if(b) selectTier(b.dataset.tier); });
+  // Landing-page plan cards drive the same picker, then jump to the upload tool.
+  const plansEl=document.getElementById('plansWrap');
+  if(plansEl) plansEl.addEventListener('click',e=>{ const b=e.target.closest('.pp-cta'); if(!b) return; selectTier(b.dataset.tier); const t=$('tool'); if(t) t.scrollIntoView({behavior:'smooth',block:'start'}); });
   function renderThumbs(){
     $('thumbs').innerHTML='';
     photos.forEach((f,i)=>{
@@ -676,7 +770,7 @@
 
   async function enterResult(jobId){
     currentJob=jobId; $('tool').style.display='none'; $('result').style.display='block';
-    { ['showcaseWrap','compareWrap','howWrap','faqWrap'].forEach(id=>{const e=$(id); if(e) e.style.display='none';}); } window.scrollTo({top:0,behavior:'smooth'});
+    { ['showcaseWrap','compareWrap','plansWrap','howWrap','faqWrap'].forEach(id=>{const e=$(id); if(e) e.style.display='none';}); } window.scrollTo({top:0,behavior:'smooth'});
     let fin; try{ fin=await (await fetch('/api/finalize/'+jobId)).json(); }catch{ $('pmsg').textContent='Could not verify payment.'; return; }
     if(fin.error){ $('pmsg').textContent=fin.error; return; }
     if(!fin.paid){ $('pmsg').textContent='Payment not confirmed. If you were charged, refresh in a moment.'; return; }
