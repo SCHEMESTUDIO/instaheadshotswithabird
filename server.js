@@ -14,6 +14,7 @@ import { addReview, listReviews, setApproved, wordCount, MEDIA_DIR } from "./lib
 import { addEmail, listEmails } from "./lib/emails.js";
 import { addProInterest, proInterestCount, listProInterest } from "./lib/prodoor.js";
 import { sendHeadshots } from "./lib/mail.js";
+import { persistDelivery, DELIVERY_DIR } from "./lib/delivery.js";
 
 dotenv.config();
 
@@ -92,6 +93,7 @@ app.post("/api/stripe/webhook", express.raw({ type: "application/json" }), async
 
 app.use(express.json({ limit: "12mb" })); // /api/card uploads the rendered Bird ID PNG (~2-4 MB)
 app.use("/review-media", express.static(MEDIA_DIR));
+app.use("/delivery-media", express.static(DELIVERY_DIR)); // hosted headshot downloads linked from the email
 app.use(express.static("public"));
 
 function baseUrl(req) {
@@ -308,9 +310,14 @@ async function startGeneration(job) {
     // Delay the delivery email so the user's Bird-ID photo pick (made on the
     // results page, uploaded via /api/card) can ride along. The browser posts
     // a default card (look 3) on completion, and re-posts if they pick another.
-    setTimeout(() => {
-      sendHeadshots({ to: job.email, bird: job.bird, results: job.results, card: job.cardPng })
-        .catch((e) => console.error("[mail]", e.message));
+    setTimeout(async () => {
+      try {
+        // Persist images (R2 if configured, else disk) and email DOWNLOAD LINKS
+        // — not 30 inline attachments, which Gmail/Yahoo silently drop.
+        // persistDelivery returns absolute URLs ready for the email.
+        const { images, cardUrl } = await persistDelivery(job.id, job.results, job.cardPng);
+        await sendHeadshots({ to: job.email, bird: job.bird, images, cardUrl });
+      } catch (e) { console.error("[mail]", e.message); }
     }, EMAIL_DELAY_MS).unref?.();
   }
   // Refund for any look we couldn't deliver. All failed → full refund (the UI's
@@ -385,7 +392,7 @@ app.post("/api/start", upload.array("photos", 2), async (req, res) => {
     };
     jobs.set(job.id, job);
     res.json({ jobId: job.id, total: job.total, priceCents: PRICE_CENTS, paymentsEnabled: PAYMENTS_ENABLED });
-  } catch (err) { console.error("[start]", err); res.status(500).json({ error: err.message }); }
+  } catch (err) { console.error("[start]", err); res.status(500).json({ error: "Something went wrong on our end — please try again." }); }
 });
 
 // 2) checkout (or dev bypass)
@@ -425,7 +432,7 @@ app.post("/api/checkout", async (req, res) => {
     });
     job.sessionId = session.id;
     res.json({ url: session.url });
-  } catch (err) { console.error("[checkout]", err); res.status(500).json({ error: err.message }); }
+  } catch (err) { console.error("[checkout]", err); res.status(500).json({ error: "Couldn't start checkout — please try again." }); }
 });
 
 // 3) verify payment, start generation
@@ -447,7 +454,7 @@ app.get("/api/finalize/:jobId", async (req, res) => {
     // cap was already enforced (pre-payment) in /api/start; bump happens in startGeneration
     if (job.status === "awaiting_payment") startGeneration(job);
     res.json({ paid: true, bird: withBirdImage(job.bird), status: job.status, total: job.total });
-  } catch (err) { console.error("[finalize]", err); res.status(500).json({ error: err.message }); }
+  } catch (err) { console.error("[finalize]", err); res.status(500).json({ error: "Something went wrong on our end — please try again." }); }
 });
 
 // 4) poll
