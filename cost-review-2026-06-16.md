@@ -77,3 +77,15 @@ What I would **not** do: drop from 5 looks to 4 to save $0.067. It lifts margin 
 3. **Finding 2** — add the daily spend ceiling.
 4. **Pricing** — your call; the math says bundling is the real margin unlock.
 5. **Verify** the $0.067/image and the "is 200-empty billed?" question against one real Gemini invoice before trusting any savings estimate.
+
+---
+
+## Implementation status — verified 2026-06-17
+
+Re-read the live `server.js` against the three code findings above. **All three are implemented** (in the working tree, uncommitted):
+
+- **Finding 1 (narrow retry):** `classifyGenError()` (server.js ~L191) buckets errors into `transient` / `noimage` / `client`; `rawGenerate()` retries transient up to 6×, gives `noimage` a single re-roll (`MAX_NOIMAGE_ATTEMPTS=2`), and fails fast on `client`. The retry-all leak is closed.
+- **Finding 2 (budget guardrail):** `GLOBAL_DAILY_IMAGE_CAP` (~$20/day default) enforced pre-payment in `/api/start`, plus `GLOBAL_DAILY_CAP` and the per-IP cap.
+- **Finding 3 (cost observability):** `spend` tracker (`recordAttempt`/`recordImage`), per-job `[cost]` log line in `startGeneration`, and a `/api/admin/cost` endpoint reporting images vs provider calls vs `wastedCalls`.
+
+**Still open (your decisions, not code):** verify `EST_COST_PER_IMAGE` ($0.067) and the "is a 200-empty billed?" question against one real Gemini invoice; and the pricing/bundling lever (amortizing Stripe's flat $0.30), which remains the largest margin move and is deliberately not a code change.
