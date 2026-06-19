@@ -252,76 +252,6 @@
   </div>
 </section>
 
-<div class="wrap">
-  <section class="tool" id="tool">
-    <p class="step-label">Upload a selfie</p>
-    <label class="drop" id="drop">
-      <input type="file" id="file" accept="image/jpeg,image/png,image/heic,image/heif,.heic,.heif" multiple />
-      <div class="icon">📸</div>
-      <p>Tap or drag a selfie here</p>
-      <small>One clear, front-facing photo is all we need.<br>JPG, PNG, or HEIC &middot; at least 768px &middot; 1024px+ is best</small>
-    </label>
-    <div class="thumbs" id="thumbs"></div>
-    <div class="count" id="count"></div>
-
-    <style>
-      .tierpick{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}
-      .tieropt{position:relative;border:1.5px solid var(--line);background:#fff;border-radius:12px;padding:14px 8px 11px;cursor:pointer;text-align:center;display:flex;flex-direction:column;gap:3px;font:inherit;color:var(--ink);transition:.12s}
-      .tieropt:hover{border-color:#c9c4b7}
-      .tieropt.active{border-color:var(--brand);box-shadow:0 0 0 3px rgba(16,163,127,.12)}
-      .tieropt .tt{font-weight:800;font-size:14px}
-      .tieropt .tp{font-weight:900;font-size:21px;color:var(--brand);line-height:1}
-      .tieropt .td{font-size:11px;color:var(--muted);line-height:1.25}
-      .tieropt .tbadge{position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:var(--brand);color:#fff;font-size:9px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:2px 8px;border-radius:999px;white-space:nowrap}
-      @media(max-width:480px){.tieropt .td{display:none}.tieropt{padding:11px 6px}}
-    </style>
-    <div class="tierpick" id="tierpick" role="radiogroup" aria-label="Choose your pack">
-      <button type="button" class="tieropt active" data-tier="basic" aria-pressed="true">
-        <span class="tt">5 looks</span><span class="tp">$1</span><span class="td">1 bird in every shot</span>
-      </button>
-      <button type="button" class="tieropt" data-tier="full" aria-pressed="false">
-        <span class="tbadge">Popular</span><span class="tt">15 looks</span><span class="tp">$3</span><span class="td">3× the variety · bird in every shot</span>
-      </button>
-      <button type="button" class="tieropt" data-tier="aviary" aria-pressed="false">
-        <span class="tt">30 images</span><span class="tp">$10</span><span class="td">15 looks + 15 birdless</span>
-      </button>
-    </div>
-
-    <input type="email" id="email" placeholder="Your email address (required)" autocomplete="email" required
-      style="display:block;width:100%;margin-top:14px;border:1px solid var(--line);border-radius:11px;padding:11px 14px;font:inherit" />
-    <label style="display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--muted);margin-top:10px;text-align:left">
-      <input type="checkbox" id="optin" /> <span>Email me occasional updates from Headshots with a Bird (optional).</span>
-    </label>
-    <input type="text" id="code" name="beta-code" placeholder="Have a beta code? Enter it here" autocomplete="off" autocorrect="off" autocapitalize="off" readonly onfocus="this.removeAttribute('readonly')"
-      style="display:block;width:100%;margin-top:12px;border:1px solid var(--line);border-radius:11px;padding:11px 14px;font:inherit;text-align:center" />
-    <button class="go" id="go" disabled>Continue to payment · $1</button>
-    <p class="note" id="goNote">The bird is non-negotiable and appears in every shot. 🐦</p>
-    <div class="err" id="err"></div>
-  </section>
-</div>
-
-<section class="compare" id="compareWrap">
-  <div class="wrap">
-    <h2>Headshots with a Bird vs. everyone else</h2>
-    <p class="sub2">They give you more headshots. We give you a bird.</p>
-    <div class="ctable-wrap">
-      <table class="ctable">
-        <thead>
-          <tr><th></th><th class="us">Us 🐦</th><th>HeadshotPro</th><th>InstaHeadshots</th><th>Dr. Headshot</th></tr>
-        </thead>
-        <tbody>
-          <tr><th>Price</th><td class="us"><b>$1</b></td><td>from $29</td><td>from $59</td><td>from $34</td></tr>
-          <tr><th>Headshots you get</th><td class="us">5</td><td>70+</td><td>100</td><td>40</td></tr>
-          <tr><th>Outfits &amp; backdrops</th><td class="us">5</td><td>100s</td><td>5</td><td>4</td></tr>
-          <tr><th>Turnaround</th><td class="us"><b>~1 min</b></td><td>~10 min–2 hrs</td><td>~90 min</td><td>~2 hrs</td></tr>
-          <tr><th>Bird on your shoulder</th><td class="us yes">✓ Always</td><td class="no">✗</td><td class="no">✗</td><td class="no">✗</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <p class="foot">Competitor figures are their advertised entry plans (approximate). The bird is exclusively ours.</p>
-  </div>
-</section>
-
 <section class="plans" id="plansWrap">
   <div class="wrap">
     <style>
@@ -412,6 +342,76 @@
     <p class="pp-foot">Comparisons are illustrative of typical AI headshot packages — standard packs from ~$35, premium/birdless from ~$59. One-time payments, no subscriptions. 🐦</p>
   </div>
 </section>
+
+<section class="compare" id="compareWrap">
+  <div class="wrap">
+    <h2>Headshots with a Bird vs. everyone else</h2>
+    <p class="sub2">They give you more headshots. We give you a bird.</p>
+    <div class="ctable-wrap">
+      <table class="ctable">
+        <thead>
+          <tr><th></th><th class="us">Us 🐦</th><th>HeadshotPro</th><th>InstaHeadshots</th><th>Dr. Headshot</th></tr>
+        </thead>
+        <tbody>
+          <tr><th>Price</th><td class="us"><b>$1</b></td><td>from $29</td><td>from $59</td><td>from $34</td></tr>
+          <tr><th>Headshots you get</th><td class="us">5</td><td>70+</td><td>100</td><td>40</td></tr>
+          <tr><th>Outfits &amp; backdrops</th><td class="us">5</td><td>100s</td><td>5</td><td>4</td></tr>
+          <tr><th>Turnaround</th><td class="us"><b>~1 min</b></td><td>~10 min–2 hrs</td><td>~90 min</td><td>~2 hrs</td></tr>
+          <tr><th>Bird on your shoulder</th><td class="us yes">✓ Always</td><td class="no">✗</td><td class="no">✗</td><td class="no">✗</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="foot">Competitor figures are their advertised entry plans (approximate). The bird is exclusively ours.</p>
+  </div>
+</section>
+
+<div class="wrap">
+  <section class="tool" id="tool">
+    <p class="step-label">Upload a selfie</p>
+    <label class="drop" id="drop">
+      <input type="file" id="file" accept="image/jpeg,image/png,image/heic,image/heif,.heic,.heif" multiple />
+      <div class="icon">📸</div>
+      <p>Tap or drag a selfie here</p>
+      <small>One clear, front-facing photo is all we need.<br>JPG, PNG, or HEIC &middot; at least 768px &middot; 1024px+ is best</small>
+    </label>
+    <div class="thumbs" id="thumbs"></div>
+    <div class="count" id="count"></div>
+
+    <style>
+      .tierpick{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}
+      .tieropt{position:relative;border:1.5px solid var(--line);background:#fff;border-radius:12px;padding:14px 8px 11px;cursor:pointer;text-align:center;display:flex;flex-direction:column;gap:3px;font:inherit;color:var(--ink);transition:.12s}
+      .tieropt:hover{border-color:#c9c4b7}
+      .tieropt.active{border-color:var(--brand);box-shadow:0 0 0 3px rgba(16,163,127,.12)}
+      .tieropt .tt{font-weight:800;font-size:14px}
+      .tieropt .tp{font-weight:900;font-size:21px;color:var(--brand);line-height:1}
+      .tieropt .td{font-size:11px;color:var(--muted);line-height:1.25}
+      .tieropt .tbadge{position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:var(--brand);color:#fff;font-size:9px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:2px 8px;border-radius:999px;white-space:nowrap}
+      @media(max-width:480px){.tieropt .td{display:none}.tieropt{padding:11px 6px}}
+    </style>
+    <div class="tierpick" id="tierpick" role="radiogroup" aria-label="Choose your pack">
+      <button type="button" class="tieropt active" data-tier="basic" aria-pressed="true">
+        <span class="tt">5 looks</span><span class="tp">$1</span><span class="td">1 bird in every shot</span>
+      </button>
+      <button type="button" class="tieropt" data-tier="full" aria-pressed="false">
+        <span class="tbadge">Popular</span><span class="tt">15 looks</span><span class="tp">$3</span><span class="td">3× the variety · bird in every shot</span>
+      </button>
+      <button type="button" class="tieropt" data-tier="aviary" aria-pressed="false">
+        <span class="tt">30 images</span><span class="tp">$10</span><span class="td">15 looks + 15 birdless</span>
+      </button>
+    </div>
+
+    <input type="email" id="email" placeholder="Your email address (required)" autocomplete="email" required
+      style="display:block;width:100%;margin-top:14px;border:1px solid var(--line);border-radius:11px;padding:11px 14px;font:inherit" />
+    <label style="display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--muted);margin-top:10px;text-align:left">
+      <input type="checkbox" id="optin" /> <span>Email me occasional updates from Headshots with a Bird (optional).</span>
+    </label>
+    <input type="text" id="code" name="beta-code" placeholder="Have a beta code? Enter it here" autocomplete="off" autocorrect="off" autocapitalize="off" readonly onfocus="this.removeAttribute('readonly')"
+      style="display:block;width:100%;margin-top:12px;border:1px solid var(--line);border-radius:11px;padding:11px 14px;font:inherit;text-align:center" />
+    <button class="go" id="go" disabled>Continue to payment · $1</button>
+    <p class="note" id="goNote">The bird is non-negotiable and appears in every shot. 🐦</p>
+    <div class="err" id="err"></div>
+  </section>
+</div>
 
 <section class="how" id="howWrap">
   <div class="wrap">
