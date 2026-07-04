@@ -313,6 +313,7 @@ async function birdifyLook(job, lookKey) {
   for (;;) {
     try {
       recordAttempt(); job.genAttempts = (job.genAttempts || 0) + 1;
+      addImages(1); // count against the daily image cap — paid birdifies still run, but future /api/start gates see the true day total
       const { src } = await withSlot(() => getProvider().generate({ images: [headshot, birdRef], prompt }));
       recordImage(); job.genImages = (job.genImages || 0) + 1;
       job.birdShots[lookKey] = src;
