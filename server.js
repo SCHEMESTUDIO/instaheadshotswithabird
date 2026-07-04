@@ -1,12 +1,13 @@
 import express from "express";
 import multer from "multer";
 import dotenv from "dotenv";
+import fs from "fs";
 import { randomUUID } from "crypto";
 import Stripe from "stripe";
 import heicConvert from "heic-convert";
-import { buildTwoPersonPrompt } from "./lib/prompt.js";
+import { buildTwoPersonPrompt, buildBirdifyPrompt } from "./lib/prompt.js";
 import { ALL_LOOKS, looksForTier } from "./lib/looks.js";
-import { hasRef, refPublicUrl, hasCutout, cutoutPublicUrl } from "./lib/birdref.js";
+import { hasRef, refPublicUrl, hasCutout, cutoutPublicUrl, cutoutPath } from "./lib/birdref.js";
 import { imageDimensions } from "./lib/imagesize.js";
 import { assignBird, chooseBird, stats } from "./lib/assign.js";
 import { BIRDS, HUGE_BIRD_IDS } from "./lib/birds.js";
@@ -283,6 +284,53 @@ function tasksForJob(job) {
   return looksForTier(tier).map((look) => ({ look, birdless: true }));
 }
 
+// ---- birdify: paint the bird INTO one finished headshot (the keepsake) ----
+// One Gemini edit call on the user's picked shot: huge birds stand behind at
+// true scale, small birds perch on the shoulder — photoreal lighting/occlusion,
+// person untouched. The flat cutout is only the instant on-card preview.
+// Cap per job: 1 auto (default look, so the email always has one) + user picks.
+const MAX_BIRDIFY = Number(process.env.MAX_BIRDIFY || 3);
+function dataUriToImage(src) {
+  const m = /^data:([^;]+);base64,(.+)$/.exec(src || "");
+  if (!m) return null;
+  return { mimeType: m[1], buffer: Buffer.from(m[2], "base64") };
+}
+async function birdifyLook(job, lookKey) {
+  job.birdShots = job.birdShots || {};
+  if (job.birdShots[lookKey]) return job.birdShots[lookKey]; // cached — repicking the same look is free
+  job.birdifyCalls = job.birdifyCalls || 0;
+  if (job.birdifyCalls >= MAX_BIRDIFY) throw new Error("Bird photo limit reached for this order.");
+  const r = (job.results || []).find((x) => x && x.look === lookKey && x.src);
+  if (!r) throw new Error("That look isn't available.");
+  const headshot = dataUriToImage(r.src);
+  if (!headshot) throw new Error("That look isn't available.");
+  if (!hasCutout(job.bird.id)) throw new Error("No bird art available.");
+  const birdRef = { mimeType: "image/png", buffer: fs.readFileSync(cutoutPath(job.bird.id)) };
+  job.birdifyCalls++;
+  const prompt = buildBirdifyPrompt(job.bird);
+  // small retry budget: 3 transient, 1 re-roll on "no image" (same taxonomy as rawGenerate)
+  let lastErr, transient = 0, noimage = 0;
+  for (;;) {
+    try {
+      recordAttempt(); job.genAttempts = (job.genAttempts || 0) + 1;
+      const { src } = await withSlot(() => getProvider().generate({ images: [headshot, birdRef], prompt }));
+      recordImage(); job.genImages = (job.genImages || 0) + 1;
+      job.birdShots[lookKey] = src;
+      job.lastBirdified = lookKey; // the email keepsake follows the latest pick
+      return src;
+    } catch (err) {
+      lastErr = err;
+      const kind = classifyGenError(err);
+      console.error(`[job ${job.id}] birdify ${lookKey} (${kind}): ${err.message}`);
+      if (kind === "client") break;
+      if (kind === "noimage") { if (++noimage >= 2) break; await sleep(1500); continue; }
+      if (++transient >= 3) break;
+      await sleep(err.retryAfterMs ? err.retryAfterMs + 1000 : 2500);
+    }
+  }
+  throw lastErr || new Error("Could not add the bird.");
+}
+
 async function startGeneration(job) {
   if (job.status === "generating" || job.status === "complete") return;
   // Build the work list and size the results array up front (synchronously,
@@ -309,6 +357,13 @@ async function startGeneration(job) {
   // or billed empties happened — a gap here is the Finding-1 leak showing up.
   const ja = job.genAttempts || 0, ji = job.genImages || 0;
   console.log(`[cost] job ${job.id}: ${job.status} · ${ji}/${tasks.length} images · ${ja} provider calls · ~$${(ja * EST_COST_PER_IMAGE).toFixed(3)} (today: ${spend.images} imgs / ${spend.attempts} calls / ~$${(spend.attempts * EST_COST_PER_IMAGE).toFixed(2)})`);
+  if (job.status === "complete") {
+    // Kick off the DEFAULT bird integration immediately (look 3 if it exists,
+    // else the first success) so the keepsake exists even if the user closes
+    // the tab before picking. A user pick just birdifies a different look.
+    const def = job.results[2]?.src ? job.results[2] : job.results.find((r) => r && r.src);
+    if (def) birdifyLook(job, def.look).catch((e) => console.error(`[birdify] job ${job.id} default:`, e.message));
+  }
   if (job.status === "complete" && job.email) {
     // Delay the delivery email so the user's Bird-ID photo pick (made on the
     // results page, uploaded via /api/card) can ride along. The browser posts
@@ -317,8 +372,10 @@ async function startGeneration(job) {
       try {
         // Persist images (R2 if configured, else disk) and email DOWNLOAD LINKS
         // — not 25 inline attachments, which Gmail/Yahoo silently drop.
-        // persistDelivery returns absolute URLs ready for the email.
-        const { images, cardUrl, birdUrl } = await persistDelivery(job.id, job.results, job.cardPng, job.birdPng);
+        // The keepsake = the user's LAST birdified look (their active pick).
+        const shots = job.birdShots || {};
+        const lastShot = job.lastBirdified && shots[job.lastBirdified] ? shots[job.lastBirdified] : Object.values(shots).pop();
+        const { images, cardUrl, birdUrl } = await persistDelivery(job.id, job.results, job.cardPng, lastShot || job.birdPng);
         await sendHeadshots({ to: job.email, bird: job.bird, images, cardUrl, birdUrl });
       } catch (e) { console.error("[mail]", e.message); }
     }, EMAIL_DELAY_MS).unref?.();
@@ -471,8 +528,23 @@ app.get("/api/job/:id", (req, res) => {
     status: job.status, paid: job.paid, total: job.total, done: job.done,
     bird: job.paid ? withBirdImage(job.bird) : null,
     results: job.paid ? job.results : [],
+    birdShots: job.paid ? (job.birdShots || {}) : {}, // look → integrated "you + bird" data URI
     error: job.error,
   });
+});
+
+// 4b) birdify a picked look: paints the bird INTO that headshot (photoreal),
+// returns the finished image. Cached per look; capped per job (MAX_BIRDIFY).
+app.post("/api/birdify", async (req, res) => {
+  try {
+    const job = jobs.get(req.body?.jobId);
+    if (!job || !job.paid) return res.status(404).json({ error: "Job not found." });
+    if (job.status !== "complete") return res.status(400).json({ error: "Headshots are still generating." });
+    const src = await birdifyLook(job, String(req.body?.look || ""));
+    res.json({ look: req.body.look, src });
+  } catch (err) {
+    res.status(400).json({ error: err.message || "Could not add the bird." });
+  }
 });
 
 // Browser-rendered composites (PNG data URIs) to ride along in the delivery

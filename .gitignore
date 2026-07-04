@@ -20,3 +20,5 @@ scripts/bakeoff/results/
 
 # raw bird refs are regenerable (scripts/gen-bird-cutouts.js) — only ship the cutouts
 public/birds/*.jpg
+bird-review.html
+public/test-headshot-review.jpg

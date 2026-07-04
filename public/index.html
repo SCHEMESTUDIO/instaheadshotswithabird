@@ -476,6 +476,7 @@
       </div>
     </div>
     <div class="cardpick" id="cardpick"></div>
+    <p class="hint" id="birdstat" style="margin-top:10px"></p>
     <div class="res-actions">
       <button class="btn primary" id="copyCard" type="button">📋 Copy card to share</button>
       <button class="btn" id="downloadCard" type="button">⬇ Download card</button>
@@ -568,7 +569,8 @@
 
 <script>
   const $ = (id) => document.getElementById(id);
-  let photos=[], currentJob=null, reviewShown=false, featuredSrc=null, rating=0, resultsData=[], cardBird=null, userPicked=false;
+  let photos=[], currentJob=null, reviewShown=false, featuredSrc=null, featuredLook=null, rating=0, resultsData=[], cardBird=null, userPicked=false;
+  let birdShots={}, integratedActive=false, birdifyBusy=false, jobComplete=false; // photoreal "you + bird" renders, keyed by look
   const MAXP=2, MIN_DIM=768;
   const isHeicFile = (f) => /heic|heif/i.test(f.type) || /\.(heic|heif)$/i.test(f.name);
 
@@ -731,11 +733,38 @@
   }
   function selectCard(i){
     const r=resultsData[i]; if(!r) return;
-    $('cardImg').src=r.src; featuredSrc=r.src;
+    featuredSrc=r.src; featuredLook=r.look;
+    const ov=$('cardBirdOv');
+    if(birdShots[r.look]){
+      // photoreal integration already rendered for this look — use it, no sticker
+      $('cardImg').src=birdShots[r.look]; integratedActive=true; if(ov) ov.style.display='none';
+      setBirdStat('🐦 Bird added — photographed together.');
+    } else {
+      $('cardImg').src=r.src; integratedActive=false;
+      if(ov && cardBird && cardBird.cutout) ov.style.display='block'; // cutout = instant preview while the real render lands
+      if(jobComplete) requestBirdify(r.look);
+    }
     [...$('grid').children].forEach(c=>c.classList.remove('sel'));
     const cell=$('cell'+i); if(cell) cell.classList.add('sel');
     [...$('cardpick').children].forEach(b=>b.classList.toggle('active', +b.dataset.index===i));
     postCard(); // keep the server's copy of the card current (rides along in the delivery email)
+  }
+  function setBirdStat(t){ const el=$('birdstat'); if(el) el.textContent=t||''; }
+  // Ask the server to paint the bird INTO this look (one Gemini edit; cached
+  // per look, capped per job server-side). Cutout preview holds the fort.
+  async function requestBirdify(look){
+    if(!currentJob || birdShots[look] || birdifyBusy) return;
+    birdifyBusy=true;
+    setBirdStat('🐦 Your bird is landing on this shot… ~15 seconds.');
+    try{
+      const r=await fetch('/api/birdify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jobId:currentJob,look})});
+      const d=await r.json();
+      if(!r.ok) throw new Error(d.error||'Could not add the bird.');
+      birdShots[d.look]=d.src;
+      if(featuredLook===d.look){ $('cardImg').src=d.src; integratedActive=true; const ov=$('cardBirdOv'); if(ov) ov.style.display='none'; setBirdStat('🐦 Bird added — photographed together.'); postCard(); }
+    }catch(e){
+      setBirdStat(''); toast(e.message||'Could not add the bird');
+    }finally{ birdifyBusy=false; }
   }
   let cardPostTimer=null;
   function postCard(){
@@ -748,12 +777,8 @@
         const png=drawCard().toDataURL('image/png');
         fetch('/api/card',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jobId:currentJob,png})}).catch(()=>{});
       }catch(e){ /* card image not ready yet — a later pick/completion will retry */ }
-      try{
-        if(birdCut&&birdCut.complete&&birdCut.naturalWidth){
-          const birdPng=drawBirdShot().toDataURL('image/png');
-          fetch('/api/card',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jobId:currentJob,birdPng})}).catch(()=>{});
-        }
-      }catch(e){ /* composite not ready yet — retried on the next pick */ }
+      // (the "you + bird" keepsake is rendered SERVER-side via /api/birdify —
+      //  no client upload needed)
     },1200);
   }
   // explicit look-picker buttons under the card (outside #sharecard so they're not in the export)
@@ -824,7 +849,7 @@
     const iw=img.naturalWidth, ih=img.naturalHeight, bw2=artW-8, bh=artH-8;
     const k=Math.max(bw2/iw,bh/ih), sw=bw2/k, sh=bh/k;
     ctx.drawImage(img,(iw-sw)/2,(ih-sh)/2,sw,sh,x0+4,artY+4,bw2,bh);
-    drawBirdInto(ctx,x0+4,artY+4,bw2,bh); // the bird joins the picked shot, in-card
+    if(!integratedActive) drawBirdInto(ctx,x0+4,artY+4,bw2,bh); // cutout preview only until the photoreal render lands
     ctx.restore();
     ctx.font=F(400,13,true); ctx.fillStyle='#6b7180'; ctx.fillText(b.sci||'',x0,sciY+9);
     ctx.fillStyle='#eafaf4'; rr(ctx,x0,factsY,cw,factsH,10); ctx.fill();
@@ -861,12 +886,17 @@
     dl(blob,'bird-card.png');
   });
   $('downloadBird').addEventListener('click', async ()=>{
-    let blob;
-    try{ blob=await new Promise((res,rej)=>{ try{ drawBirdShot().toBlob(b=>b?res(b):rej(new Error('blob'))); }catch(e){ rej(e); } }); }
-    catch{ return toast('Pick a headshot first'); }
-    const file=new File([blob],'you-and-your-bird.png',{type:'image/png'});
+    let blob, name='you-and-your-bird.jpg';
+    if(featuredLook && birdShots[featuredLook]){
+      blob=await (await fetch(birdShots[featuredLook])).blob(); // the photoreal render
+    } else {
+      if(jobComplete && featuredLook){ requestBirdify(featuredLook); return toast('Adding your bird — ready in ~15s'); }
+      try{ blob=await new Promise((res,rej)=>{ try{ drawBirdShot().toBlob(b=>b?res(b):rej(new Error('blob'))); }catch(e){ rej(e); } }); name='you-and-your-bird.png'; }
+      catch{ return toast('Pick a headshot first'); }
+    }
+    const file=new File([blob],name,{type:blob.type||'image/jpeg'});
     if(canShareFiles([file])){ try{ await navigator.share({files:[file],title:'Me + my bird'}); return; }catch(e){ if(e&&e.name==='AbortError') return; } }
-    dl(blob,'you-and-your-bird.png');
+    dl(blob,name);
   });
   $('downloadAll').addEventListener('click', async ()=>{
     const imgs=resultsData.filter(Boolean); if(!imgs.length) return;
@@ -899,13 +929,27 @@
       }
       (j.results||[]).forEach((r,i)=>{ if(r) fillCell(i,r); });
       renderCardPicker();
+      // merge server-side bird renders (the auto default lands shortly after completion)
+      let gotNewShot=false;
+      Object.entries(j.birdShots||{}).forEach(([k,v])=>{ if(!birdShots[k]){ birdShots[k]=v; gotNewShot=true; } });
+      if(gotNewShot && featuredLook && birdShots[featuredLook] && !integratedActive){
+        $('cardImg').src=birdShots[featuredLook]; integratedActive=true;
+        const ov=$('cardBirdOv'); if(ov) ov.style.display='none';
+        setBirdStat('🐦 Bird added — photographed together.'); postCard();
+      }
       // default card = look 3 (Navy Polo) once it exists; first success until then; never override a manual pick
       if(!userPicked){ const k=resultsData[2]?2:resultsData.findIndex(Boolean); if(k>=0&&resultsData[k]&&featuredSrc!==resultsData[k].src) selectCard(k); }
       $('bar').style.width=Math.round((j.done/total)*100)+'%';
       if(j.status==='running'||j.status==='generating'||j.status==='awaiting_payment') setTimeout(tick,2000);
-      else { clearInterval(mt); $('pmsg').textContent = j.status==='failed' ? 'Generation failed — your payment has been refunded automatically.' : doneMsg(total);
-        const got=resultsData.filter(Boolean).length, da=$('downloadAll'); if(da&&got) da.textContent='⬇ Download all '+got; }
+      else {
+        clearInterval(mt); jobComplete=true;
+        $('pmsg').textContent = j.status==='failed' ? 'Generation failed — your payment has been refunded automatically.' : doneMsg(total);
+        const got=resultsData.filter(Boolean).length, da=$('downloadAll'); if(da&&got) da.textContent='⬇ Download all '+got;
+        // keep listening briefly for the auto bird render (kicked off server-side at completion)
+        if(j.status!=='failed' && !birdShots[featuredLook] && extraPolls<15){ extraPolls++; if(!$('birdstat').textContent) setBirdStat('🐦 Your bird is landing on the card shot…'); setTimeout(tick,3000); }
+      }
     };
+    let extraPolls=0;
     tick();
   }
 
