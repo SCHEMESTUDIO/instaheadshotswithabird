@@ -5,10 +5,11 @@ import { randomUUID } from "crypto";
 import Stripe from "stripe";
 import heicConvert from "heic-convert";
 import { buildTwoPersonPrompt } from "./lib/prompt.js";
-import { LOOKS, looksForTier } from "./lib/looks.js";
-import { hasRef, refPublicUrl } from "./lib/birdref.js";
+import { ALL_LOOKS, looksForTier } from "./lib/looks.js";
+import { hasRef, refPublicUrl, hasCutout, cutoutPublicUrl } from "./lib/birdref.js";
 import { imageDimensions } from "./lib/imagesize.js";
-import { assignBird, stats } from "./lib/assign.js";
+import { assignBird, chooseBird, stats } from "./lib/assign.js";
+import { BIRDS, HUGE_BIRD_IDS } from "./lib/birds.js";
 import { getProvider } from "./lib/providers/index.js";
 import { addReview, listReviews, setApproved, wordCount, MEDIA_DIR } from "./lib/reviews.js";
 import { addEmail, listEmails } from "./lib/emails.js";
@@ -21,13 +22,16 @@ dotenv.config();
 const PRICE_CENTS = Number(process.env.PRICE_CENTS || 100);
 
 // ---- pricing tiers: single source of truth for amount + product name ----
-// Each maps to a look set in lib/looks.js via tasksForJob():
-//   basic  → 5 looks (bird on) · full → 15 (bird on) · aviary → 30 (15 + 15 birdless)
+// Clean-headshot hero (2026-07-04): ALL generation is birdless. The bird is
+// composited client-side onto ONE user-picked shot — it appears on the Bird ID
+// card and as a separate "you + your bird" download. Aviary buyers choose
+// their species; everyone else gets assigned one, as nature intended.
+//   basic → 5 clean · full → 10 clean · aviary → 25 clean + choose-your-bird
 // Amounts are overridable via env so prices can change without a code edit.
 const TIERS = {
-  basic:  { cents: Number(process.env.PRICE_BASIC_CENTS  || PRICE_CENTS), label: "Headshots with a Bird — 5 headshots + your Bird ID" },
-  full:   { cents: Number(process.env.PRICE_FULL_CENTS   || 300),         label: "Headshots with a Bird — 15 headshots + your Bird ID" },
-  aviary: { cents: Number(process.env.PRICE_AVIARY_CENTS || 1000),        label: "Headshots with a Bird — 30 headshots (15 + 15 birdless) + your Bird ID" },
+  basic:  { cents: Number(process.env.PRICE_BASIC_CENTS  || PRICE_CENTS), label: "Headshots with a Bird — 5 clean headshots + your Bird ID" },
+  full:   { cents: Number(process.env.PRICE_FULL_CENTS   || 300),         label: "Headshots with a Bird — 10 clean headshots + your Bird ID" },
+  aviary: { cents: Number(process.env.PRICE_AVIARY_CENTS || 1000),        label: "Headshots with a Bird — 25 clean headshots + choose your bird" },
 };
 function resolveTier(t) { return (t && TIERS[t]) ? t : "basic"; } // never trust a client tier blindly
 const DAILY_CAP = Number(process.env.DAILY_CAP || 20);
@@ -176,7 +180,14 @@ function isHeic(buf) {
 
 function withBirdImage(bird) {
   if (!bird) return bird;
-  return { ...bird, image: hasRef(bird.id) ? refPublicUrl(bird.id) : null };
+  return {
+    ...bird,
+    image: hasRef(bird.id) ? refPublicUrl(bird.id) : null,
+    // transparent PNG the browser composites onto the picked headshot
+    cutout: hasCutout(bird.id) ? cutoutPublicUrl(bird.id) : null,
+    // huge species composite LARGER (the "we could have shrunk it" gag lives on)
+    huge: HUGE_BIRD_IDS.has(bird.id),
+  };
 }
 
 // Classify a generation error so we don't pay to repeat a doomed call.
@@ -249,35 +260,27 @@ async function rawGenerate(job, look, includeBird = true) {
   throw lastErr || new Error("Generation failed.");
 }
 
-// A task is { look, birdless }. Birdless variants get a distinct key (so the
-// download filename doesn't collide with the bird-on version) and a clear label.
+// A task is { look, birdless }. Since the clean-headshot pivot every task is
+// birdless, so keys/labels are just the look's own — no "-nobird" suffixing.
 async function generateLook(job, task) {
   const { look, birdless } = task;
-  const key = birdless ? `${look.id}-nobird` : look.id;
-  const label = birdless ? `${look.label} · No bird` : look.label;
   try {
     const src = await rawGenerate(job, look, !birdless);
-    return { look: key, label, src };
+    return { look: look.id, label: look.label, src };
   } catch (err) {
-    return { look: key, label, error: err.message || "Generation failed." };
+    return { look: look.id, label: look.label, error: err.message || "Generation failed." };
   }
 }
 
 // Build the generation work list for a job from its tier.
-//   basic  ($1)  → 5 looks, bird on
-//   full   ($3)  → 15 looks, bird on
-//   aviary ($10) → 15 bird-on + the same 15 birdless = 30 images
-// Defaults to basic when job.tier is unset, so the live product is unchanged
-// until checkout starts passing a tier through (set job.tier from Stripe
-// metadata to activate $3/$10 — that's the one remaining hook).
+//   basic  ($1)  → 5 looks   · full ($3) → 10 looks · aviary ($10) → 25 looks
+// EVERY look renders clean (birdless:true): the bird is composited onto one
+// user-picked shot by the browser, never painted in by the model. This keeps
+// bird identity pixel-perfect (it's literally the reference cutout) and
+// removes the model's old habit of mangling plumage.
 function tasksForJob(job) {
   const tier = job.tier || "basic";
-  const looks = looksForTier(tier);
-  const tasks = looks.map((look) => ({ look, birdless: false }));
-  if (tier === "aviary" || tier === "premium_plus") {
-    for (const look of looks) tasks.push({ look, birdless: true });
-  }
-  return tasks;
+  return looksForTier(tier).map((look) => ({ look, birdless: true }));
 }
 
 async function startGeneration(job) {
@@ -313,10 +316,10 @@ async function startGeneration(job) {
     setTimeout(async () => {
       try {
         // Persist images (R2 if configured, else disk) and email DOWNLOAD LINKS
-        // — not 30 inline attachments, which Gmail/Yahoo silently drop.
+        // — not 25 inline attachments, which Gmail/Yahoo silently drop.
         // persistDelivery returns absolute URLs ready for the email.
-        const { images, cardUrl } = await persistDelivery(job.id, job.results, job.cardPng);
-        await sendHeadshots({ to: job.email, bird: job.bird, images, cardUrl });
+        const { images, cardUrl, birdUrl } = await persistDelivery(job.id, job.results, job.cardPng, job.birdPng);
+        await sendHeadshots({ to: job.email, bird: job.bird, images, cardUrl, birdUrl });
       } catch (e) { console.error("[mail]", e.message); }
     }, EMAIL_DELAY_MS).unref?.();
   }
@@ -382,16 +385,19 @@ app.post("/api/start", upload.array("photos", 2), async (req, res) => {
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return res.status(400).json({ error: "Please enter a valid email address." });
     const consent = req.body.consent === "true";
     addEmail(email, consent);
-    const bird = assignBird();
+    // Choose-your-bird is an aviary-tier ($10) perk ONLY — any birdId sent on a
+    // cheaper tier is ignored and the bird chooses them, as nature intended.
+    const requestedBird = (req.body.birdId || "").trim();
+    const bird = (tier === "aviary" && requestedBird && chooseBird(requestedBird)) || assignBird();
     const job = {
       id: randomUUID(), bird, email, ip, tier,
       photos: req.files.map((f) => ({ buffer: f.buffer, mimeType: f.mimetype })),
       paid: false, status: "awaiting_payment",
-      total: LOOKS.length, done: 0, results: new Array(LOOKS.length).fill(null),
+      total: jobImages, done: 0, results: new Array(jobImages).fill(null),
       sessionId: null, createdAt: Date.now(),
     };
     jobs.set(job.id, job);
-    res.json({ jobId: job.id, total: job.total, priceCents: PRICE_CENTS, paymentsEnabled: PAYMENTS_ENABLED });
+    res.json({ jobId: job.id, total: job.total, priceCents: TIERS[tier].cents, paymentsEnabled: PAYMENTS_ENABLED });
   } catch (err) { console.error("[start]", err); res.status(500).json({ error: "Something went wrong on our end — please try again." }); }
 });
 
@@ -469,16 +475,40 @@ app.get("/api/job/:id", (req, res) => {
   });
 });
 
-// Browser-rendered Bird ID card (PNG data URI) to attach to the delivery email.
-// Posted automatically on completion (default look) and again on a user pick.
+// Browser-rendered composites (PNG data URIs) to ride along in the delivery
+// email. Posted automatically on completion (default look) and again on a user
+// pick. `png` = the Bird ID card; `birdPng` = the raw "you + your bird" shot
+// (picked headshot with the bird cutout composited, no card frame). Either or
+// both may be present per request.
 app.post("/api/card", (req, res) => {
   const job = jobs.get(req.body?.jobId);
   if (!job || !job.paid) return res.status(404).json({ error: "Job not found." });
+  const okPng = (s) => /^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test(s) && s.length <= 8 * 1024 * 1024;
   const png = req.body?.png || "";
-  if (!/^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test(png)) return res.status(400).json({ error: "Expected a PNG data URI." });
-  if (png.length > 8 * 1024 * 1024) return res.status(400).json({ error: "Card too large." });
-  job.cardPng = png;
+  const birdPng = req.body?.birdPng || "";
+  if (!png && !birdPng) return res.status(400).json({ error: "Expected a PNG data URI." });
+  if (png) {
+    if (!okPng(png)) return res.status(400).json({ error: "Expected a PNG data URI (max 8 MB)." });
+    job.cardPng = png;
+  }
+  if (birdPng) {
+    if (!okPng(birdPng)) return res.status(400).json({ error: "Expected a PNG data URI (max 8 MB)." });
+    job.birdPng = birdPng;
+  }
   res.json({ ok: true });
+});
+
+// Roster for the aviary-tier "choose your bird" picker. Public, static-ish.
+let birdsCache = null;
+app.get("/api/birds", (_req, res) => {
+  if (!birdsCache) {
+    birdsCache = BIRDS.map((b) => ({
+      id: b.id, name: b.name, sci: b.sci, emoji: b.emoji,
+      cutout: hasCutout(b.id) ? cutoutPublicUrl(b.id) : null,
+    }));
+  }
+  res.set("Cache-Control", "public, max-age=3600");
+  res.json(birdsCache);
 });
 
 // ---- reviews ----
@@ -557,7 +587,8 @@ app.get("/healthz", (_req, res) =>
     // resolved model — catches a stale GEMINI_MODEL env var silently overriding
     // the bake-off winner (this exact bug cost a real user run on 2026-06-10)
     model: process.env.GEMINI_MODEL || "gemini-3.1-flash-image (default)",
-    paymentsEnabled: PAYMENTS_ENABLED, priceCents: PRICE_CENTS, looks: LOOKS.length,
+    paymentsEnabled: PAYMENTS_ENABLED, priceCents: PRICE_CENTS, looks: ALL_LOOKS.length,
+    cutouts: BIRDS.filter((b) => hasCutout(b.id)).length, // bird art available for compositing
     tiers: Object.fromEntries(Object.entries(TIERS).map(([k, v]) => [k, v.cents])),
     // config sanity flags — verify these say true before sharing with testers
     emailEnabled: !!process.env.RESEND_API_KEY,
@@ -593,5 +624,5 @@ app.use((err, _req, res, _next) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🐦  instaheadshotswithabird running → http://localhost:${PORT}`);
-  console.log(`    payments: ${PAYMENTS_ENABLED ? "Stripe ON" : "DEV BYPASS"} · $${(PRICE_CENTS / 100).toFixed(2)} · ${LOOKS.length} looks · admin ${ADMIN_KEY ? "ON" : "OFF"}`);
+  console.log(`    payments: ${PAYMENTS_ENABLED ? "Stripe ON" : "DEV BYPASS"} · $${(PRICE_CENTS / 100).toFixed(2)} · ${ALL_LOOKS.length} looks (clean) · admin ${ADMIN_KEY ? "ON" : "OFF"}`);
 });

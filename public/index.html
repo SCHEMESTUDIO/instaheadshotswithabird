@@ -13,27 +13,27 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<title>Headshots with a Bird — 5 headshots, one bird, $1.</title>
-<meta name="description" content="Upload one selfie, get 5 professional headshots for $1 — each starring the one bird we've paired to you, plus your own Bird ID." />
+<title>Headshots with a Bird — 5 clean headshots. One bird. $1.</title>
+<meta name="description" content="Upload one selfie, get 5 clean professional headshots for $1 — no bird in any of them. Then pick one to meet the bird we've paired to you, on your shareable Bird ID." />
 <link rel="canonical" href="https://headshotswithabird.com/" />
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Fraunces:opsz,wght@9..144,900&family=JetBrains+Mono:wght@400;500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
 <meta name="theme-color" content="#f7f5ef" />
 <!-- Social sharing (LinkedIn, Reddit, Slack, iMessage all read Open Graph) -->
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="Headshots with a Bird" />
-<meta property="og:title" content="Five headshots. One bird. $1." />
-<meta property="og:description" content="Upload one selfie, get 5 professional headshots in about a minute — each starring the one bird we've paired to you." />
+<meta property="og:title" content="Five clean headshots. One bird. $1." />
+<meta property="og:description" content="Upload one selfie, get 5 clean professional headshots in about a minute. Then pick one to meet the bird we've paired to you." />
 <meta property="og:url" content="https://headshotswithabird.com/" />
 <meta property="og:image" content="https://headshotswithabird.com/og.png" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
-<meta property="og:image:alt" content="Five professional headshots. One bird. One dollar." />
+<meta property="og:image:alt" content="Five clean professional headshots. One bird, contained. One dollar." />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Five headshots. One bird. $1." />
-<meta name="twitter:description" content="Upload one selfie, get 5 professional headshots in about a minute — each with the one bird we've paired to you." />
+<meta name="twitter:title" content="Five clean headshots. One bird. $1." />
+<meta name="twitter:description" content="Upload one selfie, get 5 clean professional headshots in about a minute. Then pick one to meet the bird we've paired to you." />
 <meta name="twitter:image" content="https://headshotswithabird.com/og.png" />
 <style>
   :root{
@@ -128,8 +128,11 @@
   .pkmn-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
   .pkmn-name{font-size:22px;font-weight:800;letter-spacing:-.02em;color:var(--ink);line-height:1.05}
   .pkmn-badge{font-size:12px;font-weight:800;color:#fff;background:var(--brand);border-radius:999px;padding:4px 10px;white-space:nowrap}
-  .pkmn-art{flex:1;min-height:0;border:4px solid var(--brand);border-radius:10px;overflow:hidden;background:#222}
+  .pkmn-art{flex:1;min-height:0;border:4px solid var(--brand);border-radius:10px;overflow:hidden;background:#222;position:relative}
   .pkmn-art #cardImg{width:100%;height:100%;object-fit:cover;display:block}
+  /* the bird, composited onto the picked shot (cutout PNG, drop-shadowed);
+     max-width/max-height are set per-bird in JS (huge species run bigger) */
+  .pkmn-art #cardBirdOv{position:absolute;right:2.5%;bottom:0;width:auto;height:auto;display:none;pointer-events:none;filter:drop-shadow(-5px 5px 9px rgba(0,0,0,.38))}
   .cardpick{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:14px auto 0;max-width:400px}
   .cardpick button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 13px;font-size:13px;font-weight:700;cursor:pointer;color:var(--ink);line-height:1}
   .cardpick button.active{background:var(--brand);color:#fff;border-color:var(--brand)}
@@ -219,16 +222,18 @@
   .about .by{font-size:14px;color:var(--muted)}
   /* SCHEME Studio calling card — shared cross-site stamp (light variant) */
   .ss-cc-wrap{display:flex;justify-content:center;margin:32px 0 8px}
-  .ss-cc{display:inline-block;text-align:center;text-decoration:none;border-radius:14px;padding:20px 36px 18px;
-    background:#ffffff;border:2.5px solid #0d0f14;box-shadow:6px 6px 0 #10a37f;
+  .ss-cc{display:inline-block;text-align:center;text-decoration:none;border-radius:16px;padding:18px 34px 16px;
+    background:#FFF4DF;border:2.5px solid #0A0706;box-shadow:6px 6px 0 #FF4A2D;
     transform:rotate(-1.4deg);transition:transform .15s ease,box-shadow .15s ease}
-  .ss-cc:hover{transform:rotate(0deg) scale(1.02);box-shadow:9px 9px 0 #10a37f}
-  .ss-cc-label{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10.5px;font-weight:500;
-    letter-spacing:.3em;text-transform:uppercase;color:#6b7180;margin-bottom:7px}
-  .ss-cc-name{font-family:'Dela Gothic One',sans-serif;font-size:30px;line-height:1.04;letter-spacing:.005em;color:#0d0f14}
-  .ss-cc-tag{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11.5px;font-weight:500;
-    letter-spacing:.02em;color:#0c7a5e;margin-top:11px}
-  @media(max-width:560px){.ss-cc{padding:16px 26px 14px}.ss-cc-name{font-size:24px}}
+  .ss-cc:hover{transform:rotate(0deg) scale(1.02);box-shadow:9px 9px 0 #FF4A2D}
+  .ss-cc-label{font-family:'Space Mono',ui-monospace,monospace;font-size:10px;font-weight:400;
+    letter-spacing:.3em;text-transform:uppercase;color:#8a8175;margin-bottom:9px}
+  .ss-cc-name{font-family:'Fraunces',Georgia,serif;font-weight:900;font-size:33px;line-height:1;letter-spacing:-.02em;color:#15110d}
+  .ss-cc-name .dot{color:#FF4A2D}
+  .ss-cc-name .st{color:#6e655a}
+  .ss-cc-tag{font-family:'Space Mono',ui-monospace,monospace;font-size:11px;font-weight:400;
+    letter-spacing:.02em;color:#c23b22;margin-top:10px}
+  @media(max-width:560px){.ss-cc{padding:14px 26px 12px}.ss-cc-name{font-size:26px}}
   footer{padding:48px 0 40px;text-align:center;color:var(--muted);font-size:13px}
   footer a{color:var(--muted);text-decoration:underline}
   footer .links{margin-top:10px;font-size:13px;line-height:2}
@@ -241,13 +246,13 @@
 <div class="wrap">
   <nav>
     <a class="logo" href="/"><span class="b">Headshots</span><span>🐦</span></a>
-    <span class="pill">$1 · 5 headshots · 1 bird</span>
+    <span class="pill">$1 · 5 clean headshots · 1 bird</span>
   </nav>
 
   <header class="hero">
-    <h1>Five headshots.<br><span class="hl">One bird. <span style="color:var(--good)">$1.</span></span></h1>
-    <p class="sub">Professional headshots without a photographer. Upload one selfie and get five polished headshots. Plus a bird.</p>
-    <div class="badge"><span class="dot"></span> You don't pick the bird. The bird picks you.</div>
+    <h1>Five clean headshots.<br><span class="hl">One bird. <span style="color:var(--good)">$1.</span></span></h1>
+    <p class="sub">Professional headshots without a photographer — and, by popular demand, without a bird in them. Upload one selfie, get five polished headshots. Then pick one to meet your bird.</p>
+    <div class="badge"><span class="dot"></span> The headshots are clean. The bird is contained.</div>
   </header>
 
   <div class="canceled" id="canceled">Payment canceled — no charge made. Your bird is still waiting. 🐦</div>
@@ -259,7 +264,7 @@
       <video src="/videos/demo1-web.mp4" autoplay muted loop playsinline webkit-playsinline preload="auto" aria-label="Headshot demo"></video>
       <video src="/videos/man-web.mp4" autoplay muted loop playsinline webkit-playsinline preload="auto" aria-label="Headshot demo"></video>
     </div>
-    <p class="vidnote">Headshots are delivered as static <strong>.jpg</strong> images only. These videos are for illustration and entertainment purposes only.</p>
+    <p class="vidnote">Headshots are delivered as static <strong>.jpg</strong> images only. These videos are for illustration and entertainment purposes only — and predate the great bird containment of July 2026: your headshots now come out clean, bird on the card.</p>
   </div>
 </section>
 
@@ -301,21 +306,21 @@
     </style>
 
     <div class="pp-head">
-      <h2>Pick your pack. <span class="hl">Keep the bird.</span></h2>
-      <p>Pro studios charge $35+ for a pack like this. Same one selfie, ready in about a minute — choose how many looks you want.</p>
+      <h2>Pick your pack. <span class="hl">The headshots are clean.</span></h2>
+      <p>Pro studios charge $35+ for a pack like this. One selfie, ready in about a minute, no bird in your headshots — the bird lives on your Bird ID card, starring the one shot you pick.</p>
     </div>
 
     <div class="pp-grid">
       <div class="pp-card">
         <div class="pp-tier">The Original</div>
         <div class="pp-priceRow"><div class="pp-price"><span class="cur">$</span>1</div><div class="pp-once">one-time</div></div>
-        <div class="pp-count">5 headshots</div>
+        <div class="pp-count">5 clean headshots</div>
         <div class="pp-save"><span class="pp-was">$35+ elsewhere</span><span class="pp-savebadge">Save 97%</span></div>
         <ul class="pp-benefits">
-          <li><span class="ic">✓</span>5 professional looks — 5 outfits, 5 backdrops</li>
+          <li><span class="ic">✓</span>5 professional looks — 5 outfits, 5 backdrops, zero birds</li>
           <li><span class="ic">✓</span>Generated from a single selfie</li>
-          <li><span class="ic">✓</span>Shareable Bird ID card</li>
-          <li class="bird"><span class="ic">🐦</span>Includes a bird (non-negotiable)</li>
+          <li><span class="ic">✓</span>Pick one shot → it stars on your Bird ID card</li>
+          <li class="bird"><span class="ic">🐦</span>One bird, contained — plus a “you + bird” photo</li>
         </ul>
         <button type="button" class="pp-cta" data-tier="basic">Get 5 for $1</button>
       </div>
@@ -324,40 +329,40 @@
         <span class="pp-ribbon green">Most popular</span>
         <div class="pp-tier">The Full Set</div>
         <div class="pp-priceRow"><div class="pp-price"><span class="cur">$</span>3</div><div class="pp-once">one-time</div></div>
-        <div class="pp-count">15 headshots</div>
+        <div class="pp-count">10 clean headshots</div>
         <div class="pp-save"><span class="pp-was">$35+ elsewhere</span><span class="pp-savebadge">Save 91%</span></div>
         <ul class="pp-benefits">
-          <li><span class="ic">✓</span>15 professional looks — 15 outfits, 15 backdrops</li>
-          <li><span class="ic">✓</span>3× the variety for profiles, CV &amp; socials</li>
-          <li><span class="ic">✓</span>Shareable Bird ID card</li>
-          <li class="bird"><span class="ic">🐦</span>Includes a bird (in all 15)</li>
+          <li><span class="ic">✓</span>10 professional looks — 10 outfits, 10 backdrops</li>
+          <li><span class="ic">✓</span>2× the variety for profiles, CV &amp; socials</li>
+          <li><span class="ic">✓</span>Pick one shot → Bird ID card + “you + bird” photo</li>
+          <li class="bird"><span class="ic">🐦</span>The bird chooses you, as nature intended</li>
         </ul>
-        <button type="button" class="pp-cta brand" data-tier="full">Get 15 for $3</button>
+        <button type="button" class="pp-cta brand" data-tier="full">Get 10 for $3</button>
       </div>
 
       <div class="pp-card pp-card--premium">
-        <span class="pp-ribbon orange">Bird optional</span>
+        <span class="pp-ribbon orange">You pick the bird</span>
         <div class="pp-tier">The Whole Aviary</div>
         <div class="pp-priceRow"><div class="pp-price"><span class="cur">$</span>10</div><div class="pp-once">one-time</div></div>
-        <div class="pp-count">30 images (15 + 15 birdless)</div>
+        <div class="pp-count">25 clean headshots</div>
         <div class="pp-save"><span class="pp-was">$59+ premium packs</span><span class="pp-savebadge">Save 83%</span></div>
         <ul class="pp-benefits">
-          <li><span class="ic">✓</span>All 15 looks <b>with</b> your bird</li>
-          <li><span class="ic">✓</span>The same 15 looks <b>birdless</b> — 30 total</li>
-          <li class="soon"><span class="ic">★</span>Choose your bird<span class="soontag">Soon</span></li>
-          <li class="bird"><span class="ic">🐦</span>Includes a bird… then shows it the door</li>
+          <li><span class="ic">✓</span>All 25 looks — our entire wardrobe</li>
+          <li><span class="ic">✓</span><b>Choose your bird</b> from all 148 species</li>
+          <li><span class="ic">✓</span>Bird ID card + “you + bird” photo, your pick of shot</li>
+          <li class="bird"><span class="ic">🐦</span>For the first time ever: you pick the bird</li>
         </ul>
-        <button type="button" class="pp-cta orange" data-tier="aviary">Get 30 for $10</button>
+        <button type="button" class="pp-cta orange" data-tier="aviary">Get 25 for $10</button>
       </div>
     </div>
-    <p class="pp-foot">Comparisons are illustrative of typical AI headshot packages — standard packs from ~$35, premium/birdless from ~$59. One-time payments, no subscriptions. 🐦</p>
+    <p class="pp-foot">Comparisons are illustrative of typical AI headshot packages — standard packs from ~$35, premium from ~$59. One-time payments, no subscriptions. Every pack includes exactly one bird, contained. 🐦</p>
   </div>
 </section>
 
 <section class="compare" id="compareWrap">
   <div class="wrap">
     <h2>Headshots with a Bird vs. everyone else</h2>
-    <p class="sub2">They give you more headshots. We give you a bird.</p>
+    <p class="sub2">Clean professional headshots, same as them — except ours cost $1 and come with a bird you can share.</p>
     <div class="ctable-wrap">
       <table class="ctable">
         <thead>
@@ -368,7 +373,8 @@
           <tr><th>Headshots you get</th><td class="us">5</td><td>70+</td><td>100</td><td>40</td></tr>
           <tr><th>Outfits &amp; backdrops</th><td class="us">5</td><td>100s</td><td>5</td><td>4</td></tr>
           <tr><th>Turnaround</th><td class="us"><b>~1 min</b></td><td>~10 min–2 hrs</td><td>~90 min</td><td>~2 hrs</td></tr>
-          <tr><th>Bird on your shoulder</th><td class="us yes">✓ Always</td><td class="no">✗</td><td class="no">✗</td><td class="no">✗</td></tr>
+          <tr><th>Bird in your headshots</th><td class="us yes">✗ Never (you're welcome)</td><td class="no">✗</td><td class="no">✗</td><td class="no">✗</td></tr>
+          <tr><th>Bird ID card + a bird to call your own</th><td class="us yes">✓ Always</td><td class="no">✗</td><td class="no">✗</td><td class="no">✗</td></tr>
         </tbody>
       </table>
     </div>
@@ -401,14 +407,27 @@
     </style>
     <div class="tierpick" id="tierpick" role="radiogroup" aria-label="Choose your pack">
       <button type="button" class="tieropt active" data-tier="basic" aria-pressed="true">
-        <span class="tt">5 looks</span><span class="tp">$1</span><span class="td">1 bird in every shot</span>
+        <span class="tt">5 looks</span><span class="tp">$1</span><span class="td">clean shots · 1 bird card</span>
       </button>
       <button type="button" class="tieropt" data-tier="full" aria-pressed="false">
-        <span class="tbadge">Popular</span><span class="tt">15 looks</span><span class="tp">$3</span><span class="td">3× the variety · bird in every shot</span>
+        <span class="tbadge">Popular</span><span class="tt">10 looks</span><span class="tp">$3</span><span class="td">2× the variety · 1 bird card</span>
       </button>
       <button type="button" class="tieropt" data-tier="aviary" aria-pressed="false">
-        <span class="tt">30 images</span><span class="tp">$10</span><span class="td">15 looks + 15 birdless</span>
+        <span class="tt">25 looks</span><span class="tp">$10</span><span class="td">choose your bird</span>
       </button>
+    </div>
+
+    <!-- aviary-only perk: choose the species (everyone else is chosen BY the bird) -->
+    <div id="birdchooser" style="display:none;margin-top:14px;border:1.5px solid var(--line);border-radius:12px;padding:14px;background:#fcfbf8">
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <img id="birdPrev" alt="" style="width:64px;height:64px;object-fit:contain;display:none" />
+        <div style="flex:1;min-width:220px">
+          <label for="birdChoice" style="font-size:13px;font-weight:700;display:block;margin-bottom:6px">Choose your bird <span style="color:var(--muted);font-weight:600">(a $10 privilege)</span></label>
+          <select id="birdChoice" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:inherit;background:#fff">
+            <option value="">🎲 Surprise me — let the bird choose</option>
+          </select>
+        </div>
+      </div>
     </div>
 
     <input type="email" id="email" placeholder="Your email address (required)" autocomplete="email" required
@@ -419,7 +438,7 @@
     <input type="text" id="code" name="beta-code" placeholder="Have a beta code? Enter it here" autocomplete="off" autocorrect="off" autocapitalize="off" readonly onfocus="this.removeAttribute('readonly')"
       style="display:block;width:100%;margin-top:12px;border:1px solid var(--line);border-radius:11px;padding:11px 14px;font:inherit;text-align:center" />
     <button class="go" id="go" disabled>Continue to payment · $1</button>
-    <p class="note" id="goNote">The bird is non-negotiable and appears in every shot. 🐦</p>
+    <p class="note" id="goNote">Your headshots come out clean. The bird waits in your Bird ID. 🐦</p>
     <div class="err" id="err"></div>
   </section>
 </div>
@@ -429,8 +448,8 @@
     <h2>How it works</h2>
     <div class="steps">
       <div class="step"><div class="n">1</div><h3>Upload a selfie</h3><p>One clear, front-facing, well-lit photo — that's all the likeness needs.</p></div>
-      <div class="step"><div class="n">2</div><h3>Pick a pack</h3><p>5 looks for $1, 15 for $3, or 30 for $10 — secure checkout via Stripe. No subscription.</p></div>
-      <div class="step"><div class="n">3</div><h3>Get your headshots</h3><p>Your professional looks in about a minute — each with your bird, plus your Bird ID.</p></div>
+      <div class="step"><div class="n">2</div><h3>Pick a pack</h3><p>5 looks for $1, 10 for $3, or 25 for $10 — secure checkout via Stripe. No subscription.</p></div>
+      <div class="step"><div class="n">3</div><h3>Get your headshots — then meet your bird</h3><p>Clean, professional looks in about a minute. Pick your favourite: it stars on your shareable Bird ID, bird included, plus a “you + bird” photo.</p></div>
     </div>
   </div>
 </section>
@@ -444,12 +463,12 @@
       <button class="btn" id="downloadAll" type="button">⬇ Download all</button>
     </div>
     <p class="step-label" style="text-align:center;margin-top:30px">Your shareable Bird ID</p>
-    <p class="hint" id="cardhint">Pick which headshot goes on your card:</p>
+    <p class="hint" id="cardhint">Pick which headshot meets the bird — it goes on your card, with a bird-added photo to download:</p>
     <div class="cardstage" id="cardstage">
       <div class="sharecard" id="sharecard">
         <div class="pkmn-inner">
           <div class="pkmn-head"><span class="pkmn-name" id="cardName"></span><span class="pkmn-badge" id="cardBadge"></span></div>
-          <div class="pkmn-art"><img id="cardImg" alt="your headshot" /></div>
+          <div class="pkmn-art"><img id="cardImg" alt="your headshot" /><img id="cardBirdOv" alt="" aria-hidden="true" /></div>
           <div class="pkmn-sci" id="cardSci"></div>
           <ul class="pkmn-facts" id="cardFacts"></ul>
           <div class="pkmn-foot">headshotswithabird.com</div>
@@ -460,6 +479,7 @@
     <div class="res-actions">
       <button class="btn primary" id="copyCard" type="button">📋 Copy card to share</button>
       <button class="btn" id="downloadCard" type="button">⬇ Download card</button>
+      <button class="btn" id="downloadBird" type="button" style="display:none">🐦 You + bird (no card)</button>
       <button class="btn" id="leaveReview" type="button">★ Leave a review</button>
       <button class="btn" id="again" type="button">↻ Make another ($1)</button>
     </div>
@@ -479,18 +499,19 @@
 <section class="faq" id="faqWrap">
   <div class="wrap">
     <h2>Questions</h2>
-    <details><summary>Can I remove the bird?</summary><p>Not on the $1 or $3 packs — there's no button, there never was a button, the bird stays. The one exception is the $10 Whole Aviary pack (see below), and we say that through gritted teeth.</p></details>
-    <details><summary>Can I get them without the bird?</summary><p>Yes — but only on the $10 Whole Aviary pack. It gives you all 15 looks with your bird <em>and</em> the same 15 with the bird removed (30 images total). The $1 and $3 packs keep the bird in every shot. The bird is load-bearing.</p></details>
+    <details><summary>Wait — the bird is GONE?</summary><p>Contained, not gone. As of today your headshots come out clean — no bird in any of them, because that's what you kept asking for. The bird now lives on your shareable Bird ID card, added to the one headshot you pick, plus a separate “you + your bird” photo to download. The bird remains load-bearing. It's just been given an office.</p></details>
+    <details><summary>Can I get the bird IN a headshot?</summary><p>Yes — exactly one. After your headshots generate, pick your favourite and we add your bird to it: that photo appears on your Bird ID card and as its own download. The other headshots stay clean for LinkedIn, CVs, and other bird-hostile environments.</p></details>
     <details><summary>Will it actually look like me?</summary><p>Yes — the headshots are AI-generated from your photo, and we keep your exact expression rather than inventing one. A real likeness is the whole point.</p></details>
-    <details><summary>What do I get for $1?</summary><p>Five professional headshots across five outfit-and-backdrop looks, each starring the one bird we've paired to you — plus a shareable Bird ID card.</p></details>
+    <details><summary>What do I get for $1?</summary><p>Five clean professional headshots across five outfit-and-backdrop looks, a shareable Bird ID card starring the shot you pick (bird included), and a “you + your bird” photo.</p></details>
     <details><summary>How long does it take?</summary><p>About a minute. No model training, no waiting hours like the other guys.</p></details>
     <details><summary>What photos work best?</summary><p>One clear, front-facing, well-lit shot, at least 768px on the short side. JPG, PNG, or HEIC. Tip: your headshots will carry the same expression as your photo — so pick one where you look how you'd like your headshot to look.</p></details>
     <details><summary>Do you keep my photos?</summary><p>No. Your uploads are used to generate your headshots and then discarded — we don't store them. See our <a href="/privacy.html">Privacy Policy</a>.</p></details>
-    <details><summary>Can I choose my bird?</summary><p>No. The bird chooses you. There are 148 species; you get exactly one.</p></details>
-    <details><summary>Why is my bird ENORMOUS?</summary><p>Because it's enormous in real life. Our 148 species include ostriches, condors, an emperor penguin, and a wandering albatross with a 3.5-metre wingspan. Small birds perch on your shoulder. Birds that physics forbids from perching stand behind you at true scale, face proudly over your shoulder. We could have shrunk them. We chose truth.</p></details>
+    <details><summary>Can I choose my bird?</summary><p>On the $10 Whole Aviary pack, yes — all 148 species, your call, drunk with power. On the $1 and $3 packs the bird chooses you, as nature intended.</p></details>
+    <details><summary>Why is my bird ENORMOUS?</summary><p>Because it's enormous in real life. Our 148 species include ostriches, condors, an emperor penguin, and a wandering albatross with a 3.5-metre wingspan. Small birds appear at polite, shoulder-adjacent scale. Birds that physics forbids from perching appear appropriately, alarmingly large. We could have shrunk them. We chose truth.</p></details>
     <details><summary>Why only one photo? Other services want 10+.</summary><p>Because we tested it. One great photo beat two in our trials, and it beats making you dig up twelve. Services demanding 10+ selfies are training a custom model, which is why they take hours and cost $30+. We do something smarter, faster, and one dollar-er.</p></details>
     <details><summary>Why is it so cheap?</summary><p>Because it's cheap to make and we're not pretending otherwise. Your five headshots cost us about 40 cents to generate — honestly, the payment processor takes a bigger cut than the AI does. We charge $1 because that covers it. That's the whole business model.</p></details>
     <details><summary>Refunds?</summary><p>If we fail to deliver your headshots, you're refunded. Otherwise all sales — and all birds — are final.</p></details>
+    <details><summary>I miss the bird being in every shot.</summary><p>We understand. Progress is painful. Your Bird ID card and “you + your bird” photo are shareable precisely so the bird's legacy survives. If demand is loud enough we may offer a birds-in-everything heritage mode. Email us.</p></details>
   </div>
 </section>
 
@@ -498,11 +519,11 @@
   <div class="wrap">
     <h2>About</h2>
     <p>AI headshot companies are charging huge markup on simple $1 API calls. We decided to create an alternative that can rival their quality for much, much less. So we built it in 2 days, and it only costs one dollar.</p>
-    <p>Why the bird? Frankly we're just as confused as you. Frontier AI models struggle with specialised cognitive tasks. Our bot generates incredible headshots quickly and at low cost, but always with a bird. We just decided to go with it. Long live bird bot.</p>
+    <p>Why the bird? Frankly we're just as confused as you. For a while the bird appeared in every single headshot — non-negotiable, no button to remove it. People loved the bird but wanted clean headshots, so we reached a compromise: the headshots come out clean, and the bird gets one shot, your card, and your heart. Long live bird bot.</p>
     <div class="ss-cc-wrap">
-      <a class="ss-cc" href="https://schemestudio.lol" target="_blank" rel="noopener" aria-label="A production of SCHEME STUDIO — visit schemestudio.lol">
+      <a class="ss-cc" href="https://www.schemestudio.lol" target="_blank" rel="noopener" aria-label="A production of scheme.studio — visit schemestudio.lol">
         <div class="ss-cc-label">A production of</div>
-        <div class="ss-cc-name">SCHEME<br>STUDIO</div>
+        <div class="ss-cc-name">scheme<span class="dot">.</span><span class="st">studio</span></div>
         <div class="ss-cc-tag">schemestudio.lol &#8599;</div>
       </a>
     </div>
@@ -512,7 +533,7 @@
 <footer><div class="wrap">
   <div class="big">Headshots with a Bird 🐦</div>
   A parody. Not affiliated with any other headshot service. We don't store your selfie after generating.<br>
-  Your bird is assigned at random and is, regrettably for you, permanent.
+  Your headshots are clean. Your bird is assigned at random (unless you pay $10 to play God) and is, regrettably for you, permanent.
   <div class="links"><a href="#about">About</a> · <a href="/terms.html">Terms</a> · <a href="/privacy.html">Privacy</a> · <a href="mailto:james@schemestudio.lol">Contact</a> · <a href="https://schemestudio.lol" target="_blank" rel="noopener">SCHEME Studio</a></div>
 </div></footer>
 
@@ -563,17 +584,34 @@
   // ---- tier selection (must match server TIERS in server.js) ----
   const TIER_PRICE={basic:1,full:3,aviary:10};
   const TIER_NOTE={
-    basic:'The bird is non-negotiable and appears in every shot. 🐦',
-    full:'The bird appears in all 15 looks. 🐦',
-    aviary:'15 with your bird, 15 birdless — 30 images total. 🐦',
+    basic:'Your headshots come out clean. The bird waits in your Bird ID. 🐦',
+    full:'10 clean headshots. One gets the bird — your pick. 🐦',
+    aviary:'25 clean headshots, and YOU choose the bird. Power corrupts. 🐦',
   };
-  let selectedTier='basic';
+  let selectedTier='basic', birdsLoaded=false;
   function goLabel(){ return 'Continue to payment · $'+TIER_PRICE[selectedTier]; }
+  // aviary perk: load the roster once and show the species picker
+  async function loadBirdChooser(){
+    if(birdsLoaded) return; birdsLoaded=true;
+    try{
+      const list=await (await fetch('/api/birds')).json();
+      const sel=$('birdChoice');
+      list.sort((a,b)=>a.name.localeCompare(b.name)).forEach(b=>{
+        const o=document.createElement('option'); o.value=b.id; o.textContent=`${b.emoji||'🐦'} ${b.name}`; o.dataset.cutout=b.cutout||''; sel.appendChild(o);
+      });
+      sel.addEventListener('change',()=>{
+        const opt=sel.selectedOptions[0], img=$('birdPrev');
+        if(opt&&opt.dataset.cutout){ img.src=opt.dataset.cutout; img.style.display='block'; }
+        else img.style.display='none';
+      });
+    }catch{ /* picker stays "surprise me" — server assigns as usual */ }
+  }
   function selectTier(t){
     if(!TIER_PRICE[t]) t='basic';
     selectedTier=t;
     document.querySelectorAll('#tierpick .tieropt').forEach(b=>{const on=b.dataset.tier===t;b.classList.toggle('active',on);b.setAttribute('aria-pressed',on?'true':'false');});
     const note=$('goNote'); if(note) note.textContent=TIER_NOTE[t];
+    const bc=$('birdchooser'); if(bc){ bc.style.display = t==='aviary' ? 'block' : 'none'; if(t==='aviary') loadBirdChooser(); }
     if($('go').dataset.busy!=='1') $('go').textContent=goLabel();
   }
   $('tierpick').addEventListener('click',e=>{ const b=e.target.closest('.tieropt'); if(b) selectTier(b.dataset.tier); });
@@ -616,6 +654,7 @@
       fd.append('email', ($('email').value||'').trim());
       fd.append('consent', $('optin').checked ? 'true' : 'false');
       fd.append('tier', selectedTier);
+      if(selectedTier==='aviary' && $('birdChoice') && $('birdChoice').value) fd.append('birdId', $('birdChoice').value);
       const s=await fetch('/api/start',{method:'POST',body:fd}); const sd=await s.json();
       if(!s.ok) throw new Error(sd.error||'Could not start.');
       const c=await fetch('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jobId:sd.jobId, code:($('code').value||'').trim()})});
@@ -625,6 +664,14 @@
   });
 
   // ---- result ----
+  // The bird cutout (transparent PNG served from /birds/cutouts/) is layered
+  // onto the PICKED headshot: in the card preview (DOM overlay), in the card
+  // export (canvas), and in the raw "you + your bird" download. Huge species
+  // composite larger — we could have shrunk them; we chose truth.
+  let birdCut=null; // preloaded Image of the cutout, shared by all composites
+  // Sizing: width fraction of the frame, capped by a height fraction so tall
+  // birds (emu, ostrich) photobomb beside the face instead of eclipsing it.
+  const birdDims = ()=> (cardBird&&cardBird.huge) ? {w:0.62,h:0.58} : {w:0.36,h:0.45};
   function renderCard(b){
     cardBird=b;
     $('cardName').textContent = (b.emoji?b.emoji+' ':'') + b.name;
@@ -632,7 +679,39 @@
     $('cardSci').textContent = b.sci||'';
     const facts=(b.facts||[]).slice(0,2);
     $('cardFacts').innerHTML = (facts.length?facts:[b.blurb||'']).map(f=>`<li>${f}</li>`).join('');
+    const ov=$('cardBirdOv');
+    if(b.cutout){
+      birdCut=new Image();
+      birdCut.onload=()=>{ postCard(); }; // re-post once the bird is drawable
+      birdCut.src=b.cutout;
+      const d=birdDims();
+      ov.src=b.cutout; ov.style.maxWidth=(d.w*100)+'%'; ov.style.maxHeight=(d.h*100)+'%'; ov.style.display='block';
+      $('downloadBird').style.display='';
+    } else { birdCut=null; ov.style.display='none'; } // no cutout → clean card, no bird download
     setTimeout(fitCard,0);
+  }
+  // shared composite: draw the cutout into frame (x,y,w,h) bottom-right, with shadow
+  function drawBirdInto(ctx,x,y,w,h){
+    if(!(birdCut&&birdCut.complete&&birdCut.naturalWidth)) return;
+    const d=birdDims(), ar=birdCut.naturalHeight/birdCut.naturalWidth;
+    let bw=w*d.w, bh=bw*ar;
+    if(bh>h*d.h){ bh=h*d.h; bw=bh/ar; } // height cap: keep faces visible
+    const bx=x+w-bw-w*0.025, by=y+h-bh;
+    ctx.save();
+    ctx.shadowColor='rgba(0,0,0,.38)'; ctx.shadowBlur=w*0.02; ctx.shadowOffsetX=-w*0.012; ctx.shadowOffsetY=w*0.012;
+    ctx.drawImage(birdCut,bx,by,bw,bh);
+    ctx.restore();
+  }
+  // full-res "you + your bird" (no card frame) from the picked headshot
+  function drawBirdShot(){
+    const img=$('cardImg');
+    if(!img||!img.naturalWidth) throw new Error('image not loaded');
+    const c=document.createElement('canvas'); c.width=img.naturalWidth; c.height=img.naturalHeight;
+    const ctx=c.getContext('2d');
+    ctx.imageSmoothingEnabled=true; ctx.imageSmoothingQuality='high';
+    ctx.drawImage(img,0,0);
+    drawBirdInto(ctx,0,0,c.width,c.height);
+    return c;
   }
   function fitCard(){ /* card now sizes responsively via CSS — no transform-scaling (which blurred it) */ }
   window.addEventListener('resize', fitCard);
@@ -663,10 +742,18 @@
     if(!currentJob) return;
     clearTimeout(cardPostTimer);
     cardPostTimer=setTimeout(()=>{
+      // two sequential posts (card, then the raw you+bird composite) so each
+      // stays well under the server's per-image 8 MB cap
       try{
         const png=drawCard().toDataURL('image/png');
         fetch('/api/card',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jobId:currentJob,png})}).catch(()=>{});
       }catch(e){ /* card image not ready yet — a later pick/completion will retry */ }
+      try{
+        if(birdCut&&birdCut.complete&&birdCut.naturalWidth){
+          const birdPng=drawBirdShot().toDataURL('image/png');
+          fetch('/api/card',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jobId:currentJob,birdPng})}).catch(()=>{});
+        }
+      }catch(e){ /* composite not ready yet — retried on the next pick */ }
     },1200);
   }
   // explicit look-picker buttons under the card (outside #sharecard so they're not in the export)
@@ -737,6 +824,7 @@
     const iw=img.naturalWidth, ih=img.naturalHeight, bw2=artW-8, bh=artH-8;
     const k=Math.max(bw2/iw,bh/ih), sw=bw2/k, sh=bh/k;
     ctx.drawImage(img,(iw-sw)/2,(ih-sh)/2,sw,sh,x0+4,artY+4,bw2,bh);
+    drawBirdInto(ctx,x0+4,artY+4,bw2,bh); // the bird joins the picked shot, in-card
     ctx.restore();
     ctx.font=F(400,13,true); ctx.fillStyle='#6b7180'; ctx.fillText(b.sci||'',x0,sciY+9);
     ctx.fillStyle='#eafaf4'; rr(ctx,x0,factsY,cw,factsH,10); ctx.fill();
@@ -772,6 +860,14 @@
     if(canShareFiles([file])){ try{ await navigator.share({files:[file],title:'Bird card'}); return; }catch(e){ if(e&&e.name==='AbortError') return; } }
     dl(blob,'bird-card.png');
   });
+  $('downloadBird').addEventListener('click', async ()=>{
+    let blob;
+    try{ blob=await new Promise((res,rej)=>{ try{ drawBirdShot().toBlob(b=>b?res(b):rej(new Error('blob'))); }catch(e){ rej(e); } }); }
+    catch{ return toast('Pick a headshot first'); }
+    const file=new File([blob],'you-and-your-bird.png',{type:'image/png'});
+    if(canShareFiles([file])){ try{ await navigator.share({files:[file],title:'Me + my bird'}); return; }catch(e){ if(e&&e.name==='AbortError') return; } }
+    dl(blob,'you-and-your-bird.png');
+  });
   $('downloadAll').addEventListener('click', async ()=>{
     const imgs=resultsData.filter(Boolean); if(!imgs.length) return;
     const files=[]; for(let i=0;i<imgs.length;i++){ try{ files.push(await fileFromSrc(imgs[i].src,`headshot-${i+1}.jpg`)); }catch{} }
@@ -789,9 +885,10 @@
     if(!fin.paid){ $('pmsg').textContent='Payment not confirmed. If you were charged, refresh in a moment.'; return; }
     resultsData=[]; featuredSrc=null; userPicked=false; renderCard(fin.bird); buildGrid(fin.total); pollImages(jobId, fin.total);
   }
-  const msgs=['Developing your headshots…','Tailoring outfits…','Coaxing the bird onto your shoulder…','Adjusting the lighting…','Almost there…'];
+  const msgs=['Developing your headshots…','Tailoring outfits…','Keeping the bird out of frame…','Adjusting the lighting…','Almost there…'];
+  const doneMsg=t=>'✓ All '+t+' ready — clean, no bird. Pick your favourite below; that one meets the bird.';
   function pollImages(jobId,total){
-    let mi=0; const mt=setInterval(()=>$('pmsg').textContent = $('bar').style.width==='100%'?'✓ All '+total+' ready. Same bird, every shot.':msgs[mi=(mi+1)%msgs.length],2200);
+    let mi=0; const mt=setInterval(()=>$('pmsg').textContent = $('bar').style.width==='100%'?doneMsg(total):msgs[mi=(mi+1)%msgs.length],2200);
     let fails=0;
     const tick=async()=>{
       let j;
@@ -806,7 +903,7 @@
       if(!userPicked){ const k=resultsData[2]?2:resultsData.findIndex(Boolean); if(k>=0&&resultsData[k]&&featuredSrc!==resultsData[k].src) selectCard(k); }
       $('bar').style.width=Math.round((j.done/total)*100)+'%';
       if(j.status==='running'||j.status==='generating'||j.status==='awaiting_payment') setTimeout(tick,2000);
-      else { clearInterval(mt); $('pmsg').textContent = j.status==='failed' ? 'Generation failed — your $1 has been refunded automatically.' : '✓ All '+total+' ready. Same bird, every shot.';
+      else { clearInterval(mt); $('pmsg').textContent = j.status==='failed' ? 'Generation failed — your payment has been refunded automatically.' : doneMsg(total);
         const got=resultsData.filter(Boolean).length, da=$('downloadAll'); if(da&&got) da.textContent='⬇ Download all '+got; }
     };
     tick();
