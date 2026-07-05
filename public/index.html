@@ -130,9 +130,17 @@
   .pkmn-badge{font-size:12px;font-weight:800;color:#fff;background:var(--brand);border-radius:999px;padding:4px 10px;white-space:nowrap}
   .pkmn-art{flex:1;min-height:0;border:4px solid var(--brand);border-radius:10px;overflow:hidden;background:#222;position:relative}
   .pkmn-art #cardImg{width:100%;height:100%;object-fit:cover;display:block}
-  /* the bird, composited onto the picked shot (cutout PNG, drop-shadowed);
-     max-width/max-height are set per-bird in JS (huge species run bigger) */
-  .pkmn-art #cardBirdOv{position:absolute;right:2.5%;bottom:0;width:auto;height:auto;display:none;pointer-events:none;filter:drop-shadow(-5px 5px 9px rgba(0,0,0,.38))}
+  /* card art = the bird itself (specimen portrait on soft paper) */
+  #cardBirdArt{position:absolute;inset:0;display:none;align-items:flex-end;justify-content:center;background:linear-gradient(180deg,#f7f4ec 0%,#ece7d9 100%)}
+  #cardBirdArt img{max-width:84%;max-height:90%;filter:drop-shadow(0 7px 12px rgba(0,0,0,.22))}
+  /* the one-shot confirm moment */
+  #birdConfirm{display:none;flex-direction:column;align-items:center;gap:8px;margin:16px auto 0;max-width:400px;text-align:center}
+  #birdConfirm button{background:var(--orange);color:#fff;border:none;border-radius:12px;padding:13px 20px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit}
+  #birdConfirm button:hover{filter:brightness(1.06)} #birdConfirm button:disabled{opacity:.5;cursor:not-allowed}
+  #birdConfirm .warn{font-size:12.5px;color:var(--muted);font-weight:600}
+  /* the reveal */
+  #finalShot{display:none;margin-top:26px;text-align:center}
+  #finalShot img{width:100%;max-width:400px;border-radius:16px;border:1px solid var(--line);box-shadow:var(--shadow)}
   .cardpick{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:14px auto 0;max-width:400px}
   .cardpick button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 13px;font-size:13px;font-weight:700;cursor:pointer;color:var(--ink);line-height:1}
   .cardpick button.active{background:var(--brand);color:#fff;border-color:var(--brand)}
@@ -319,7 +327,7 @@
         <ul class="pp-benefits">
           <li><span class="ic">✓</span>5 professional looks — 5 outfits, 5 backdrops</li>
           <li><span class="ic">✓</span>Generated from a single selfie</li>
-          <li><span class="ic">✓</span>Pick one shot → it stars on your Bird ID card</li>
+          <li><span class="ic">✓</span>Pick ONE shot to be photographed with your bird — final</li>
           <li class="bird"><span class="ic">🐦</span>One bird, contained — plus a “you + bird” photo</li>
         </ul>
         <button type="button" class="pp-cta" data-tier="basic">Get 5 for $1</button>
@@ -334,7 +342,7 @@
         <ul class="pp-benefits">
           <li><span class="ic">✓</span>10 professional looks — 10 outfits, 10 backdrops</li>
           <li><span class="ic">✓</span>2× the variety for profiles, CV &amp; socials</li>
-          <li><span class="ic">✓</span>Pick one shot → Bird ID card + “you + bird” photo</li>
+          <li><span class="ic">✓</span>Pick ONE shot to be photographed with your bird — final</li>
           <li class="bird"><span class="ic">🐦</span>The bird chooses you, as nature intended</li>
         </ul>
         <button type="button" class="pp-cta brand" data-tier="full">Get 10 for $3</button>
@@ -449,7 +457,7 @@
     <div class="steps">
       <div class="step"><div class="n">1</div><h3>Upload a selfie</h3><p>One clear, front-facing, well-lit photo — that's all the likeness needs.</p></div>
       <div class="step"><div class="n">2</div><h3>Pick a pack</h3><p>5 looks for $1, 10 for $3, or 25 for $10 — secure checkout via Stripe. No subscription.</p></div>
-      <div class="step"><div class="n">3</div><h3>Get your headshots — then meet your bird</h3><p>Professional looks in about a minute. Pick your favourite: it stars on your shareable Bird ID, bird included, plus a “you + bird” photo.</p></div>
+      <div class="step"><div class="n">3</div><h3>Get your headshots — then meet your bird</h3><p>Professional looks in about a minute, plus your bird's own shareable Bird ID card. Then the ceremony: pick ONE headshot to be photographed with your bird. One photo. Final.</p></div>
     </div>
   </div>
 </section>
@@ -463,12 +471,12 @@
       <button class="btn" id="downloadAll" type="button">⬇ Download all</button>
     </div>
     <p class="step-label" style="text-align:center;margin-top:30px">Your shareable Bird ID</p>
-    <p class="hint" id="cardhint">Pick which headshot meets the bird — it goes on your card, with a bird-added photo to download:</p>
+    <p class="hint" id="cardhint">Your Bird ID. Below it: pick ONE headshot to be photographed with your bird — one photo per order, and it's final.</p>
     <div class="cardstage" id="cardstage">
       <div class="sharecard" id="sharecard">
         <div class="pkmn-inner">
           <div class="pkmn-head"><span class="pkmn-name" id="cardName"></span><span class="pkmn-badge" id="cardBadge"></span></div>
-          <div class="pkmn-art"><img id="cardImg" alt="your headshot" /><img id="cardBirdOv" alt="" aria-hidden="true" /></div>
+          <div class="pkmn-art"><img id="cardImg" alt="your headshot" style="display:none" /><div id="cardBirdArt"><img id="cardBirdImg" alt="your bird" /></div></div>
           <div class="pkmn-sci" id="cardSci"></div>
           <ul class="pkmn-facts" id="cardFacts"></ul>
           <div class="pkmn-foot">headshotswithabird.com</div>
@@ -476,11 +484,19 @@
       </div>
     </div>
     <div class="cardpick" id="cardpick"></div>
+    <div id="birdConfirm">
+      <button type="button" id="confirmBird">📸 Photograph us together</button>
+      <span class="warn">One bird photo per order. This is final — no re-rolls.</span>
+    </div>
     <p class="hint" id="birdstat" style="margin-top:10px"></p>
+    <div id="finalShot">
+      <p class="step-label">You + your bird</p>
+      <img id="finalImg" alt="you and your bird" />
+    </div>
     <div class="res-actions">
       <button class="btn primary" id="copyCard" type="button">📋 Copy card to share</button>
       <button class="btn" id="downloadCard" type="button">⬇ Download card</button>
-      <button class="btn" id="downloadBird" type="button" style="display:none">🐦 You + bird (no card)</button>
+      <button class="btn" id="downloadBird" type="button" style="display:none">⬇ You + your bird</button>
       <button class="btn" id="leaveReview" type="button">★ Leave a review</button>
       <button class="btn" id="again" type="button">↻ Make another ($1)</button>
     </div>
@@ -501,7 +517,7 @@
   <div class="wrap">
     <h2>Questions</h2>
     <details><summary>Is there a bird in my headshots?</summary><p>No. Your headshots are entirely bird-free — safe for LinkedIn, CVs, and other bird-hostile environments. The bird lives on your shareable Bird ID card and in one photo of the two of you together. The bird is non-negotiable; its placement, mercifully, is ours.</p></details>
-    <details><summary>Can I get the bird IN a headshot?</summary><p>Yes — exactly one. After your headshots generate, pick your favourite and we photograph you together: that shot appears on your Bird ID card and as its own download. The rest stay bird-free.</p></details>
+    <details><summary>Can I get the bird IN a headshot?</summary><p>Yes — exactly once. After your headshots generate, you pick ONE to be photographed with your bird, and that photo is final: no re-rolls, no second sittings. Your Bird ID card stars the bird itself, and the rest of your headshots stay bird-free. Choose with the gravity the moment deserves.</p></details>
     <details><summary>Will it actually look like me?</summary><p>Yes — the headshots are AI-generated from your photo, and we keep your exact expression rather than inventing one. A real likeness is the whole point.</p></details>
     <details><summary>What do I get for $1?</summary><p>Five professional headshots across five outfit-and-backdrop looks, a shareable Bird ID card starring the shot you pick (bird included), and a “you + your bird” photo.</p></details>
     <details><summary>How long does it take?</summary><p>About a minute. No model training, no waiting hours like the other guys.</p></details>
@@ -569,7 +585,7 @@
 <script>
   const $ = (id) => document.getElementById(id);
   let photos=[], currentJob=null, reviewShown=false, featuredSrc=null, featuredLook=null, rating=0, resultsData=[], cardBird=null, userPicked=false;
-  let birdShots={}, integratedActive=false, birdifyBusy=false, jobComplete=false; // photoreal "you + bird" renders, keyed by look
+  let birdShots={}, birdifyBusy=false, jobComplete=false; // the one photoreal "you + bird" render lives in birdShots
   const MAXP=2, MIN_DIM=768;
   const isHeicFile = (f) => /heic|heif/i.test(f.type) || /\.(heic|heif)$/i.test(f.name);
 
@@ -665,14 +681,10 @@
   });
 
   // ---- result ----
-  // The bird cutout (transparent PNG served from /birds/cutouts/) is layered
-  // onto the PICKED headshot: in the card preview (DOM overlay), in the card
-  // export (canvas), and in the raw "you + your bird" download. Huge species
-  // composite larger — we could have shrunk them; we chose truth.
-  let birdCut=null; // preloaded Image of the cutout, shared by all composites
-  // Sizing: width fraction of the frame, capped by a height fraction so tall
-  // birds (emu, ostrich) photobomb beside the face instead of eclipsing it.
-  const birdDims = ()=> (cardBird&&cardBird.huge) ? {w:0.62,h:0.58} : {w:0.36,h:0.45};
+  // The Bird ID card stars the BIRD ITSELF (its cutout on soft paper). The
+  // user's headshots stay in the grid; they pick ONE to be photographed with
+  // the bird — a single photoreal render, final, revealed under the card.
+  let birdCut=null; // preloaded Image of the cutout (card art + canvas export)
   function renderCard(b){
     cardBird=b;
     $('cardName').textContent = (b.emoji?b.emoji+' ':'') + b.name;
@@ -680,39 +692,14 @@
     $('cardSci').textContent = b.sci||'';
     const facts=(b.facts||[]).slice(0,2);
     $('cardFacts').innerHTML = (facts.length?facts:[b.blurb||'']).map(f=>`<li>${f}</li>`).join('');
-    const ov=$('cardBirdOv');
     if(b.cutout){
       birdCut=new Image();
-      birdCut.onload=()=>{ postCard(); }; // re-post once the bird is drawable
+      birdCut.onload=()=>{ postCard(); }; // post the card once the bird is drawable
       birdCut.src=b.cutout;
-      const d=birdDims();
-      ov.src=b.cutout; ov.style.maxWidth=(d.w*100)+'%'; ov.style.maxHeight=(d.h*100)+'%'; ov.style.display='block';
-      $('downloadBird').style.display='';
-    } else { birdCut=null; ov.style.display='none'; } // no cutout → clean card, no bird download
+      $('cardBirdImg').src=b.cutout;
+      $('cardBirdArt').style.display='flex';
+    } else { birdCut=null; $('cardBirdArt').style.display='none'; }
     setTimeout(fitCard,0);
-  }
-  // shared composite: draw the cutout into frame (x,y,w,h) bottom-right, with shadow
-  function drawBirdInto(ctx,x,y,w,h){
-    if(!(birdCut&&birdCut.complete&&birdCut.naturalWidth)) return;
-    const d=birdDims(), ar=birdCut.naturalHeight/birdCut.naturalWidth;
-    let bw=w*d.w, bh=bw*ar;
-    if(bh>h*d.h){ bh=h*d.h; bw=bh/ar; } // height cap: keep faces visible
-    const bx=x+w-bw-w*0.025, by=y+h-bh;
-    ctx.save();
-    ctx.shadowColor='rgba(0,0,0,.38)'; ctx.shadowBlur=w*0.02; ctx.shadowOffsetX=-w*0.012; ctx.shadowOffsetY=w*0.012;
-    ctx.drawImage(birdCut,bx,by,bw,bh);
-    ctx.restore();
-  }
-  // full-res "you + your bird" (no card frame) from the picked headshot
-  function drawBirdShot(){
-    const img=$('cardImg');
-    if(!img||!img.naturalWidth) throw new Error('image not loaded');
-    const c=document.createElement('canvas'); c.width=img.naturalWidth; c.height=img.naturalHeight;
-    const ctx=c.getContext('2d');
-    ctx.imageSmoothingEnabled=true; ctx.imageSmoothingQuality='high';
-    ctx.drawImage(img,0,0);
-    drawBirdInto(ctx,0,0,c.width,c.height);
-    return c;
   }
   function fitCard(){ /* card now sizes responsively via CSS — no transform-scaling (which blurred it) */ }
   window.addEventListener('resize', fitCard);
@@ -730,53 +717,51 @@
     cell.innerHTML = `<img src="${r.src}" alt="${r.label}"><span class="lbl">${r.label}</span>
       <button class="dl" type="button" title="Save" data-save="${r.src}" data-name="headshot-${r.look||(i+1)}.jpg">⬇</button>`;
   }
+  // Picking a look ARMS the confirm button — nothing generates until the user
+  // explicitly locks it in. One photo per order, final: the confirm is the
+  // ritual, and it also means zero wasted renders from click-around.
+  let finalLook=null, finalSrc=null;
   function selectCard(i){
     const r=resultsData[i]; if(!r) return;
     featuredSrc=r.src; featuredLook=r.look;
-    const ov=$('cardBirdOv');
-    if(birdShots[r.look]){
-      // photoreal integration already rendered for this look — use it, no sticker
-      $('cardImg').src=birdShots[r.look]; integratedActive=true; if(ov) ov.style.display='none';
-      setBirdStat('🐦 Bird added — photographed together.');
-    } else {
-      $('cardImg').src=r.src; integratedActive=false;
-      if(ov && cardBird && cardBird.cutout) ov.style.display='block'; // cutout = instant preview while the real render lands
-      if(jobComplete) requestBirdify(r.look);
-    }
     [...$('grid').children].forEach(c=>c.classList.remove('sel'));
     const cell=$('cell'+i); if(cell) cell.classList.add('sel');
     [...$('cardpick').children].forEach(b=>b.classList.toggle('active', +b.dataset.index===i));
-    postCard(); // keep the server's copy of the card current (rides along in the delivery email)
+    if(finalLook){
+      setBirdStat(finalLook===r.look ? '' : '🐦 Your bird photo is final — the headshots are all still yours to download.');
+      return;
+    }
+    if(!jobComplete || !cardBird || !cardBird.cutout) return;
+    const btn=$('confirmBird');
+    btn.textContent='📸 Photograph us together — '+(r.label||'this look');
+    btn.disabled=false;
+    $('birdConfirm').style.display='flex';
+    setBirdStat('');
   }
   function setBirdStat(t){ const el=$('birdstat'); if(el) el.textContent=t||''; }
-  // Ask the server to paint the bird INTO this look (one Gemini edit; cached
-  // per look, capped per job server-side). Cutout preview holds the fort.
-  // Only ONE request runs at a time; if the user hops looks mid-render, we
-  // re-fire for wherever they LANDED once the current render finishes —
-  // without this, quick pick-hopping silently strands looks on the sticker.
-  let birdifyCapped=false;
-  async function requestBirdify(look){
-    if(!currentJob || birdShots[look] || birdifyCapped) return;
-    if(birdifyBusy){ setBirdStat('🐦 Finishing the previous shot — this one is next…'); return; }
+  function showFinal(look,src){
+    finalLook=look; finalSrc=src; birdShots[look]=src;
+    $('birdConfirm').style.display='none';
+    $('finalImg').src=src;
+    $('finalShot').style.display='block';
+    $('downloadBird').style.display='';
+    setBirdStat('🐦 Final: you + your '+(cardBird?cardBird.name:'bird')+'. Forever.');
+  }
+  $('confirmBird').addEventListener('click', async ()=>{
+    if(!currentJob || !featuredLook || birdifyBusy || finalLook) return;
     birdifyBusy=true;
-    setBirdStat('🐦 Your bird is landing on this shot… ~15 seconds.');
+    const btn=$('confirmBird'); btn.disabled=true;
+    setBirdStat('🐦 Hold still — your bird is landing… ~15 seconds.');
     try{
-      const r=await fetch('/api/birdify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jobId:currentJob,look})});
+      const r=await fetch('/api/birdify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jobId:currentJob,look:featuredLook})});
       const d=await r.json();
-      if(!r.ok){
-        if(/limit/i.test(d.error||'')){ birdifyCapped=true; setBirdStat('🐦 Bird-photo limit reached for this order — the preview stays for other looks.'); return; }
-        throw new Error(d.error||'Could not add the bird.');
-      }
-      birdShots[d.look]=d.src;
-      if(featuredLook===d.look){ $('cardImg').src=d.src; integratedActive=true; const ov=$('cardBirdOv'); if(ov) ov.style.display='none'; setBirdStat('🐦 Bird added — photographed together.'); postCard(); }
+      if(!r.ok) throw new Error(d.error||'Could not add the bird.');
+      showFinal(d.look,d.src);
     }catch(e){
       setBirdStat(''); toast(e.message||'Could not add the bird');
-    }finally{
-      birdifyBusy=false;
-      // the user may have moved on mid-render — catch the look they're on now
-      if(featuredLook && !birdShots[featuredLook] && !birdifyCapped) requestBirdify(featuredLook);
-    }
-  }
+      btn.disabled=false; // failed attempt ≠ your one shot — let them retry
+    }finally{ birdifyBusy=false; }
+  });
   let cardPostTimer=null;
   function postCard(){
     if(!currentJob) return;
@@ -828,8 +813,7 @@
   function wrapLines(ctx,text,maxW){ const words=String(text).split(/\s+/); const lines=[]; let cur=''; for(const w of words){ const t=cur?cur+' '+w:w; if(ctx.measureText(t).width>maxW&&cur){ lines.push(cur); cur=w; } else cur=t; } if(cur) lines.push(cur); return lines; }
   function drawCard(){
     const S=4, W=400, H=560, b=cardBird||{};
-    const img=$('cardImg');
-    if(!img||!img.naturalWidth) throw new Error('card image not loaded');
+    if(!(birdCut&&birdCut.complete&&birdCut.naturalWidth)) throw new Error('bird art not loaded');
     const c=document.createElement('canvas'); c.width=W*S; c.height=H*S;
     const ctx=c.getContext('2d'); ctx.scale(S,S);
     ctx.imageSmoothingEnabled=true; ctx.imageSmoothingQuality='high';
@@ -857,10 +841,20 @@
     const artY=58, artH=sciY-gap-artY, artW=cw;
     ctx.fillStyle='#10a37f'; rr(ctx,x0,artY,artW,artH,10); ctx.fill();
     ctx.save(); rr(ctx,x0+4,artY+4,artW-8,artH-8,7); ctx.clip();
-    const iw=img.naturalWidth, ih=img.naturalHeight, bw2=artW-8, bh=artH-8;
-    const k=Math.max(bw2/iw,bh/ih), sw=bw2/k, sh=bh/k;
-    ctx.drawImage(img,(iw-sw)/2,(ih-sh)/2,sw,sh,x0+4,artY+4,bw2,bh);
-    if(!integratedActive) drawBirdInto(ctx,x0+4,artY+4,bw2,bh); // cutout preview only until the photoreal render lands
+    // card art = the bird itself, centered on soft paper (matches #cardBirdArt)
+    const bw2=artW-8, bh=artH-8, ax=x0+4, ay=artY+4;
+    const g=ctx.createLinearGradient(0,ay,0,ay+bh); g.addColorStop(0,'#f7f4ec'); g.addColorStop(1,'#ece7d9');
+    ctx.fillStyle=g; ctx.fillRect(ax,ay,bw2,bh);
+    if(birdCut&&birdCut.complete&&birdCut.naturalWidth){
+      const ar=birdCut.naturalHeight/birdCut.naturalWidth;
+      let dw=bw2*0.84, dh=dw*ar;
+      if(dh>bh*0.9){ dh=bh*0.9; dw=dh/ar; }
+      const dx=ax+(bw2-dw)/2, dy=ay+bh-dh; // bottom-anchored, like it's standing
+      ctx.save();
+      ctx.shadowColor='rgba(0,0,0,.22)'; ctx.shadowBlur=10; ctx.shadowOffsetY=6;
+      ctx.drawImage(birdCut,dx,dy,dw,dh);
+      ctx.restore();
+    }
     ctx.restore();
     ctx.font=F(400,13,true); ctx.fillStyle='#6b7180'; ctx.fillText(b.sci||'',x0,sciY+9);
     ctx.fillStyle='#eafaf4'; rr(ctx,x0,factsY,cw,factsH,10); ctx.fill();
@@ -897,17 +891,11 @@
     dl(blob,'bird-card.png');
   });
   $('downloadBird').addEventListener('click', async ()=>{
-    let blob, name='you-and-your-bird.jpg';
-    if(featuredLook && birdShots[featuredLook]){
-      blob=await (await fetch(birdShots[featuredLook])).blob(); // the photoreal render
-    } else {
-      if(jobComplete && featuredLook){ requestBirdify(featuredLook); return toast('Adding your bird — ready in ~15s'); }
-      try{ blob=await new Promise((res,rej)=>{ try{ drawBirdShot().toBlob(b=>b?res(b):rej(new Error('blob'))); }catch(e){ rej(e); } }); name='you-and-your-bird.png'; }
-      catch{ return toast('Pick a headshot first'); }
-    }
-    const file=new File([blob],name,{type:blob.type||'image/jpeg'});
+    if(!finalSrc) return toast('Pick a headshot and photograph it with your bird first');
+    const blob=await (await fetch(finalSrc)).blob();
+    const file=new File([blob],'you-and-your-bird.jpg',{type:blob.type||'image/jpeg'});
     if(canShareFiles([file])){ try{ await navigator.share({files:[file],title:'Me + my bird'}); return; }catch(e){ if(e&&e.name==='AbortError') return; } }
-    dl(blob,name);
+    dl(blob,'you-and-your-bird.jpg');
   });
   $('downloadAll').addEventListener('click', async ()=>{
     const imgs=resultsData.filter(Boolean); if(!imgs.length) return;
@@ -927,7 +915,7 @@
     resultsData=[]; featuredSrc=null; userPicked=false; renderCard(fin.bird); buildGrid(fin.total); pollImages(jobId, fin.total);
   }
   const msgs=['Developing your headshots…','Tailoring outfits…','Keeping the bird out of frame…','Adjusting the lighting…','Almost there…'];
-  const doneMsg=t=>'✓ All '+t+' ready. Pick your favourite below — that one meets the bird.';
+  const doneMsg=t=>'✓ All '+t+' ready. Now pick ONE to be photographed with your bird — one photo, and it\'s final.';
   function pollImages(jobId,total){
     let mi=0; const mt=setInterval(()=>$('pmsg').textContent = $('bar').style.width==='100%'?doneMsg(total):msgs[mi=(mi+1)%msgs.length],2200);
     let fails=0;
@@ -940,27 +928,19 @@
       }
       (j.results||[]).forEach((r,i)=>{ if(r) fillCell(i,r); });
       renderCardPicker();
-      // merge server-side bird renders (the auto default lands shortly after completion)
-      let gotNewShot=false;
-      Object.entries(j.birdShots||{}).forEach(([k,v])=>{ if(!birdShots[k]){ birdShots[k]=v; gotNewShot=true; } });
-      if(gotNewShot && featuredLook && birdShots[featuredLook] && !integratedActive){
-        $('cardImg').src=birdShots[featuredLook]; integratedActive=true;
-        const ov=$('cardBirdOv'); if(ov) ov.style.display='none';
-        setBirdStat('🐦 Bird added — photographed together.'); postCard();
-      }
-      // default card = look 3 (Navy Polo) once it exists; first success until then; never override a manual pick
-      if(!userPicked){ const k=resultsData[2]?2:resultsData.findIndex(Boolean); if(k>=0&&resultsData[k]&&featuredSrc!==resultsData[k].src) selectCard(k); }
+      // page-reload recovery: if this order's ONE final render already exists
+      // server-side, adopt it (never re-generated)
+      const done=Object.entries(j.birdShots||{})[0];
+      if(done && !finalLook) showFinal(done[0], done[1]);
       $('bar').style.width=Math.round((j.done/total)*100)+'%';
       if(j.status==='running'||j.status==='generating'||j.status==='awaiting_payment') setTimeout(tick,2000);
       else {
         clearInterval(mt); jobComplete=true;
         $('pmsg').textContent = j.status==='failed' ? 'Generation failed — your payment has been refunded automatically.' : doneMsg(total);
         const got=resultsData.filter(Boolean).length, da=$('downloadAll'); if(da&&got) da.textContent='⬇ Download all '+got;
-        // keep listening briefly for the auto bird render (kicked off server-side at completion)
-        if(j.status!=='failed' && !birdShots[featuredLook] && extraPolls<15){ extraPolls++; if(!$('birdstat').textContent) setBirdStat('🐦 Your bird is landing on the card shot…'); setTimeout(tick,3000); }
+        if(j.status!=='failed' && !finalLook) setBirdStat('🐦 One of these headshots gets the bird. Your call. Choose wisely — it\'s final.');
       }
     };
-    let extraPolls=0;
     tick();
   }
 

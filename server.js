@@ -287,8 +287,10 @@ function tasksForJob(job) {
 // ---- birdify: paint the bird INTO one finished headshot (the keepsake) ----
 // One Gemini edit call on the user's picked shot: huge birds stand behind at
 // true scale, small birds perch on the shoulder — photoreal lighting/occlusion,
-// person untouched. The flat cutout is only the instant on-card preview.
-// Cap per job: 1 auto (default look, so the email always has one) + user picks.
+// person untouched.
+// ONE successful render per order, chosen by the user, and it's FINAL — that's
+// the product ritual (and the cost control). MAX_BIRDIFY only bounds total
+// CALLS so a failed attempt still leaves retry headroom.
 const MAX_BIRDIFY = Number(process.env.MAX_BIRDIFY || 3);
 function dataUriToImage(src) {
   const m = /^data:([^;]+);base64,(.+)$/.exec(src || "");
@@ -297,7 +299,8 @@ function dataUriToImage(src) {
 }
 async function birdifyLook(job, lookKey) {
   job.birdShots = job.birdShots || {};
-  if (job.birdShots[lookKey]) return job.birdShots[lookKey]; // cached — repicking the same look is free
+  if (job.birdShots[lookKey]) return job.birdShots[lookKey]; // same look → return the final
+  if (Object.keys(job.birdShots).length > 0) throw new Error("Your bird photo is already final for this order — one per customer, no re-rolls.");
   job.birdifyCalls = job.birdifyCalls || 0;
   if (job.birdifyCalls >= MAX_BIRDIFY) throw new Error("Bird photo limit reached for this order.");
   const r = (job.results || []).find((x) => x && x.look === lookKey && x.src);
@@ -358,13 +361,8 @@ async function startGeneration(job) {
   // or billed empties happened — a gap here is the Finding-1 leak showing up.
   const ja = job.genAttempts || 0, ji = job.genImages || 0;
   console.log(`[cost] job ${job.id}: ${job.status} · ${ji}/${tasks.length} images · ${ja} provider calls · ~$${(ja * EST_COST_PER_IMAGE).toFixed(3)} (today: ${spend.images} imgs / ${spend.attempts} calls / ~$${(spend.attempts * EST_COST_PER_IMAGE).toFixed(2)})`);
-  if (job.status === "complete") {
-    // Kick off the DEFAULT bird integration immediately (look 3 if it exists,
-    // else the first success) so the keepsake exists even if the user closes
-    // the tab before picking. A user pick just birdifies a different look.
-    const def = job.results[2]?.src ? job.results[2] : job.results.find((r) => r && r.src);
-    if (def) birdifyLook(job, def.look).catch((e) => console.error(`[birdify] job ${job.id} default:`, e.message));
-  }
+  // (No automatic bird render: the user PICKS one headshot to be photographed
+  //  with their bird — one shot per order, final. See /api/birdify.)
   if (job.status === "complete" && job.email) {
     // Delay the delivery email so the user's Bird-ID photo pick (made on the
     // results page, uploaded via /api/card) can ride along. The browser posts
