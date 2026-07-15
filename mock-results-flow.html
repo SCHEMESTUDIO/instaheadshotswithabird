@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MOCK — New results journey · Headshots with a Bird</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  /* Print-shop design system — flat colors, 2px ink borders, offset shadows, radius 0 */
+  :root{
+    --paper:#EFEAE0; --card:#FDFBF5; --ink:#121212;
+    --green:#0D7A5C; --orange:#F2500A; --yellow:#F6C445;
+    --body:#3B382F; --mutedmono:#8C877B; --green-tint:#EFEAE0;
+  }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{font-family:'Archivo',sans-serif;color:var(--ink);background:var(--paper);line-height:1.5;-webkit-font-smoothing:antialiased}
+  .mono{font-family:'IBM Plex Mono',monospace}
+
+  /* mock banner + controls (NOT part of the product) */
+  .mockbar{background:var(--yellow);border-bottom:3px solid var(--ink);padding:10px 20px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;
+    font:600 12px/1 'IBM Plex Mono',monospace;letter-spacing:.08em;text-transform:uppercase}
+  .mockbar button{border:2px solid var(--ink);background:var(--card);padding:7px 12px;font:700 11px/1 'Archivo',sans-serif;text-transform:uppercase;cursor:pointer}
+  .mockbar button.on{background:var(--ink);color:var(--paper)}
+
+  .wrap{max-width:920px;margin:0 auto;padding:48px 20px 90px}
+
+  /* one connected experience: numbered stations on a dashed spine */
+  .station{position:relative;padding-left:56px;margin-bottom:40px}
+  .station::before{content:"";position:absolute;left:19px;top:44px;bottom:-40px;border-left:3px dashed var(--ink);opacity:.25}
+  .station:last-child::before{display:none}
+  .snum{position:absolute;left:0;top:0;width:40px;height:40px;display:flex;align-items:center;justify-content:center;
+    background:var(--ink);color:var(--paper);font:400 16px/1 'Archivo Black',sans-serif;border:2px solid var(--ink)}
+  .station.done .snum{background:var(--green)}
+  .station.locked{opacity:.45;filter:grayscale(.3)}
+  .station.locked .snum{background:var(--paper);color:var(--mutedmono);border-color:var(--mutedmono)}
+  .stitle{font:400 clamp(20px,3vw,28px)/1.05 'Archivo Black',sans-serif;text-transform:uppercase;letter-spacing:-.01em;margin:6px 0 4px}
+  .ssub{font:500 14px/1.5 'Archivo',sans-serif;color:var(--body);margin:0 0 18px;max-width:560px}
+
+  /* ---- STATION 1: the bird match card (bird + facts ONLY, instant) ---- */
+  .matchcard{background:var(--card);border:2px solid var(--ink);box-shadow:6px 6px 0 var(--green);display:grid;grid-template-columns:240px 1fr;position:relative}
+  @media(max-width:640px){.matchcard{grid-template-columns:1fr}}
+  .matchsticker{position:absolute;top:-13px;left:18px;background:var(--orange);color:var(--green-tint);font:800 10px/1 'Archivo',sans-serif;
+    letter-spacing:.1em;text-transform:uppercase;padding:7px 10px;border:2px solid var(--ink);transform:rotate(-2deg)}
+  .matchart{background:var(--paper);border-right:2px solid var(--ink);display:flex;align-items:flex-end;justify-content:center;min-height:230px;padding:14px}
+  @media(max-width:640px){.matchart{border-right:none;border-bottom:2px solid var(--ink)}}
+  .matchart img{max-width:88%;max-height:210px;filter:drop-shadow(0 7px 12px rgba(0,0,0,.22))}
+  .matchbody{padding:20px 22px;display:flex;flex-direction:column;gap:10px}
+  .matchhead{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid var(--ink);padding-bottom:8px}
+  .matchhead .t{font:800 12px/1 'Archivo',sans-serif;letter-spacing:.14em}
+  .matchhead .n{font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:.1em;color:var(--mutedmono)}
+  .matchname{font:400 26px/1 'Archivo Black',sans-serif;text-transform:uppercase}
+  .matchsci{font:500 12px/1 'IBM Plex Mono',monospace;color:var(--mutedmono);text-transform:uppercase;letter-spacing:.06em}
+  .matchfacts{margin:4px 0 0;padding:10px 0 0;list-style:none;display:flex;flex-direction:column;gap:6px;
+    font:500 12px/1.55 'IBM Plex Mono',monospace;color:var(--body);border-top:2px dotted var(--ink)}
+  .matchfacts li{padding-left:14px;position:relative}
+  .matchfacts li::before{content:"·";position:absolute;left:2px;font-weight:800}
+  .matchfoot{font:600 10px/1 'IBM Plex Mono',monospace;letter-spacing:.12em;color:var(--green);margin-top:auto}
+  .matchnote{font:500 11px/1.6 'IBM Plex Mono',monospace;letter-spacing:.06em;color:var(--mutedmono);text-transform:uppercase;margin-top:12px}
+
+  /* ---- STATION 2: photos, one at a time ---- */
+  .pbar{margin:0 0 6px;height:12px;background:var(--card);border:2px solid var(--ink);overflow:hidden}
+  .pbar i{display:block;height:100%;width:0;background:var(--green);transition:width .5s}
+  .pmsg{font:600 12px/1.5 'IBM Plex Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--body);margin:0 0 18px}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media(max-width:560px){.grid{grid-template-columns:repeat(2,1fr)}}
+  .cell{aspect-ratio:1;overflow:hidden;border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);background:var(--card);position:relative}
+  .cell img{width:100%;height:100%;object-fit:cover;display:block;opacity:0;transform:scale(1.03)}
+  .cell.rev img{opacity:1;transform:none;transition:opacity .5s,transform .5s}
+  .cell .lbl{position:absolute;left:0;bottom:0;background:var(--ink);color:var(--paper);font:600 10px/1 'IBM Plex Mono',monospace;letter-spacing:.08em;text-transform:uppercase;padding:5px 9px;opacity:0}
+  .cell.rev .lbl{opacity:1;transition:opacity .5s}
+  .cell .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+  .cell.rev .ph{display:none}
+  .cell .dl{position:absolute;top:0;right:0;width:30px;height:30px;display:none;align-items:center;justify-content:center;background:var(--paper);border:none;border-left:2px solid var(--ink);border-bottom:2px solid var(--ink);cursor:pointer;font-size:14px}
+  .cell.rev:hover .dl{display:flex}
+  .spin{width:26px;height:26px;border:3px solid var(--paper);border-top-color:var(--green);border-radius:50%;animation:s 1s linear infinite}
+  @keyframes s{to{transform:rotate(360deg)}}
+
+  /* ---- STATION 3: download all ---- */
+  .bigbtn{display:block;width:100%;background:var(--green);color:var(--green-tint);border:2px solid var(--ink);box-shadow:5px 5px 0 var(--ink);
+    padding:20px;font:800 18px/1.2 'Archivo',sans-serif;text-transform:uppercase;letter-spacing:.02em;cursor:pointer;transition:box-shadow .1s,transform .1s;text-align:center}
+  .bigbtn:hover{box-shadow:1px 1px 0 var(--ink);transform:translate(4px,4px)}
+  .bigbtn:disabled{opacity:.45;cursor:not-allowed}
+  .bigbtn:disabled:hover{box-shadow:5px 5px 0 var(--ink);transform:none}
+  .bignote{font:500 11px/1.6 'IBM Plex Mono',monospace;letter-spacing:.08em;color:var(--mutedmono);text-transform:uppercase;margin:10px 0 0;text-align:center}
+
+  /* ---- STATION 4: the one-time de-bird ---- */
+  .pickwrap{background:var(--card);border:2px solid var(--ink);box-shadow:6px 6px 0 var(--orange);padding:24px}
+  .pickwarn{display:inline-block;background:var(--yellow);border:2px solid var(--ink);font:700 11px/1.4 'Archivo',sans-serif;
+    letter-spacing:.04em;text-transform:uppercase;padding:8px 12px;margin:0 0 16px}
+  .picks{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+  @media(max-width:560px){.picks{grid-template-columns:repeat(3,1fr)}}
+  .pick{aspect-ratio:1;border:2px solid var(--ink);overflow:hidden;cursor:pointer;padding:0;background:var(--paper);position:relative}
+  .pick img{width:100%;height:100%;object-fit:cover;display:block}
+  .pick.sel{outline:4px solid var(--orange);outline-offset:2px}
+  .pick.sel::after{content:"PICKED";position:absolute;left:0;bottom:0;right:0;background:var(--orange);color:var(--green-tint);font:800 9px/1 'Archivo',sans-serif;letter-spacing:.1em;text-align:center;padding:4px 0}
+  .armrow{display:flex;flex-direction:column;gap:10px;align-items:center;margin-top:18px;text-align:center}
+  .armbtn{background:var(--orange);color:var(--green-tint);border:2px solid var(--ink);box-shadow:4px 4px 0 var(--ink);padding:16px 22px;
+    font:800 15px/1 'Archivo',sans-serif;text-transform:uppercase;letter-spacing:.02em;cursor:pointer;transition:box-shadow .1s,transform .1s}
+  .armbtn:hover{box-shadow:1px 1px 0 var(--ink);transform:translate(3px,3px)}
+  .armbtn:disabled{opacity:.45;cursor:not-allowed}
+  .armwarn{font:500 11px/1.6 'IBM Plex Mono',monospace;letter-spacing:.08em;color:var(--mutedmono);text-transform:uppercase}
+  .sent{display:none;text-align:center;padding:10px 0 2px}
+  .sent .big{font:400 30px/1.1 'Archivo Black',sans-serif;color:var(--green);text-transform:uppercase;margin-bottom:8px}
+  .sent p{margin:0;font:500 14px/1.6 'Archivo',sans-serif;color:var(--body)}
+
+  .endrow{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:8px}
+  .abtn{border:2px solid var(--ink);background:var(--card);box-shadow:3px 3px 0 var(--ink);padding:13px 18px;font:800 13px/1 'Archivo',sans-serif;
+    text-transform:uppercase;letter-spacing:.02em;cursor:pointer;transition:box-shadow .1s,transform .1s}
+  .abtn:hover{box-shadow:1px 1px 0 var(--ink);transform:translate(2px,2px)}
+</style>
+</head>
+<body>
+
+<div class="mockbar">
+  <span>⚠ MOCK — new results journey (nothing here is wired to the backend)</span>
+  <span style="margin-left:auto">Simulate:</span>
+  <button id="sim5" class="on">$1 · 5 photos</button>
+  <button id="sim30">$10 · 30 photos</button>
+  <button id="replay">↻ Replay</button>
+</div>
+
+<div class="wrap">
+
+  <!-- ── STATION 1 · instant bird match ─────────────────────────── -->
+  <div class="station done" id="st1">
+    <div class="snum">01</div>
+    <div class="stitle">You've been matched.</div>
+    <p class="ssub">Meet your bird while your headshots develop. It's in every photo. That was never in question.</p>
+    <div class="matchcard">
+      <div class="matchsticker">Your bird</div>
+      <div class="matchart"><img src="public/birds/cutouts/american-kestrel.png" alt="American Kestrel"></div>
+      <div class="matchbody">
+        <div class="matchhead"><span class="t">BIRD ID</span><span class="n">№ 000147 · 2026</span></div>
+        <div class="matchname">American Kestrel</div>
+        <div class="matchsci">Falco sparverius</div>
+        <ul class="matchfacts">
+          <li>Can hover in place while hunting.</li>
+          <li>Sees ultraviolet light to track prey.</li>
+          <li>North America's smallest falcon and entirely unbothered by its size.</li>
+        </ul>
+        <div class="matchfoot">HEADSHOTSWITHABIRD.COM</div>
+      </div>
+    </div>
+    <div class="matchnote">Your shareable Bird ID card is included in the download below.</div>
+  </div>
+
+  <!-- ── STATION 2 · photos, one at a time ──────────────────────── -->
+  <div class="station" id="st2">
+    <div class="snum">02</div>
+    <div class="stitle">Your photos, developing.</div>
+    <p class="ssub" id="ssub2">5 looks, printed one at a time. Fresh ones land at the top of the stack.</p>
+    <div class="pbar"><i id="bar"></i></div>
+    <p class="pmsg" id="pmsg">Warming up the studio lights…</p>
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <!-- ── STATION 3 · download all ───────────────────────────────── -->
+  <div class="station locked" id="st3">
+    <div class="snum">03</div>
+    <div class="stitle">Take them home.</div>
+    <p class="ssub">Everything above, in one go.</p>
+    <button class="bigbtn" id="dlall" disabled>Download all your photos</button>
+    <p class="bignote" id="dlnote">Includes your Bird ID card · your bird-free pick (below) is emailed separately</p>
+  </div>
+
+  <!-- ── STATION 4 · the one-time de-bird (basic tier only) ─────── -->
+  <div class="station locked" id="st4">
+    <div class="snum">04</div>
+    <div class="stitle">One photo. No bird.</div>
+    <div class="pickwrap">
+      <div class="pickwarn">⚠ Choose one to remove the bird — but be careful! You can only do this once.</div>
+      <div class="picks" id="picks"></div>
+      <div class="armrow" id="armrow">
+        <button class="armbtn" id="arm" disabled>Pick a photo above</button>
+        <span class="armwarn">ONE REMOVAL PER ORDER · FINAL · NO RE-ROLLS · DELIVERED TO YOUR INBOX</span>
+      </div>
+      <div class="sent" id="sent">
+        <div class="big">It's on its way.</div>
+        <p>Your bird-free <b id="sentlook">Charcoal Cardigan</b> is rendering and will land in your inbox in about a minute.<br>The bird remains in all other photos, where it belongs.<br>Download all your photos from the link above!</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- end actions -->
+  <div class="endrow">
+    <button class="abtn">Leave a review</button>
+    <button class="abtn">Make another ($1)</button>
+  </div>
+</div>
+
+<script>
+  const EXAMPLES=[
+    {src:'public/examples/white-shirt-bird-web.jpg',label:'White shirt'},
+    {src:'public/examples/charcoal-cardigan-2-bird-web.jpg',label:'Charcoal cardigan'},
+    {src:'public/examples/you-bird-kestrel-web.jpg',label:'Black tee'},
+    {src:'public/examples/you-bird-frogmouth-web.jpg',label:'Navy polo'},
+    {src:'public/examples/you-bird-rhea-web.jpg',label:'Black turtleneck'},
+  ];
+  const PHRASES=['Developing your headshots…','Tailoring outfits…','Getting the bird into frame…','Adjusting the lighting…',
+    'Negotiating with the bird…','Pressing your collar…','Asking the bird to look professional…','Steaming the backdrop…','Almost there…'];
+  const $=id=>document.getElementById(id);
+  let n=5, timers=[];
+
+  function reset(){
+    timers.forEach(clearTimeout); timers=[];
+    $('grid').innerHTML=''; $('picks').innerHTML='';
+    $('bar').style.width='0%'; $('pmsg').textContent='Warming up the studio lights…';
+    $('st2').classList.remove('done'); $('st3').classList.add('locked'); $('st4').classList.add('locked');
+    $('dlall').disabled=true; $('dlall').textContent='Download all your photos';
+    $('armrow').style.display='flex'; $('sent').style.display='none';
+    $('arm').disabled=true; $('arm').textContent='Pick a photo above'; picked=null;
+    $('ssub2').textContent=n+' looks, printed one at a time. Fresh ones land as they finish.';
+    $('st4').style.display = n===5 ? '' : 'none'; // $3/$10 packs include birdless versions of every look
+    $('dlnote').textContent = n===5
+      ? 'Includes your Bird ID card · your bird-free pick (below) is emailed separately'
+      : 'Includes your Bird ID card and the birdless version of every look';
+    build();
+  }
+
+  function build(){
+    for(let i=0;i<n;i++){
+      const c=document.createElement('div'); c.className='cell'; c.id='cell'+i;
+      const ex=EXAMPLES[i%EXAMPLES.length];
+      c.innerHTML='<div class="ph"><div class="spin"></div></div>'+
+        '<img src="'+ex.src+'" alt=""><span class="lbl">'+ex.label+(i>=EXAMPLES.length?' '+(Math.floor(i/EXAMPLES.length)+1):'')+'</span>'+
+        '<button class="dl" title="Save">⬇</button>';
+      $('grid').appendChild(c);
+    }
+    // reveal ONE AT A TIME — the user watches the system work
+    let mi=0;
+    const msg=setInterval(()=>{ $('pmsg').textContent=PHRASES[mi=(mi+1)%PHRASES.length]; },2200);
+    timers.push(msg);
+    const gap = n===5 ? 2000 : 900; // 30-pack paces faster but still one by one
+    for(let i=0;i<n;i++){
+      timers.push(setTimeout(()=>{
+        $('cell'+i).classList.add('rev');
+        $('bar').style.width=Math.round(((i+1)/n)*100)+'%';
+        if(i===n-1) finish(msg);
+      }, 1200+i*gap));
+    }
+  }
+
+  function finish(msg){
+    clearInterval(msg);
+    $('pmsg').textContent='All '+n+' ready. They\'re yours — grab them below.';
+    $('st2').classList.add('done');
+    $('st3').classList.remove('locked');
+    $('dlall').disabled=false; $('dlall').textContent='Download all '+n+' photos + bird card';
+    if(n===5){
+      $('st4').classList.remove('locked');
+      EXAMPLES.forEach((ex,i)=>{
+        const b=document.createElement('button'); b.className='pick';
+        b.innerHTML='<img src="'+ex.src+'" alt="'+ex.label+'">';
+        b.onclick=()=>{ picked=ex; document.querySelectorAll('.pick').forEach(p=>p.classList.remove('sel'));
+          b.classList.add('sel'); $('arm').disabled=false; $('arm').textContent='Remove the bird — '+ex.label; };
+        $('picks').appendChild(b);
+      });
+    }
+  }
+
+  let picked=null;
+  $('arm').onclick=()=>{
+    if(!picked) return;
+    $('arm').disabled=true; $('arm').textContent='The bird is leaving…';
+    timers.push(setTimeout(()=>{
+      $('armrow').style.display='none';
+      $('sentlook').textContent=picked.label;
+      $('sent').style.display='block';
+      document.querySelectorAll('.pick').forEach(p=>{ p.onclick=null; p.style.cursor='default'; if(!p.classList.contains('sel')) p.style.opacity=.45; });
+    },1600));
+  };
+
+  $('dlall').onclick=()=>{ $('dlall').textContent='✓ Saved (mock)'; setTimeout(()=>$('dlall').textContent='Download all '+n+' photos + bird card',1400); };
+  $('sim5').onclick=()=>{ n=5; $('sim5').classList.add('on'); $('sim30').classList.remove('on'); reset(); };
+  $('sim30').onclick=()=>{ n=30; $('sim30').classList.add('on'); $('sim5').classList.remove('on'); reset(); };
+  $('replay').onclick=reset;
+  reset();
+</script>
+</body>
+</html>

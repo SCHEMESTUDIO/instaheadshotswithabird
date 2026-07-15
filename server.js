@@ -15,8 +15,8 @@ import { getProvider } from "./lib/providers/index.js";
 import { addReview, listReviews, setApproved, wordCount, MEDIA_DIR } from "./lib/reviews.js";
 import { addEmail, listEmails } from "./lib/emails.js";
 import { addProInterest, proInterestCount, listProInterest } from "./lib/prodoor.js";
-import { sendHeadshots } from "./lib/mail.js";
-import { persistDelivery, DELIVERY_DIR } from "./lib/delivery.js";
+import { sendHeadshots, sendCleanPick } from "./lib/mail.js";
+import { persistDelivery, persistOne, DELIVERY_DIR } from "./lib/delivery.js";
 
 dotenv.config();
 
@@ -58,7 +58,6 @@ const GLOBAL_CONCURRENCY = Number(process.env.GLOBAL_CONCURRENCY || 15);
 const CONCURRENCY = Number(process.env.CONCURRENCY || 5);
 const ADMIN_KEY = process.env.ADMIN_KEY || "";
 const MIN_IMAGE_DIM = Number(process.env.MIN_IMAGE_DIM || 768); // reject tiny uploads that produce bad results
-const EMAIL_DELAY_MS = Number(process.env.EMAIL_DELAY_MS || 3 * 60 * 1000); // window for the user's Bird-ID pick to reach the delivery email
 const PAYMENTS_ENABLED = !!process.env.STRIPE_SECRET_KEY;
 const FREE_CODES = (process.env.FREE_CODES || "").split(",").map((s) => s.trim().toLowerCase()).filter(Boolean); // beta codes that skip payment
 const stripe = PAYMENTS_ENABLED ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
@@ -384,20 +383,13 @@ async function startGeneration(job) {
   // (Basic tier: no automatic de-bird — the user PICKS one headshot to lose
   //  its bird. One removal per order, final. See /api/debird.)
   if (job.status === "complete" && job.email) {
-    // Delay the delivery email so the user's basic-tier de-bird pick (made on
-    // the results page) can ride along. The browser posts the Bird ID card on
-    // completion via /api/card.
-    setTimeout(async () => {
-      try {
-        // Persist images (R2 if configured, else disk) and email DOWNLOAD LINKS
-        // — not 30 inline attachments, which Gmail/Yahoo silently drop.
-        // The keepsake = the basic tier's bird-free pick (if they made one).
-        const shots = job.cleanShots || {};
-        const lastShot = job.lastDebirded && shots[job.lastDebirded] ? shots[job.lastDebirded] : Object.values(shots).pop();
-        const { images, cardUrl, birdUrl } = await persistDelivery(job.id, job.results, job.cardPng, lastShot || job.birdPng);
-        await sendHeadshots({ to: job.email, bird: job.bird, images, cardUrl, cleanUrl: birdUrl });
-      } catch (e) { console.error("[mail]", e.message); }
-    }, EMAIL_DELAY_MS).unref?.();
+    // Send the delivery email IMMEDIATELY on completion. This used to sit
+    // behind a 3-minute setTimeout (so the de-bird pick could ride along) —
+    // but an in-memory timer dies with the process, and a process restart is
+    // exactly when the email matters most (the browser already told the user
+    // "your headshots will be emailed"). The de-bird pick now gets its OWN
+    // email at pick time — see /api/debird.
+    deliverByEmail(job).catch((e) => console.error(`[mail] job ${job.id}: delivery email FAILED for good —`, e.message));
   }
   // Refund for any look we couldn't deliver. All failed → full refund (the UI's
   // "your money will be refunded" promise). SOME failed (e.g. the Gemini cap
@@ -408,6 +400,28 @@ async function startGeneration(job) {
     refundJob(job, failed, job.total).catch((e) => console.error(`[refund] job ${job.id}:`, e.message));
   }
   job.photos = null; // drop the uploaded selfies once done
+}
+
+// Persist images (R2 if configured, else disk) and email DOWNLOAD LINKS —
+// not 30 inline attachments, which Gmail/Yahoo silently drop. 3 attempts
+// with a pause: a transient Resend/network blip must not eat a paid delivery.
+async function deliverByEmail(job) {
+  if (job.emailSent) return;
+  const { images, cardUrl } = await persistDelivery(job.id, job.results, job.cardPng, null);
+  let lastErr;
+  for (let i = 0; i < 3; i++) {
+    try {
+      await sendHeadshots({ to: job.email, bird: job.bird, images, cardUrl });
+      job.emailSent = true;
+      console.log(`[mail] job ${job.id}: delivery email sent (${images.length} images${cardUrl ? " + card" : ""})`);
+      return;
+    } catch (e) {
+      lastErr = e;
+      console.error(`[mail] job ${job.id}: send attempt ${i + 1}/3 failed —`, e.message);
+      await sleep(15000);
+    }
+  }
+  throw lastErr;
 }
 
 async function refundJob(job, failedCount = job.total, totalCount = job.total) {
@@ -539,7 +553,11 @@ app.get("/api/finalize/:jobId", async (req, res) => {
   } catch (err) { console.error("[finalize]", err); res.status(500).json({ error: "Something went wrong on our end — please try again." }); }
 });
 
-// 4) poll
+// 4) poll — a LIGHTWEIGHT manifest only. This route used to inline every
+// finished image as a base64 data URI on every 2-second poll; on a 30-image
+// job that's a ~60-90 MB JSON body re-serialized on the event loop each time,
+// which is what "timed out" the aviary tier (and could knock the process over
+// entirely). Image bytes are now fetched ONCE each from /api/job/:id/img/:i.
 app.get("/api/job/:id", (req, res) => {
   const job = jobs.get(req.params.id);
   if (!job) return res.status(404).json({ error: "Job not found or expired." });
@@ -547,21 +565,49 @@ app.get("/api/job/:id", (req, res) => {
     status: job.status, paid: job.paid, total: job.total, done: job.done,
     tier: job.tier || "basic",
     bird: job.paid ? withBirdImage(job.bird) : null,
-    results: job.paid ? job.results : [],
-    cleanShots: job.paid ? (job.cleanShots || {}) : {}, // look → bird-free data URI (basic-tier pick)
+    results: job.paid
+      ? (job.results || []).map((r) => (r ? { look: r.look, label: r.label, error: r.error || null, ready: !!r.src } : null))
+      : [],
+    cleanLook: job.paid ? (job.lastDebirded || null) : null, // basic tier's one final pick (emailed)
     error: job.error,
   });
 });
 
+// 4a) one finished image, by slot index — fetched once, cacheable.
+app.get("/api/job/:id/img/:i", (req, res) => {
+  const job = jobs.get(req.params.id);
+  if (!job || !job.paid) return res.status(404).json({ error: "Not found." });
+  const r = (job.results || [])[Number(req.params.i)];
+  const img = r?.src ? dataUriToImage(r.src) : null;
+  if (!img) return res.status(404).json({ error: "Not ready." });
+  res.set("Content-Type", img.mimeType || "image/jpeg");
+  res.set("Cache-Control", "private, max-age=7200, immutable");
+  res.send(img.buffer);
+});
+
 // 4b) de-bird a picked look (basic tier): removes the bird from that finished
-// headshot, returns the clean image. ONE per order, final; capped (MAX_DEBIRD).
+// headshot, then DELIVERS IT BY EMAIL — the pick is the last step of the flow,
+// so nobody sits watching a spinner for it. ONE per order, final; capped
+// (MAX_DEBIRD). The hosted URL rides back as a fallback download link.
 app.post("/api/debird", async (req, res) => {
   try {
     const job = jobs.get(req.body?.jobId);
     if (!job || !job.paid) return res.status(404).json({ error: "Job not found." });
     if (job.status !== "complete") return res.status(400).json({ error: "Headshots are still generating." });
-    const src = await debirdLook(job, String(req.body?.look || ""));
-    res.json({ look: req.body.look, src });
+    const look = String(req.body?.look || "");
+    const src = await debirdLook(job, look);
+    let url = null, emailed = false;
+    if (job.cleanPick) return res.json(job.cleanPick); // repeat call (reload) → same answer, no duplicate email
+    try {
+      url = await persistOne(job.id, `bird-free-${look}.jpg`, src, "image/jpeg");
+      if (job.email) {
+        await sendCleanPick({ to: job.email, bird: job.bird, url });
+        emailed = true;
+        console.log(`[mail] job ${job.id}: bird-free pick (${look}) emailed`);
+      }
+    } catch (e) { console.error(`[mail] job ${job.id}: clean-pick delivery failed —`, e.message); }
+    job.cleanPick = { look, emailed, url };
+    res.json(job.cleanPick);
   } catch (err) {
     res.status(400).json({ error: err.message || "Could not remove the bird." });
   }
@@ -606,16 +652,17 @@ app.get("/api/birds", (_req, res) => {
 // ---- reviews ----
 app.post("/api/review", async (req, res) => {
   try {
-    const { jobId, stars, text, name, consent, featuredSrc } = req.body || {};
+    const { jobId, stars, text, name, consent, featuredLook } = req.body || {};
     if (wordCount(text) > 30) return res.status(400).json({ error: "Reviews are limited to 30 words." });
     const job = jobs.get(jobId);
     const bird = job?.bird || null;
-    // ONLY persist an image the server itself generated for this job. Anything
-    // else would let an anonymous POST host arbitrary images on our domain
-    // (or make the server fetch attacker-chosen URLs).
+    // ONLY persist an image the server itself generated for this job. The
+    // client names its featured shot by LOOK ID (it never holds image data
+    // anymore); anything else would let an anonymous POST host arbitrary
+    // images on our domain.
     let src = null;
     if (job?.results?.length) {
-      const ok = job.results.find((r) => r && r.src && (!featuredSrc || r.src === featuredSrc));
+      const ok = job.results.find((r) => r && r.src && (!featuredLook || r.look === featuredLook));
       if (ok) src = ok.src;
     }
     const review = await addReview({ stars, text, name, bird, featuredSrc: src, consent });

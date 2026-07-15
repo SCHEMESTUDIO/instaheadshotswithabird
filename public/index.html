@@ -323,9 +323,78 @@
   .cell .lbl{position:absolute;left:0;bottom:0;background:var(--ink);color:var(--paper);font:600 10px/1 'IBM Plex Mono',monospace;letter-spacing:.08em;text-transform:uppercase;padding:5px 9px}
   .cell .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
   .cell.failed{display:flex;align-items:center;justify-content:center;font:600 11px/1.5 'IBM Plex Mono',monospace;color:var(--mutedmono);text-align:center;padding:10px;text-transform:uppercase}
-  .cell.sel{outline:3px solid var(--green);outline-offset:2px}
+  .cell img{opacity:0;transform:scale(1.03)}
+  .cell.rev img{opacity:1;transform:none;transition:opacity .5s,transform .5s}
+  .cell .lbl{opacity:0}
+  .cell.rev .lbl{opacity:1;transition:opacity .5s}
+  .cell.rev .ph{display:none}
   .cell .dl{position:absolute;top:0;right:0;width:30px;height:30px;display:none;align-items:center;justify-content:center;background:var(--paper);border:none;border-left:2px solid var(--ink);border-bottom:2px solid var(--ink);cursor:pointer;padding:0;font-size:14px;color:var(--ink)}
-  .cell:hover .dl{display:flex}
+  .cell.rev:hover .dl{display:flex}
+
+  /* one connected journey: numbered stations on a dashed spine */
+  .station{position:relative;padding-left:56px;margin-bottom:40px}
+  .station::before{content:"";position:absolute;left:19px;top:44px;bottom:-40px;border-left:3px dashed var(--ink);opacity:.25}
+  .station.laststation::before{display:none}
+  .snum{position:absolute;left:0;top:0;width:40px;height:40px;display:flex;align-items:center;justify-content:center;
+    background:var(--ink);color:var(--paper);font:400 16px/1 'Archivo Black',sans-serif;border:2px solid var(--ink)}
+  .station.done .snum{background:var(--green)}
+  .station.locked{opacity:.45;filter:grayscale(.3)}
+  .station.locked .snum{background:var(--paper);color:var(--mutedmono);border-color:var(--mutedmono)}
+  .stitle{font:400 clamp(20px,3vw,28px)/1.05 'Archivo Black',sans-serif;text-transform:uppercase;letter-spacing:-.01em;margin:6px 0 4px}
+  .ssub{font:500 14px/1.5 'Archivo',sans-serif;color:var(--body);margin:0 0 18px;max-width:560px}
+  @media(max-width:560px){.station{padding-left:0}.station::before,.snum{display:none}}
+
+  /* station 1: the bird match card (bird + facts only, instant) */
+  .matchcard{background:var(--card);border:2px solid var(--ink);box-shadow:6px 6px 0 var(--green);display:grid;grid-template-columns:240px 1fr;position:relative}
+  @media(max-width:640px){.matchcard{grid-template-columns:1fr}}
+  .matchsticker{position:absolute;top:-13px;left:18px;background:var(--orange);color:var(--green-tint);font:800 10px/1 'Archivo',sans-serif;
+    letter-spacing:.1em;text-transform:uppercase;padding:7px 10px;border:2px solid var(--ink);transform:rotate(-2deg);z-index:1}
+  .matchart{background:var(--paper);border-right:2px solid var(--ink);display:flex;align-items:flex-end;justify-content:center;min-height:230px;padding:14px}
+  @media(max-width:640px){.matchart{border-right:none;border-bottom:2px solid var(--ink)}}
+  .matchart img{max-width:88%;max-height:210px;filter:drop-shadow(0 7px 12px rgba(0,0,0,.22))}
+  .matchart .memoji{font-size:110px;line-height:1;margin-bottom:30px}
+  .matchbody{padding:20px 22px;display:flex;flex-direction:column;gap:10px}
+  .matchhead{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid var(--ink);padding-bottom:8px}
+  .matchhead .t{font:800 12px/1 'Archivo',sans-serif;letter-spacing:.14em}
+  .matchhead .n{font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:.1em;color:var(--mutedmono)}
+  .matchname{font:400 26px/1 'Archivo Black',sans-serif;text-transform:uppercase}
+  .matchsci{font:500 12px/1 'IBM Plex Mono',monospace;color:var(--mutedmono);text-transform:uppercase;letter-spacing:.06em}
+  .matchfacts{margin:4px 0 0;padding:10px 0 0;list-style:none;display:flex;flex-direction:column;gap:6px;
+    font:500 12px/1.55 'IBM Plex Mono',monospace;color:var(--body);border-top:2px dotted var(--ink)}
+  .matchfacts li{padding-left:14px;position:relative}
+  .matchfacts li::before{content:"·";position:absolute;left:2px;font-weight:800}
+  .matchfoot{font:600 10px/1 'IBM Plex Mono',monospace;letter-spacing:.12em;color:var(--green);margin-top:auto}
+  .matchnote{font:500 11px/1.6 'IBM Plex Mono',monospace;letter-spacing:.06em;color:var(--mutedmono);text-transform:uppercase;margin-top:12px}
+  .matchactions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+
+  /* station 3: the one big download */
+  .bigbtn{display:block;width:100%;background:var(--green);color:var(--green-tint);border:2px solid var(--ink);box-shadow:5px 5px 0 var(--ink);
+    padding:20px;font:800 18px/1.2 'Archivo',sans-serif;text-transform:uppercase;letter-spacing:.02em;cursor:pointer;transition:box-shadow .1s,transform .1s;text-align:center;font-family:'Archivo',sans-serif}
+  .bigbtn:hover{box-shadow:1px 1px 0 var(--ink);transform:translate(4px,4px)}
+  .bigbtn:disabled{opacity:.45;cursor:not-allowed}
+  .bigbtn:disabled:hover{box-shadow:5px 5px 0 var(--ink);transform:none}
+  .bignote{font:500 11px/1.6 'IBM Plex Mono',monospace;letter-spacing:.08em;color:var(--mutedmono);text-transform:uppercase;margin:10px 0 0;text-align:center}
+
+  /* station 4: the one-time de-bird */
+  .pickwrap{background:var(--card);border:2px solid var(--ink);box-shadow:6px 6px 0 var(--orange);padding:24px}
+  .pickwarn{display:inline-block;background:var(--yellow);border:2px solid var(--ink);font:700 11px/1.4 'Archivo',sans-serif;
+    letter-spacing:.04em;text-transform:uppercase;padding:8px 12px;margin:0 0 16px}
+  .picks{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+  @media(max-width:560px){.picks{grid-template-columns:repeat(3,1fr)}}
+  .pick{aspect-ratio:1;border:2px solid var(--ink);overflow:hidden;cursor:pointer;padding:0;background:var(--paper);position:relative}
+  .pick img{width:100%;height:100%;object-fit:cover;display:block}
+  .pick.sel{outline:4px solid var(--orange);outline-offset:2px}
+  .pick.sel::after{content:"PICKED";position:absolute;left:0;bottom:0;right:0;background:var(--orange);color:var(--green-tint);font:800 9px/1 'Archivo',sans-serif;letter-spacing:.1em;text-align:center;padding:4px 0}
+  .armrow{display:flex;flex-direction:column;gap:10px;align-items:center;margin-top:18px;text-align:center}
+  .armbtn{background:var(--orange);color:var(--green-tint);border:2px solid var(--ink);box-shadow:4px 4px 0 var(--ink);padding:16px 22px;
+    font:800 15px/1 'Archivo',sans-serif;text-transform:uppercase;letter-spacing:.02em;cursor:pointer;transition:box-shadow .1s,transform .1s;font-family:'Archivo',sans-serif}
+  .armbtn:hover{box-shadow:1px 1px 0 var(--ink);transform:translate(3px,3px)}
+  .armbtn:disabled{opacity:.45;cursor:not-allowed}
+  .armwarn{font:500 11px/1.6 'IBM Plex Mono',monospace;letter-spacing:.08em;color:var(--mutedmono);text-transform:uppercase}
+  .sent{display:none;text-align:center;padding:10px 0 2px}
+  .sent .big{font:400 30px/1.1 'Archivo Black',sans-serif;color:var(--green);text-transform:uppercase;margin-bottom:8px}
+  .sent p{margin:0;font:500 14px/1.6 'Archivo',sans-serif;color:var(--body)}
+  .endrow{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:8px}
   .spin{width:26px;height:26px;border:3px solid var(--paper);border-top-color:var(--green);border-radius:50%;animation:s 1s linear infinite}
   @keyframes s{to{transform:rotate(360deg)}}
   .res-actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:24px}
@@ -335,8 +404,9 @@
   .abtn.primary{background:var(--ink);color:var(--paper)}
   .hint{text-align:center;color:var(--body);font-size:14px;margin:0 0 14px;font-weight:500}
 
-  /* Bird ID card (real product) — print-shop ID, matches drawCard() export */
-  .cardstage{display:flex;justify-content:center}
+  /* Bird ID card (export template) — kept OFFSCREEN for the html2canvas
+     fallback in cardCanvas(); the visible bird presentation is .matchcard */
+  .cardstage{position:absolute;left:-9999px;top:0;width:400px;overflow:hidden}
   .sharecard{width:100%;max-width:400px;aspect-ratio:400/560;background:var(--card);border:3px solid var(--ink);box-shadow:6px 6px 0 var(--ink);padding:22px;display:flex;flex-direction:column;gap:12px}
   .pkmn-inner{height:100%;display:flex;flex-direction:column;gap:12px;box-sizing:border-box}
   .pkmn-head{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid var(--ink);padding-bottom:10px}
@@ -352,17 +422,6 @@
   .pkmn-facts li{padding-left:14px;position:relative}
   .pkmn-facts li::before{content:"·";position:absolute;left:2px;font-weight:800}
   .pkmn-foot{text-align:center;font:600 10px/1 'IBM Plex Mono',monospace;letter-spacing:.14em;color:var(--green)}
-  .cardpick{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:14px auto 0;max-width:460px}
-  .cardpick button{border:2px solid var(--ink);background:var(--card);padding:8px 13px;font:700 12px/1 'Archivo',sans-serif;text-transform:uppercase;letter-spacing:.02em;cursor:pointer;color:var(--ink)}
-  .cardpick button.active{background:var(--green);color:var(--green-tint)}
-  #birdConfirm{display:none;flex-direction:column;align-items:center;gap:10px;margin:18px auto 0;max-width:420px;text-align:center}
-  #birdConfirm button{background:var(--orange);color:var(--green-tint);border:2px solid var(--ink);box-shadow:4px 4px 0 var(--ink);padding:15px 20px;
-    font:800 15px/1 'Archivo',sans-serif;text-transform:uppercase;letter-spacing:.02em;cursor:pointer;font-family:'Archivo',sans-serif;transition:box-shadow .1s,transform .1s}
-  #birdConfirm button:hover{box-shadow:1px 1px 0 var(--ink);transform:translate(3px,3px)}
-  #birdConfirm button:disabled{opacity:.45;cursor:not-allowed}
-  #birdConfirm .warn{font:500 11px/1.6 'IBM Plex Mono',monospace;letter-spacing:.08em;color:var(--mutedmono);text-transform:uppercase}
-  #finalShot{display:none;margin-top:26px;text-align:center}
-  #finalShot img{width:100%;max-width:400px;border:2px solid var(--ink);box-shadow:4px 4px 0 var(--ink)}
 
   /* review modal */
   .overlay{position:fixed;inset:0;background:rgba(18,18,18,.6);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
@@ -645,22 +704,85 @@
   </div>
 </section>
 
-<!-- result flow (hidden until paid) -->
+<!-- result flow (hidden until paid): one connected journey, four stations.
+     01 your bird (instant) → 02 photos one at a time → 03 download all →
+     04 the one-time de-bird pick, delivered by EMAIL (basic tier only). -->
 <div id="resultWrap">
   <div class="inner">
     <section id="result">
-      <div class="pbar"><i id="bar"></i></div>
-      <p class="pmsg" id="pmsg">Starting up…</p>
-      <div class="grid" id="grid"></div>
-      <div class="res-actions" style="margin-top:14px">
-        <button class="abtn" id="downloadAll" type="button">Download all</button>
+
+      <!-- ── 01 · your bird — instant, keeps them company while photos render -->
+      <div class="station done" id="st1">
+        <div class="snum">01</div>
+        <div class="stitle">You've been matched.</div>
+        <p class="ssub">Meet your bird while your headshots develop. It's in every photo. That was never in question.</p>
+        <div class="matchcard">
+          <div class="matchsticker">Your bird</div>
+          <div class="matchart"><img id="matchImg" alt="your bird" style="display:none" /><div class="memoji" id="matchEmoji" style="display:none"></div></div>
+          <div class="matchbody">
+            <div class="matchhead"><span class="t">BIRD ID</span><span class="n" id="matchBadge"></span></div>
+            <div class="matchname" id="matchName"></div>
+            <div class="matchsci" id="matchSci"></div>
+            <ul class="matchfacts" id="matchFacts"></ul>
+            <div class="matchfoot">HEADSHOTSWITHABIRD.COM</div>
+          </div>
+        </div>
+        <div class="matchactions">
+          <button class="abtn primary" id="copyCard" type="button">Copy card to share</button>
+          <button class="abtn" id="downloadCard" type="button">Download card</button>
+        </div>
+        <div class="matchnote">Your shareable Bird ID card is included in the download below.</div>
       </div>
-      <p class="step-label" style="text-align:center;margin-top:36px">Your Bird ID</p>
-      <div class="cardstage" id="cardstage">
+
+      <!-- ── 02 · the photos, revealed one at a time -->
+      <div class="station" id="st2">
+        <div class="snum">02</div>
+        <div class="stitle">Your photos, developing.</div>
+        <p class="ssub" id="ssub2">Printed one at a time, fresh from the studio.</p>
+        <div class="pbar"><i id="bar"></i></div>
+        <p class="pmsg" id="pmsg">Starting up…</p>
+        <div class="grid" id="grid"></div>
+      </div>
+
+      <!-- ── 03 · one big download -->
+      <div class="station locked" id="st3">
+        <div class="snum">03</div>
+        <div class="stitle">Take them home.</div>
+        <p class="ssub">Everything above, in one go.</p>
+        <button class="bigbtn" id="downloadAll" type="button" disabled>Download all your photos</button>
+        <p class="bignote" id="dlnote">Includes your Bird ID card</p>
+      </div>
+
+      <!-- ── 04 · the one-time de-bird (basic tier only; delivered by email) -->
+      <div class="station locked laststation" id="st4">
+        <div class="snum">04</div>
+        <div class="stitle">One photo. No bird.</div>
+        <div class="pickwrap">
+          <div class="pickwarn">⚠ Choose one to remove the bird — but be careful! You can only do this once.</div>
+          <div class="picks" id="picks"></div>
+          <div class="armrow" id="armrow">
+            <button class="armbtn" id="confirmBird" type="button" disabled>Pick a photo above</button>
+            <span class="armwarn">ONE REMOVAL PER ORDER · FINAL · NO RE-ROLLS · DELIVERED TO YOUR INBOX</span>
+          </div>
+          <div class="sent" id="sent">
+            <div class="big">It's on its way.</div>
+            <p id="sentcopy">Your bird-free pick is rendering and will land in your inbox shortly.<br>The bird remains in all other photos, where it belongs.<br>Download all your photos from the link above!</p>
+            <p id="senturl" style="margin-top:10px"></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="endrow">
+        <button class="abtn" id="leaveReview" type="button">Leave a review</button>
+        <button class="abtn" id="again" type="button">Make another ($1)</button>
+      </div>
+
+      <!-- offscreen Bird ID card template — html2canvas fallback for exports -->
+      <div class="cardstage" id="cardstage" aria-hidden="true">
         <div class="sharecard" id="sharecard">
           <div class="pkmn-inner">
             <div class="pkmn-head"><span class="idt">BIRD ID</span><span class="pkmn-badge" id="cardBadge"></span></div>
-            <div class="pkmn-art"><img id="cardImg" alt="your headshot" /><div id="cardBirdArt"><img id="cardBirdImg" alt="your bird" /></div></div>
+            <div class="pkmn-art"><img id="cardImg" alt="" /><div id="cardBirdArt"><img id="cardBirdImg" alt="" /></div></div>
             <div class="pkmn-fields">
               <div><span class="l">SPECIES:</span> <span id="cardName"></span></div>
               <div><span class="l">LATIN:</span> <span id="cardSci"></span></div>
@@ -670,24 +792,7 @@
           </div>
         </div>
       </div>
-      <p class="hint" id="cardhint">Every headshot includes your bird. Pick your favorite below and we remove the bird from that one. One removal per order. It cannot be undone.</p>
-      <div class="cardpick" id="cardpick"></div>
-      <div id="birdConfirm">
-        <button type="button" id="confirmBird">Remove the bird</button>
-        <span class="warn">ONE BIRD REMOVAL PER ORDER. THIS IS FINAL. NO RE-ROLLS.</span>
-      </div>
-      <p class="hint" id="birdstat" style="margin-top:10px"></p>
-      <div id="finalShot">
-        <p class="step-label">Your bird-free pick</p>
-        <img id="finalImg" alt="your bird-free headshot" />
-      </div>
-      <div class="res-actions">
-        <button class="abtn primary" id="copyCard" type="button">Copy card to share</button>
-        <button class="abtn" id="downloadCard" type="button">Download card</button>
-        <button class="abtn" id="downloadBird" type="button" style="display:none">Bird-free pick</button>
-        <button class="abtn" id="leaveReview" type="button">Leave a review</button>
-        <button class="abtn" id="again" type="button">Make another ($1)</button>
-      </div>
+
     </section>
   </div>
 </div>
@@ -803,8 +908,8 @@
 
 <script>
   const $ = (id) => document.getElementById(id);
-  let photos=[], currentJob=null, reviewShown=false, featuredSrc=null, featuredLook=null, rating=0, resultsData=[], cardBird=null, userPicked=false;
-  let birdShots={}, birdifyBusy=false, jobComplete=false, jobTier='basic'; // basic tier's ONE bird-free render lives in birdShots
+  let photos=[], currentJob=null, reviewShown=false, featuredLook=null, rating=0, resultsData=[], cardBird=null;
+  let birdifyBusy=false, jobComplete=false, jobTier='basic', jobTotal=0;
   const MAXP=2, MIN_DIM=768;
   const isHeicFile = (f) => /heic|heif/i.test(f.type) || /\.(heic|heif)$/i.test(f.name);
 
@@ -899,15 +1004,23 @@
     }catch(err){ const m=/load failed|failed to fetch|networkerror/i.test(err.message||'')?'Upload failed — check your connection and try again (large photos can take a moment).':(err.message||'Something went wrong.'); $('err').textContent=m; $('err').style.display='block'; $('go').disabled=false; $('go').dataset.busy=''; $('go').textContent=goLabel(); }
   });
 
-  // ---- result ----
-  // The Bird ID card stars the BIRD ITSELF (its cutout on paper). The user's
-  // headshots stay in the grid; they pick ONE to be photographed with the
-  // bird — a single photoreal render, final, revealed under the card.
+  // ---- result flow ----
+  // 01 bird match (instant) → 02 photos one at a time → 03 download all →
+  // 04 the one-time de-bird pick, delivered by EMAIL (basic tier only).
   let birdCut=null; // preloaded Image of the cutout (card art + canvas export)
   const CARD_YEAR=new Date().getFullYear();
   const cardNo=n=>'№ '+String(n||1).padStart(6,'0')+' · '+CARD_YEAR;
   function renderCard(b){
     cardBird=b;
+    // station 01 — the visible bird match card (instant company while photos render)
+    $('matchName').textContent=b.name||'';
+    $('matchSci').textContent=b.sci||'';
+    $('matchBadge').textContent=cardNo(b.assignmentNumber);
+    const mfacts=(b.facts||[]).slice(0,2); if(b.blurb) mfacts.push(b.blurb);
+    $('matchFacts').innerHTML=mfacts.map(f=>`<li>${esc(f)}</li>`).join('');
+    if(b.cutout){ $('matchImg').src=b.cutout; $('matchImg').style.display='block'; $('matchEmoji').style.display='none'; }
+    else { $('matchEmoji').textContent=b.emoji||'🐦'; $('matchEmoji').style.display='block'; $('matchImg').style.display='none'; }
+    // offscreen Bird ID template (export + html2canvas fallback)
     $('cardName').textContent = (b.name||'').toUpperCase();
     $('cardBadge').textContent = cardNo(b.assignmentNumber);
     $('cardSci').textContent = (b.sci||'').toUpperCase();
@@ -920,67 +1033,102 @@
       $('cardBirdImg').src=b.cutout;
       $('cardBirdArt').style.display='flex';
     } else { birdCut=null; $('cardBirdArt').style.display='none'; }
-    setTimeout(fitCard,0);
   }
-  function fitCard(){ /* card sizes responsively via CSS */ }
-  window.addEventListener('resize', fitCard);
   function buildGrid(n){
     const g=$('grid'); g.innerHTML='';
     for(let i=0;i<n;i++){ const c=document.createElement('div'); c.className='cell'; c.id='cell'+i; c.innerHTML='<div class="ph"><div class="spin"></div></div>'; g.appendChild(c); }
   }
-  function fillCell(i, r){
-    const cell=document.getElementById('cell'+i); if(!cell || cell.dataset.filled) return;
-    cell.dataset.filled='1';
-    if(r.error){ cell.className='cell failed'; cell.innerHTML=`${r.label}<br>· skipped ·`; return; }
-    resultsData[i]={src:r.src,label:r.label,look:r.look};
-    cell.innerHTML = `<img src="${r.src}" alt="${r.label}"><span class="lbl">${r.label}</span>
-      <button class="dl" type="button" title="Save" data-save="${r.src}" data-name="headshot-${r.look||(i+1)}.jpg">⬇</button>`;
+  // Photos reveal ONE AT A TIME so the user watches the system work, even when
+  // a concurrent batch of 5 finishes together. On a page reload, everything
+  // already finished appears instantly — no fake waiting.
+  let revealQueue=[], queued=new Set(), revealed=0, revealTimer=null, firstPoll=true, pmsgTimer=null;
+  const REVEAL_MS=1400;
+  function enqueue(i,r,instant){
+    if(queued.has(i)) return; queued.add(i);
+    if(instant){ revealCell(i,r); return; }
+    revealQueue.push([i,r]); drain();
   }
-  // BASIC tier: picking a look ARMS the de-bird button — nothing generates
-  // until the user explicitly locks it in. One removal per order, final.
-  // FULL/AVIARY: birdless versions arrive automatically; picking just
-  // highlights (and feeds the review's featured shot).
-  let finalLook=null, finalSrc=null;
-  function selectCard(i){
-    const r=resultsData[i]; if(!r) return;
-    featuredSrc=r.src; featuredLook=r.look;
-    [...$('grid').children].forEach(c=>c.classList.remove('sel'));
-    const cell=$('cell'+i); if(cell) cell.classList.add('sel');
-    [...$('cardpick').children].forEach(b=>b.classList.toggle('active', +b.dataset.index===i));
-    if(jobTier!=='basic') return; // birdless set is included — nothing to arm
-    if(finalLook){
-      setBirdStat(finalLook===r.look ? '' : 'Your bird removal is final — every shot is still yours to download.');
-      return;
+  function drain(){
+    if(revealTimer) return;
+    const step=()=>{
+      const next=revealQueue.shift();
+      if(!next){ revealTimer=null; maybeFinishUI(); return; }
+      revealCell(next[0],next[1]);
+      revealTimer=setTimeout(step,REVEAL_MS);
+    };
+    step();
+  }
+  function revealCell(i,r){
+    const cell=document.getElementById('cell'+i); if(!cell||cell.dataset.filled) return;
+    cell.dataset.filled='1'; revealed++;
+    if(r.error){ cell.className='cell failed rev'; cell.innerHTML=`${esc(r.label)}<br>· skipped ·`; }
+    else{
+      const url='/api/job/'+currentJob+'/img/'+i; // bytes fetched ONCE — never inlined in the poll
+      resultsData[i]={url,label:r.label,look:r.look};
+      const img=new Image(); img.alt=r.label||''; img.onload=()=>cell.classList.add('rev'); img.src=url;
+      cell.appendChild(img);
+      const lbl=document.createElement('span'); lbl.className='lbl'; lbl.textContent=r.label||''; cell.appendChild(lbl);
+      const dlb=document.createElement('button'); dlb.className='dl'; dlb.type='button'; dlb.title='Save'; dlb.textContent='⬇';
+      dlb.onclick=(e)=>{ e.stopPropagation(); saveOne(url,'headshot-'+(r.look||(i+1))+'.jpg'); };
+      cell.appendChild(dlb);
     }
-    if(!jobComplete) return;
-    const btn=$('confirmBird');
-    btn.textContent='Remove the bird — '+(r.label||'this look');
-    btn.disabled=false;
-    $('birdConfirm').style.display='flex';
-    setBirdStat('');
+    $('bar').style.width=Math.round((revealed/(jobTotal||1))*100)+'%';
+    maybeFinishUI();
   }
-  function setBirdStat(t){ const el=$('birdstat'); if(el) el.textContent=t||''; }
-  function showFinal(look,src){
-    finalLook=look; finalSrc=src; birdShots[look]=src;
-    $('birdConfirm').style.display='none';
-    $('finalImg').src=src;
-    $('finalShot').style.display='block';
-    $('downloadBird').style.display='';
-    setBirdStat('Final. One bird removed. The rest keep theirs.');
+  const PHRASES=['Developing your headshots…','Tailoring outfits…','Getting the bird into frame…','Adjusting the lighting…',
+    'Negotiating with the bird…','Pressing your collar…','Asking the bird to look professional…','Steaming the backdrop…','Almost there…'];
+  const doneMsg=()=> jobTier==='basic'
+    ? 'All '+revealed+' ready — they\'re yours. And one can lose its bird below.'
+    : 'All '+revealed+' ready — every look with bird and without.';
+  function maybeFinishUI(){
+    if(!jobComplete || revealQueue.length || revealed<jobTotal) return;
+    clearInterval(pmsgTimer);
+    $('pmsg').textContent=doneMsg();
+    $('st2').classList.add('done');
+    $('st3').classList.remove('locked');
+    const got=resultsData.filter(Boolean).length;
+    const da=$('downloadAll'); da.disabled=!got; if(got) da.textContent='Download all '+got+' photos + bird card';
+    if(jobTier==='basic') unlockPick();
+  }
+  // ---- station 04: the one-time de-bird (basic tier) — delivered by email ----
+  let picked=null, debirdDone=false;
+  function unlockPick(){
+    if(debirdDone) return; // already final (page-reload recovery shows the sent state)
+    $('st4').classList.remove('locked');
+    const wrap=$('picks'); if(wrap.children.length) return;
+    resultsData.forEach((r)=>{
+      if(!r) return;
+      const b=document.createElement('button'); b.type='button'; b.className='pick';
+      const im=document.createElement('img'); im.src=r.url; im.alt=r.label||''; b.appendChild(im);
+      b.onclick=()=>{ if(debirdDone) return; picked=r; featuredLook=r.look;
+        [...wrap.children].forEach(p=>p.classList.remove('sel')); b.classList.add('sel');
+        const btn=$('confirmBird'); btn.disabled=false; btn.textContent='Remove the bird — '+(r.label||'this look'); };
+      wrap.appendChild(b);
+    });
+  }
+  function showSent(url,emailed){
+    debirdDone=true;
+    $('st4').classList.remove('locked');
+    $('armrow').style.display='none';
+    $('sent').style.display='block';
+    $('senturl').innerHTML = (emailed===false && url)
+      ? '<a href="'+url+'" target="_blank" rel="noopener" style="color:var(--green);font-weight:800">The email hiccuped — download your bird-free photo here.</a>'
+      : '';
+    [...$('picks').children].forEach(p=>{ p.onclick=null; p.style.cursor='default'; if(!p.classList.contains('sel')) p.style.opacity=.45; });
   }
   $('confirmBird').addEventListener('click', async ()=>{
-    if(!currentJob || !featuredLook || birdifyBusy || finalLook) return;
+    if(!currentJob || !picked || birdifyBusy || debirdDone) return;
     birdifyBusy=true;
-    const btn=$('confirmBird'); btn.disabled=true;
-    setBirdStat('Hold still — the bird is leaving. About 15 seconds.');
+    const btn=$('confirmBird'); btn.disabled=true; btn.textContent='The bird is leaving…';
     try{
-      const r=await fetch('/api/debird',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jobId:currentJob,look:featuredLook})});
+      const r=await fetch('/api/debird',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jobId:currentJob,look:picked.look})});
       const d=await r.json();
       if(!r.ok) throw new Error(d.error||'Could not remove the bird.');
-      showFinal(d.look,d.src);
+      $('sentcopy').innerHTML='Your bird-free <b>'+esc(picked.label||'pick')+'</b> is rendering and will land in your inbox in about a minute.<br>The bird remains in all other photos, where it belongs.<br>Download all your photos from the link above!';
+      showSent(d.url,d.emailed);
     }catch(e){
-      setBirdStat(''); toast(e.message||'Could not remove the bird');
-      btn.disabled=false; // failed attempt ≠ your one shot — let them retry
+      toast(e.message||'Could not remove the bird');
+      btn.disabled=false; btn.textContent='Remove the bird — '+(picked.label||'this look'); // failed attempt ≠ your one shot
     }finally{ birdifyBusy=false; }
   });
   let cardPostTimer=null;
@@ -994,25 +1142,6 @@
       }catch(e){ /* card image not ready yet — a later pick/completion will retry */ }
     },1200);
   }
-  // explicit look-picker buttons under the card (outside #sharecard so they're not in the export)
-  function renderCardPicker(){
-    const wrap=$('cardpick'); if(!wrap) return;
-    wrap.innerHTML='';
-    resultsData.forEach((r,i)=>{
-      if(!r) return;
-      const b=document.createElement('button'); b.type='button';
-      b.textContent=r.label||('Look '+(i+1)); b.dataset.index=i;
-      if(r.src===featuredSrc) b.classList.add('active');
-      b.addEventListener('click',()=>{ userPicked=true; selectCard(i); });
-      wrap.appendChild(b);
-    });
-  }
-  $('grid').addEventListener('click', e=>{
-    const save=e.target.closest('.dl');
-    if(save){ e.stopPropagation(); saveOne(save.dataset.save, save.dataset.name||'headshot.jpg'); return; }
-    const cell=e.target.closest('.cell'); if(!cell || cell.classList.contains('dummy') || cell.classList.contains('failed')) return;
-    const m=(cell.id||'').match(/^cell(\d+)$/); if(m){ userPicked=true; selectCard(+m[1]); }
-  });
   async function saveOne(src,name){
     try{ const f=await fileFromSrc(src,name);
       if(canShareFiles([f])){ try{ await navigator.share({files:[f]}); return; }catch(e){ if(e&&e.name==='AbortError') return; } }
@@ -1129,20 +1258,20 @@
     if(canShareFiles([file])){ try{ await navigator.share({files:[file],title:'Bird card'}); return; }catch(e){ if(e&&e.name==='AbortError') return; } }
     dl(blob,'bird-card.png');
   });
-  $('downloadBird').addEventListener('click', async ()=>{
-    if(!finalSrc) return toast('Pick a headshot and remove its bird first');
-    const blob=await (await fetch(finalSrc)).blob();
-    const file=new File([blob],'bird-free-pick.jpg',{type:blob.type||'image/jpeg'});
-    if(canShareFiles([file])){ try{ await navigator.share({files:[file],title:'My bird-free pick'}); return; }catch(e){ if(e&&e.name==='AbortError') return; } }
-    dl(blob,'bird-free-pick.jpg');
-  });
+  // The ONE big download: every generated photo + the Bird ID card (default).
+  // The bird-free pick is NOT in here — it's delivered separately by email.
   $('downloadAll').addEventListener('click', async ()=>{
     const imgs=resultsData.filter(Boolean); if(!imgs.length) return;
-    const files=[]; for(let i=0;i<imgs.length;i++){ try{ files.push(await fileFromSrc(imgs[i].src,`headshot-${i+1}.jpg`)); }catch{} }
-    if(!files.length) return;
-    if(canShareFiles(files)){ try{ await navigator.share({files,title:'My Headshots with a Bird'}); return; }catch(e){ if(e&&e.name==='AbortError') return; } }
-    for(const f of files){ const u=URL.createObjectURL(f); const a=document.createElement('a'); a.href=u; a.download=f.name; document.body.appendChild(a); a.click(); a.remove(); await new Promise(r=>setTimeout(r,500)); URL.revokeObjectURL(u); }
-    toast('Saved your '+files.length+' headshot'+(files.length===1?'':'s'));
+    const da=$('downloadAll'); const prev=da.textContent; da.disabled=true; da.textContent='Packing…';
+    try{
+      const files=[];
+      try{ const cb=await cardBlob(); files.push(new File([cb],'bird-id-card.png',{type:'image/png'})); }catch{}
+      for(const im of imgs){ try{ files.push(await fileFromSrc(im.url,'headshot-'+(im.look||'look')+'.jpg')); }catch{} }
+      if(!files.length) return;
+      if(canShareFiles(files)){ try{ await navigator.share({files,title:'My Headshots with a Bird'}); return; }catch(e){ if(e&&e.name==='AbortError') return; } }
+      for(const f of files){ const u=URL.createObjectURL(f); const a=document.createElement('a'); a.href=u; a.download=f.name; document.body.appendChild(a); a.click(); a.remove(); await new Promise(r=>setTimeout(r,500)); URL.revokeObjectURL(u); }
+      toast('Saved '+files.length+' files (photos + bird card)');
+    } finally { da.disabled=false; da.textContent=prev; }
   });
 
   async function enterResult(jobId){
@@ -1154,48 +1283,46 @@
     let fin; try{ fin=await (await fetch('/api/finalize/'+jobId)).json(); }catch{ $('pmsg').textContent='Could not verify payment.'; return; }
     if(fin.error){ $('pmsg').textContent=fin.error; return; }
     if(!fin.paid){ $('pmsg').textContent='Payment not confirmed. If you were charged, refresh in a moment.'; return; }
-    jobTier=fin.tier||'basic';
-    if(jobTier!=='basic') $('cardhint').textContent='Every look arrives twice: with your bird, then without. The birdless versions land right after the bird set.';
-    resultsData=[]; featuredSrc=null; userPicked=false; renderCard(fin.bird); buildGrid(fin.total); pollImages(jobId, fin.total);
+    jobTier=fin.tier||'basic'; jobTotal=fin.total;
+    $('ssub2').textContent = jobTier==='basic'
+      ? fin.total+' looks, printed one at a time, fresh from the studio.'
+      : 'Every look arrives twice — with your bird, then without. '+fin.total+' photos, printed one at a time.';
+    if(jobTier!=='basic'){ // birdless twins are included — no pick station
+      $('st4').style.display='none'; $('st3').classList.add('laststation');
+      $('dlnote').textContent='Includes your Bird ID card and the birdless version of every look';
+    }
+    resultsData=[]; renderCard(fin.bird); buildGrid(fin.total); pollImages(jobId, fin.total);
   }
-  const msgs=['Developing your headshots…','Tailoring outfits…','Getting the bird into frame…','Adjusting the lighting…','Almost there…'];
-  const msgs2=['Developing your headshots…','Getting the bird into frame…','Adjusting the lighting…','Making the bird-free copies…','Almost there…'];
-  const doneMsg=t=>jobTier==='basic'
-    ? 'All '+t+' ready. Pick the one that loses its bird. One removal. Final.'
-    : 'All '+t+' ready — every look with bird and without.';
   function pollImages(jobId,total){
-    const mlist = jobTier==='basic' ? msgs : msgs2;
-    let mi=0; const mt=setInterval(()=>$('pmsg').textContent = $('bar').style.width==='100%'?doneMsg(total):mlist[mi=(mi+1)%mlist.length],2200);
+    let mi=0;
+    pmsgTimer=setInterval(()=>{ if(!jobComplete||revealQueue.length) $('pmsg').textContent=PHRASES[mi=(mi+1)%PHRASES.length]; },2200);
     let fails=0;
     const tick=async()=>{
       let j;
       try{ const res=await fetch('/api/job/'+jobId); j=await res.json(); if(!res.ok) throw new Error(j.error||'poll'); fails=0; }
       catch{ // transient network blip / phone lock — keep trying instead of freezing the spinner
         if(++fails<=15) return setTimeout(tick,3000);
-        clearInterval(mt); $('pmsg').textContent='Connection lost — your headshots are still being made and will be emailed to you. Refresh to keep watching.'; return;
+        clearInterval(pmsgTimer); $('pmsg').textContent='Connection lost — your headshots are still being made and the full set will be emailed to you. Refresh to keep watching.'; return;
       }
-      (j.results||[]).forEach((r,i)=>{ if(r) fillCell(i,r); });
-      renderCardPicker();
-      // page-reload recovery: if this order's ONE bird removal already exists
-      // server-side, adopt it (never re-generated)
-      const done=Object.entries(j.cleanShots||{})[0];
-      if(done && !finalLook) showFinal(done[0], done[1]);
-      $('bar').style.width=Math.round((j.done/total)*100)+'%';
-      if(j.status==='running'||j.status==='generating'||j.status==='awaiting_payment') setTimeout(tick,2000);
+      // manifest only (no image bytes): stagger fresh arrivals, but on the
+      // FIRST poll (e.g. a page reload) reveal everything already done at once
+      const instant=firstPoll; firstPoll=false;
+      (j.results||[]).forEach((r,i)=>{ if(r && (r.ready||r.error)) enqueue(i,r,instant); });
+      if(j.status==='generating'||j.status==='awaiting_payment') setTimeout(tick,2000);
       else {
-        clearInterval(mt); jobComplete=true;
-        $('pmsg').textContent = j.status==='failed' ? 'Generation failed — your payment has been refunded automatically.' : doneMsg(total);
-        const got=resultsData.filter(Boolean).length, da=$('downloadAll'); if(da&&got) da.textContent='Download all '+got;
-        if(j.status!=='failed' && !finalLook && jobTier==='basic') setBirdStat('One of these loses its bird. Your call. Choose wisely — it\'s final.');
+        jobComplete=true;
+        if(j.status==='failed'){ clearInterval(pmsgTimer); $('pmsg').textContent='Generation failed — your payment has been refunded automatically.'; return; }
+        // page-reload recovery: this order's ONE removal already happened
+        if(j.cleanLook && jobTier==='basic') showSent(null,null);
+        maybeFinishUI();
       }
     };
     tick();
   }
 
   // ---- review modal ----
-  function openReview(src){ if(src) featuredSrc=src; $('overlay').style.display='flex'; }
-  function maybeReview(src){ if(!reviewShown){ reviewShown=true; openReview(src); } }
-  $('leaveReview').addEventListener('click',()=>openReview(featuredSrc));
+  function openReview(){ $('overlay').style.display='flex'; }
+  $('leaveReview').addEventListener('click',()=>openReview());
   $('stars').addEventListener('click',e=>{ const s=e.target.closest('span'); if(!s)return; rating=+s.dataset.v;
     [...$('stars').children].forEach(x=>x.classList.toggle('on', +x.dataset.v<=rating)); });
   $('rtext').addEventListener('input',()=>{ const w=$('rtext').value.trim().split(/\s+/).filter(Boolean).length;
@@ -1208,7 +1335,7 @@
     if(w>30) return toast('Keep it under 30 words');
     try{
       const r=await fetch('/api/review',{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({jobId:currentJob,stars:rating,text,name:$('rname').value,consent:$('consent').checked,featuredSrc})});
+        body:JSON.stringify({jobId:currentJob,stars:rating,text,name:$('rname').value,consent:$('consent').checked,featuredLook})});
       const d=await r.json(); if(!r.ok) throw new Error(d.error||'Could not submit.');
       $('reviewForm').style.display='none'; $('thanks').style.display='block';
     }catch(err){ toast(err.message); }
