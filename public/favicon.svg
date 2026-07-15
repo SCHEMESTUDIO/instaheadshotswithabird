@@ -1,1 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text x="50" y="52" font-size="80" text-anchor="middle" dominant-baseline="central">🐦</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <rect x="4" y="4" width="92" height="92" fill="#EFEAE0" stroke="#121212" stroke-width="8"/>
+  <g fill="#0D7A5C">
+    <path d="M50 30c-10 0-17 7-17 16 0 7 4 12 9 15l-3 13h6l3-11c1 0 2 0 2 0l3 11h6l-3-13c5-3 9-8 9-15 0-9-7-16-15-16z"/>
+    <circle cx="58" cy="41" r="3" fill="#EFEAE0"/>
+    <path d="M64 44l12-4-12-2z"/>
+  </g>
+</svg>

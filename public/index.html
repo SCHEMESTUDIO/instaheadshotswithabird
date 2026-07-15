@@ -13,221 +13,279 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<title>Headshots with a Bird — Five serious headshots. One bird. $1.</title>
-<meta name="description" content="Upload one selfie, get five professional headshots in about a minute — for $1. Includes exactly one bird, delivered on your shareable Bird ID card, not in your headshots. House rules." />
+<title>Headshots with a Bird — Studio headshots. One bird. $1.</title>
+<meta name="description" content="One selfie input, five professional looks, delivered in a minute — for $1. Every pack includes exactly one bird, on its own Bird ID card. The bird is not optional." />
 <link rel="canonical" href="https://headshotswithabird.com/" />
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Fraunces:opsz,wght@9..144,900&family=JetBrains+Mono:wght@400;500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
-<meta name="theme-color" content="#f7f5ef" />
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&family=Fraunces:opsz,wght@9..144,900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<meta name="theme-color" content="#EFEAE0" />
 <!-- Social sharing (LinkedIn, Reddit, Slack, iMessage all read Open Graph) -->
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="Headshots with a Bird" />
-<meta property="og:title" content="Five serious headshots. One bird. $1." />
-<meta property="og:description" content="Upload one selfie, get five professional headshots in about a minute. Also included: one bird, on your shareable Bird ID card. This part is not optional." />
+<meta property="og:title" content="Studio headshots. One bird. $1." />
+<meta property="og:description" content="One selfie input, five professional looks, delivered in a minute. Every pack includes exactly one bird, on its own Bird ID card. The bird is not optional." />
 <meta property="og:url" content="https://headshotswithabird.com/" />
 <meta property="og:image" content="https://headshotswithabird.com/og.png" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
 <meta property="og:image:alt" content="Five professional headshots. One bird. One dollar." />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Five serious headshots. One bird. $1." />
-<meta name="twitter:description" content="Upload one selfie, get five professional headshots in about a minute. Also included: one bird, on your shareable Bird ID card. This part is not optional." />
+<meta name="twitter:title" content="Studio headshots. One bird. $1." />
+<meta name="twitter:description" content="One selfie input, five professional looks, delivered in a minute. Every pack includes exactly one bird, on its own Bird ID card. The bird is not optional." />
 <meta name="twitter:image" content="https://headshotswithabird.com/og.png" />
 <style>
+  /* ============================================================
+     Print-shop design system (design_handoff_homepage_redesign)
+     Flat colors, 2px ink borders, offset solid shadows, radius 0.
+     ============================================================ */
   :root{
-    --ink:#0d0f14; --paper:#f7f5ef; --card:#ffffff;
-    --brand:#10a37f; --orange:#ff5a3c; --brand-2:#1b6cff; --accent:#ffd23c;
-    --muted:#6b7180; --line:#e6e2d8; --good:#16a34a; --star:#f5a623;
-    --shadow:0 10px 40px rgba(13,15,20,.12); --r:18px;
+    --paper:#EFEAE0; --card:#FDFBF5; --ink:#121212;
+    --green:#0D7A5C; --orange:#F2500A; --yellow:#F6C445;
+    --body:#3B382F; --mutedmono:#8C877B;
+    --green-tint:#EFEAE0; --green-label:#9FD4BF; --footer-green:#5FBF9A;
   }
   *{box-sizing:border-box} html,body{margin:0}
-  body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
-    color:var(--ink);background:var(--paper);line-height:1.5;-webkit-font-smoothing:antialiased}
-  .wrap{max-width:920px;margin:0 auto;padding:0 22px}
+  body{font-family:'Archivo',sans-serif;color:var(--ink);background:var(--paper);line-height:1.5;-webkit-font-smoothing:antialiased}
+  a{color:var(--ink)}
 
-  nav{display:flex;align-items:center;justify-content:space-between;padding:18px 0}
-  .logo{font-weight:800;font-size:20px;letter-spacing:-.02em;display:flex;align-items:center;gap:8px;text-decoration:none;color:var(--ink);cursor:pointer}
-  .logo .b{background:transparent;border:2px solid var(--brand);color:var(--ink);border-radius:8px;padding:2px 7px}
-  .hero{padding:46px 0 14px;text-align:center}
-  .awards{display:flex;justify-content:center;align-items:center;gap:16px;flex-wrap:wrap;margin-top:22px}
-  .awards img{height:65px;width:auto;max-width:100%;display:block}
-  h1{font-size:clamp(36px,6vw,62px);line-height:.99;letter-spacing:-.04em;margin:0 0 14px;font-weight:850}
-  h1 .hl{color:var(--orange);white-space:nowrap}
-  .sub{font-size:clamp(16px,2.2vw,20px);color:var(--muted);max-width:620px;margin:0 auto 10px}
-  .micro{font-size:14px;color:var(--muted);font-style:italic;max-width:540px;margin:0 auto}
+  .display{font-family:'Archivo Black',sans-serif;font-weight:400;text-transform:uppercase;letter-spacing:-.01em;line-height:1.0}
+  .mono{font-family:'IBM Plex Mono',monospace}
+  h1{margin:0;font:400 clamp(44px,7vw,84px)/0.98 'Archivo Black',sans-serif;text-transform:uppercase;letter-spacing:-.015em}
+  h2{margin:0;font:400 clamp(30px,4vw,48px)/1.05 'Archivo Black',sans-serif;text-transform:uppercase;letter-spacing:-.01em}
+  .gr{color:var(--green)}
 
-  .tool{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);margin:34px auto 0;padding:26px;max-width:620px}
-  .step-label{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 12px}
-  .drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border:2px dashed var(--line);border-radius:14px;padding:30px;text-align:center;cursor:pointer;transition:.15s;background:#fcfbf8}
+  .inner{max-width:1200px;margin:0 auto;width:100%}
+  section{padding:72px 40px;border-bottom:3px solid var(--ink)}
+  @media(max-width:700px){section{padding:56px 20px}}
+
+  /* buttons: 2px ink border + offset shadow, press-down hover */
+  .btn{display:inline-block;font:800 16px/1 'Archivo',sans-serif;letter-spacing:.02em;text-transform:uppercase;text-decoration:none;
+    padding:17px 26px;border:2px solid var(--ink);box-shadow:4px 4px 0 var(--ink);cursor:pointer;background:var(--paper);color:var(--ink);
+    transition:box-shadow .1s,transform .1s;font-family:'Archivo',sans-serif}
+  .btn:hover{box-shadow:1px 1px 0 var(--ink);transform:translate(3px,3px)}
+  .btn.green{background:var(--green);color:var(--green-tint)}
+  .btn.orange{background:var(--orange);color:var(--green-tint)}
+  .btn.sm{font-size:14px;padding:15px 20px;box-shadow:3px 3px 0 var(--ink)}
+  .btn.sm:hover{box-shadow:1px 1px 0 var(--ink);transform:translate(2px,2px)}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+  .btn:disabled:hover{box-shadow:4px 4px 0 var(--ink);transform:none}
+
+  /* ticker */
+  .ticker{background:var(--ink);color:var(--green-tint);overflow:hidden;padding:8px 0;font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:.16em}
+  .ticker-track{display:inline-flex;white-space:nowrap;animation:hwb-marquee 30s linear infinite}
+  .ticker-track span{padding-right:32px}
+  @keyframes hwb-marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  @media(prefers-reduced-motion:reduce){.ticker-track{animation:none}}
+
+  /* nav */
+  .nav{display:flex;align-items:center;justify-content:space-between;padding:18px 40px;border-bottom:3px solid var(--ink);background:var(--paper);gap:20px;flex-wrap:wrap}
+  .wordmark{display:flex;align-items:baseline;gap:8px;text-decoration:none}
+  .wordmark span{font:400 19px/1 'Archivo Black',sans-serif;text-transform:uppercase;letter-spacing:-.01em;color:var(--ink)}
+  .wordmark span.b{color:var(--green)}
+  .navlinks{display:flex;align-items:center;gap:26px;flex-wrap:wrap}
+  .navlinks a.nl{font:700 13px/1 'Archivo',sans-serif;letter-spacing:.04em;text-decoration:none;text-transform:uppercase;padding:12px 0}
+  .navlinks a.nl:hover{color:var(--green)}
+  .navcta{font:800 13px/1 'Archivo',sans-serif;letter-spacing:.02em;text-transform:uppercase;text-decoration:none;background:var(--green);color:var(--green-tint);
+    padding:11px 18px;border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);display:inline-block;transition:box-shadow .1s,transform .1s}
+  .navcta:hover{box-shadow:1px 1px 0 var(--ink);transform:translate(2px,2px);color:var(--green-tint)}
+  @media(max-width:700px){.nav{padding:14px 20px}.navlinks{gap:16px}}
+
+  /* hero */
+  .hero{padding:72px 40px 64px;border-bottom:3px solid var(--ink)}
+  .hero .inner{display:flex;flex-direction:column;gap:36px}
+  .hero-copy{display:flex;flex-direction:column;gap:22px;max-width:900px}
+  .h1wrap{position:relative;width:fit-content}
+  .stamp{position:absolute;top:-14px;right:-30px;font:700 12px/1 'Archivo',sans-serif;letter-spacing:.1em;text-transform:uppercase;
+    background:var(--orange);color:var(--green-tint);padding:8px 11px;border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);transform:rotate(-5deg)}
+  @media(max-width:700px){.stamp{right:0}}
+  .hero-sub{margin:0;font:500 19px/1.5 'Archivo',sans-serif;color:var(--body);max-width:560px}
+  .hero-ctas{display:flex;gap:14px;flex-wrap:wrap}
+  .hero-foot{font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:.14em;color:var(--mutedmono)}
+  .strip{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+  .strip.strip5{grid-template-columns:repeat(5,1fr)}
+  @media(max-width:1000px){.strip,.strip.strip5{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:560px){.strip,.strip.strip5{grid-template-columns:1fr}}
+  .frame{display:flex;flex-direction:column;gap:8px}
+  .frame .ph{border:2px solid var(--ink);box-shadow:4px 4px 0 var(--ink);height:240px;background:var(--card)}
+  .frame .ph img{width:100%;height:100%;object-fit:cover;display:block}
+  .frame .cap{font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:.14em;color:var(--body)}
+  .frame.bird .ph{border-color:var(--green);box-shadow:4px 4px 0 var(--green)}
+  .frame.bird .cap{color:var(--green)}
+  @media(max-width:700px){.hero{padding:56px 20px 48px}}
+
+  /* how it works */
+  #how{background:var(--card)}
+  #how .inner{display:flex;flex-direction:column;gap:40px}
+  .steps3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  @media(max-width:820px){.steps3{grid-template-columns:1fr}}
+  .stepcard{border:2px solid var(--ink);box-shadow:4px 4px 0 var(--ink);background:var(--paper);padding:26px;display:flex;flex-direction:column;gap:12px}
+  .stepcard.birdstep{border-color:var(--green);box-shadow:4px 4px 0 var(--green)}
+  .stepcard .num{font:400 34px/1 'Archivo Black',sans-serif;color:var(--green)}
+  .stepcard.birdstep .num{color:var(--orange)}
+  .stepcard .t{font:800 17px/1.2 'Archivo',sans-serif;text-transform:uppercase;letter-spacing:.02em}
+  .stepcard .d{font:500 14px/1.55 'Archivo',sans-serif;color:var(--body)}
+
+  /* pricing */
+  #pricing .inner{display:flex;flex-direction:column;gap:16px}
+  .pricing-sub{margin:0 0 24px;font:500 16px/1.5 'Archivo',sans-serif;color:var(--body);max-width:620px}
+  .pp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;align-items:start}
+  @media(max-width:900px){.pp-grid{grid-template-columns:1fr;max-width:460px}}
+  .pp-card{border:2px solid var(--ink);box-shadow:4px 4px 0 var(--ink);background:var(--card);padding:28px;display:flex;flex-direction:column;gap:14px;position:relative}
+  .pp-card--feature{box-shadow:6px 6px 0 var(--green);margin-top:14px}
+  .pp-card--premium{margin-top:14px}
+  @media(max-width:900px){.pp-card{margin-top:14px}}
+  .pp-sticker{position:absolute;top:-14px;left:24px;font:700 10px/1 'Archivo',sans-serif;letter-spacing:.1em;color:var(--green-tint);padding:7px 10px;border:2px solid var(--ink)}
+  .pp-sticker.green{background:var(--green);transform:rotate(-2deg)}
+  .pp-sticker.orange{background:var(--orange);transform:rotate(2deg)}
+  .pp-tier{font:800 13px/1 'Archivo',sans-serif;letter-spacing:.12em;text-transform:uppercase}
+  .pp-priceRow{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+  .pp-price{font:400 46px/1 'Archivo Black',sans-serif}
+  .pp-price.green{color:var(--green)}
+  .pp-was{font:600 12px 'Archivo',sans-serif;color:var(--mutedmono);text-decoration:line-through}
+  .pp-savebadge{font:700 11px 'Archivo',sans-serif;background:var(--yellow);padding:4px 7px;border:1.5px solid var(--ink);color:var(--ink)}
+  .pp-count{font:600 15px/1.3 'Archivo',sans-serif}
+  .pp-benefits{display:flex;flex-direction:column;gap:9px;border-top:2px dotted var(--ink);padding-top:14px;font:500 13.5px/1.5 'Archivo',sans-serif;color:var(--body);margin:0;list-style:none;padding-left:0}
+  .pp-benefits .bird-line{color:var(--green);font-weight:700}
+  .pp-benefits .bird-line.o{color:var(--orange)}
+  .pp-cta{margin-top:6px;text-align:center;width:100%;font:800 14px/1 'Archivo',sans-serif;letter-spacing:.02em;text-transform:uppercase;text-decoration:none;
+    padding:15px 20px;border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);cursor:pointer;transition:box-shadow .1s,transform .1s}
+  .pp-cta:hover{box-shadow:1px 1px 0 var(--ink);transform:translate(2px,2px)}
+  .pp-cta.paper{background:var(--paper);color:var(--ink)}
+  .pp-cta.green{background:var(--green);color:var(--green-tint)}
+  .pp-cta.orange{background:var(--orange);color:var(--green-tint)}
+  .pp-disclaimer{font:500 11px/1.6 'IBM Plex Mono',monospace;letter-spacing:.1em;color:var(--mutedmono);margin-top:8px}
+
+  /* upload tool */
+  #toolWrap{background:var(--paper)}
+  .tool{background:var(--card);border:2px solid var(--ink);box-shadow:6px 6px 0 var(--ink);margin:0 auto;padding:28px;max-width:640px}
+  .step-label{font:600 12px/1 'IBM Plex Mono',monospace;letter-spacing:.18em;text-transform:uppercase;color:var(--mutedmono);margin:0 0 14px}
+  .drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border:2px dashed var(--ink);padding:30px;text-align:center;cursor:pointer;transition:.15s;background:var(--paper)}
   .drop>*{margin:0}
-  .drop:hover,.drop.drag{border-color:var(--brand);background:#fff7f4}
+  .drop:hover,.drop.drag{border-color:var(--green);background:#e7efe9}
   .drop input{display:none}
-  .drop .icon{font-size:34px} .drop p{margin:8px 0 2px;font-weight:600} .drop small{color:var(--muted)}
-  .have{display:none;margin-top:6px;align-items:center;gap:14px}
-  .have img{width:84px;height:84px;border-radius:12px;object-fit:cover;border:1px solid var(--line)}
-  .have .swap{background:none;border:none;color:var(--brand);font-weight:700;cursor:pointer;font-size:13px}
+  .drop p{margin:8px 0 2px;font-weight:800;text-transform:uppercase;letter-spacing:.02em;font-size:15px}
+  .drop small{color:var(--body);font-size:13px}
   .thumbs{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
-  .thumb{position:relative;width:84px;height:84px;border-radius:12px;overflow:hidden;border:1px solid var(--line)}
+  .thumb{position:relative;width:84px;height:84px;overflow:hidden;border:2px solid var(--ink)}
   .thumb img{width:100%;height:100%;object-fit:cover}
-  .thumb button{position:absolute;top:3px;right:3px;width:20px;height:20px;border:none;border-radius:50%;background:rgba(13,15,20,.7);color:#fff;cursor:pointer;font-size:12px;line-height:1}
-  .count{font-size:13px;color:var(--muted);margin-top:8px;font-weight:600}
-  .heicph{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%;font-size:11px;font-weight:800;color:var(--muted);text-align:center;background:#fcfbf8}
-  .whatsincluded{margin-top:18px;font-size:13.5px;color:var(--muted);background:#fcfbf8;border:1px solid var(--line);border-radius:12px;padding:12px 14px}
-  .whatsincluded b{color:var(--ink)}
-  .go{width:100%;margin-top:18px;background:var(--brand);color:#fff;border:none;border-radius:13px;padding:17px;font-size:17px;font-weight:800;cursor:pointer;letter-spacing:-.01em;transition:.12s}
-  .go:hover{filter:brightness(1.05)} .go:disabled{opacity:.5;cursor:not-allowed}
-  .note{font-size:12.5px;color:var(--muted);text-align:center;margin-top:12px}
-  .err{display:none;background:#fff0ee;border:1px solid #ffcfc6;color:#b3261e;border-radius:11px;padding:12px 16px;font-size:14px;font-weight:600;margin-top:16px;text-align:center}
-  .canceled{display:none;background:#fff8e6;border:1px solid #ffe6a3;color:#8a6300;border-radius:11px;padding:12px 16px;font-size:14px;font-weight:600;margin:16px auto 0;max-width:620px;text-align:center}
+  .thumb button{position:absolute;top:0;right:0;width:22px;height:22px;border:none;background:var(--ink);color:var(--paper);cursor:pointer;font-size:13px;line-height:1}
+  .count{font:600 12px/1.4 'IBM Plex Mono',monospace;letter-spacing:.08em;color:var(--body);margin-top:8px;text-transform:uppercase}
+  .heicph{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%;font-size:11px;font-weight:800;color:var(--mutedmono);text-align:center;background:var(--paper)}
+  .tierpick{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}
+  .tieropt{position:relative;border:2px solid var(--ink);background:var(--card);padding:14px 8px 11px;cursor:pointer;text-align:center;display:flex;flex-direction:column;gap:3px;font-family:'Archivo',sans-serif;color:var(--ink);transition:.12s;box-shadow:2px 2px 0 var(--ink)}
+  .tieropt:hover{background:var(--paper)}
+  .tieropt.active{background:var(--green);color:var(--green-tint);box-shadow:2px 2px 0 var(--ink)}
+  .tieropt.active .tp,.tieropt.active .td{color:var(--green-tint)}
+  .tieropt .tt{font-weight:800;font-size:14px;text-transform:uppercase}
+  .tieropt .tp{font-family:'Archivo Black',sans-serif;font-size:21px;color:var(--green);line-height:1}
+  .tieropt .td{font:500 10px/1.3 'IBM Plex Mono',monospace;letter-spacing:.04em;color:var(--mutedmono);text-transform:uppercase}
+  .tieropt .tbadge{position:absolute;top:-9px;left:50%;transform:translateX(-50%) rotate(-2deg);background:var(--green);color:var(--green-tint);font-size:9px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:3px 8px;border:1.5px solid var(--ink);white-space:nowrap}
+  @media(max-width:480px){.tieropt .td{display:none}.tieropt{padding:11px 6px}}
+  #birdchooser{display:none;margin-top:14px;border:2px solid var(--ink);padding:14px;background:var(--paper)}
+  #birdchooser label{font-size:13px;font-weight:800;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:.02em}
+  #birdchooser label span{color:var(--mutedmono);font-weight:600;text-transform:none;letter-spacing:0}
+  #birdchooser select{width:100%;border:2px solid var(--ink);border-radius:0;padding:10px 12px;font:inherit;background:var(--card)}
+  .tool input[type=email],.tool input[type=text]{display:block;width:100%;border:2px solid var(--ink);border-radius:0;padding:12px 14px;font:inherit;background:var(--card)}
+  .tool input[type=email]{margin-top:14px}
+  .optin{display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--body);margin-top:10px;text-align:left}
+  #code{margin-top:12px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:13px}
+  .go{width:100%;margin-top:18px;background:var(--green);color:var(--green-tint);border:2px solid var(--ink);box-shadow:4px 4px 0 var(--ink);border-radius:0;
+    padding:17px;font:800 16px/1 'Archivo',sans-serif;text-transform:uppercase;letter-spacing:.02em;cursor:pointer;transition:box-shadow .1s,transform .1s}
+  .go:hover{box-shadow:1px 1px 0 var(--ink);transform:translate(3px,3px)}
+  .go:disabled{opacity:.45;cursor:not-allowed}
+  .go:disabled:hover{box-shadow:4px 4px 0 var(--ink);transform:none}
+  .note{font:500 11px/1.6 'IBM Plex Mono',monospace;letter-spacing:.08em;color:var(--mutedmono);text-align:center;margin-top:12px;text-transform:uppercase}
+  .err{display:none;background:var(--card);border:2px solid var(--orange);color:var(--orange);padding:12px 16px;font-size:14px;font-weight:700;margin-top:16px;text-align:center}
+  .canceled{display:none;background:var(--yellow);border:2px solid var(--ink);color:var(--ink);padding:12px 16px;font-size:14px;font-weight:700;margin:0;text-align:center}
 
-  /* result */
-  #result{display:none;margin-top:36px}
-  .birdcard{background:var(--ink);color:#fff;border-radius:var(--r);padding:24px;display:flex;gap:20px;align-items:center;flex-wrap:wrap}
-  .birdcard .emoji{font-size:54px;line-height:1}
-  .birdcard .birdpic{width:96px;height:96px;border-radius:14px;object-fit:cover;border:1px solid rgba(255,255,255,.18)}
-  .birdcard .meta{flex:1;min-width:230px}
-  .birdcard .kicker{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);font-weight:700}
-  .birdcard h2{margin:4px 0 2px;font-size:26px;letter-spacing:-.02em}
-  .birdcard .sci{font-style:italic;color:#b9bdc8;font-size:14px;margin-bottom:8px}
-  .birdcard .bio{font-size:15px;color:#e7e9ee;margin:0 0 10px}
-  .birdcard .facts{display:flex;flex-direction:column;gap:4px;font-size:13px;color:#cdd1da}
-  .birdcard .facts span::before{content:"🪶 ";}
-  .pbar{margin:20px 0 6px;height:8px;background:var(--line);border-radius:999px;overflow:hidden}
-  .pbar i{display:block;height:100%;width:0;background:var(--brand);transition:width .4s}
-  .pmsg{font-size:13px;color:var(--muted);font-weight:600;text-align:center;margin-bottom:14px}
-  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-  @media (max-width:560px){ .grid{grid-template-columns:repeat(2,1fr)} }
-  .cell.dummy{border:2px dashed var(--line);background:#fcfbf8;display:flex;align-items:center;justify-content:center;cursor:pointer;text-align:center;color:var(--muted)}
-  .cell.dummy:hover{border-color:var(--brand);color:var(--brand)}
-  .cell.dummy .di{font-weight:700;font-size:15px;line-height:1.3}
-  .cell.dummy .di .plus{font-size:32px;display:block;margin-bottom:4px}
-  .cell.dummy .di small{display:block;font-weight:600;color:var(--muted);font-size:12px;margin-top:2px}
-  .cell{aspect-ratio:1;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:#efece4;position:relative}
-  .cell img{width:100%;height:100%;object-fit:cover;display:block}
-  .cell .lbl{position:absolute;left:8px;bottom:8px;background:rgba(13,15,20,.72);color:#fff;font-size:11px;font-weight:700;padding:4px 9px;border-radius:999px}
-  .cell .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
-  .cell .ops{position:absolute;top:8px;right:8px;display:none;gap:6px}
-  .cell:hover .ops{display:flex}
-  .cell .ops button{width:30px;height:30px;border:none;border-radius:8px;background:rgba(255,255,255,.94);cursor:pointer;font-size:14px}
-  .cell.failed{display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--muted);text-align:center;padding:10px}
-  .spin{width:26px;height:26px;border:3px solid #ddd;border-top-color:var(--brand);border-radius:50%;animation:s 1s linear infinite}
-  @keyframes s{to{transform:rotate(360deg)}}
-  .res-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:20px}
-  .cell img{cursor:pointer}
-  .cell.sel{outline:3px solid var(--brand);outline-offset:2px}
-  .cell .dl{position:absolute;top:8px;right:8px;width:28px;height:28px;display:none;align-items:center;justify-content:center;background:rgba(255,255,255,.92);border:none;cursor:pointer;padding:0;border-radius:8px;font-size:14px;color:var(--ink)}
-  .cell:hover .dl{display:flex}
-  .hint{text-align:center;color:var(--muted);font-size:13px;margin:0 0 14px}
-  .cardstage{display:flex;justify-content:center}
-  .sharecard{width:100%;max-width:400px;aspect-ratio:400/560;background:var(--brand);border-radius:22px;padding:12px;box-shadow:var(--shadow)}
-  .sharecard .pkmn-inner{height:100%;background:#fffdf7;border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px;box-sizing:border-box}
-  .pkmn-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
-  .pkmn-name{font-size:22px;font-weight:800;letter-spacing:-.02em;color:var(--ink);line-height:1.05}
-  .pkmn-badge{font-size:12px;font-weight:800;color:#fff;background:var(--brand);border-radius:999px;padding:4px 10px;white-space:nowrap}
-  .pkmn-art{flex:1;min-height:0;border:4px solid var(--brand);border-radius:10px;overflow:hidden;background:#222;position:relative}
-  .pkmn-art #cardImg{width:100%;height:100%;object-fit:cover;display:block}
-  /* card art = the bird itself (specimen portrait on soft paper) */
-  #cardBirdArt{position:absolute;inset:0;display:none;align-items:flex-end;justify-content:center;background:linear-gradient(180deg,#f7f4ec 0%,#ece7d9 100%)}
-  #cardBirdArt img{max-width:84%;max-height:90%;filter:drop-shadow(0 7px 12px rgba(0,0,0,.22))}
-  /* the one-shot confirm moment */
-  #birdConfirm{display:none;flex-direction:column;align-items:center;gap:8px;margin:16px auto 0;max-width:400px;text-align:center}
-  #birdConfirm button{background:var(--orange);color:#fff;border:none;border-radius:12px;padding:13px 20px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit}
-  #birdConfirm button:hover{filter:brightness(1.06)} #birdConfirm button:disabled{opacity:.5;cursor:not-allowed}
-  #birdConfirm .warn{font-size:12.5px;color:var(--muted);font-weight:600}
-  /* the reveal */
-  #finalShot{display:none;margin-top:26px;text-align:center}
-  #finalShot img{width:100%;max-width:400px;border-radius:16px;border:1px solid var(--line);box-shadow:var(--shadow)}
-  .cardpick{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:14px auto 0;max-width:400px}
-  .cardpick button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 13px;font-size:13px;font-weight:700;cursor:pointer;color:var(--ink);line-height:1}
-  .cardpick button.active{background:var(--brand);color:#fff;border-color:var(--brand)}
-  .pkmn-sci{font-style:italic;color:var(--muted);font-size:13px;margin:0}
-  .pkmn-facts{margin:0;padding:10px 12px;list-style:none;background:#eafaf4;border:1px solid #bdeade;border-radius:10px;display:flex;flex-direction:column;gap:6px}
-  .pkmn-facts li{font-size:12.5px;color:#26403a;line-height:1.3;padding-left:14px;position:relative}
-  .pkmn-facts li::before{content:"🪶";position:absolute;left:0;font-size:9px}
-  .pkmn-foot{margin-top:auto;text-align:center;font-size:11px;font-weight:800;color:var(--brand)}
-  .btn{border:1px solid var(--line);background:#fff;border-radius:11px;padding:11px 18px;font-weight:700;cursor:pointer;font-size:14px;text-decoration:none;color:var(--ink)}
-  .btn.primary{background:var(--ink);color:#fff;border-color:var(--ink)}
-
-  /* review modal */
-  .overlay{position:fixed;inset:0;background:rgba(13,15,20,.55);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
-  .modal{background:#fff;border-radius:18px;max-width:440px;width:100%;padding:26px;box-shadow:var(--shadow)}
-  .modal h3{margin:0 0 4px;font-size:21px;letter-spacing:-.02em}
-  .modal p.lead{margin:0 0 16px;color:var(--muted);font-size:14px}
-  .stars{display:flex;gap:6px;font-size:30px;cursor:pointer;margin-bottom:14px}
-  .stars span{color:#d9d5cc;transition:.1s} .stars span.on{color:var(--star)}
-  .modal textarea{width:100%;border:1px solid var(--line);border-radius:11px;padding:11px;font:inherit;resize:vertical;min-height:74px}
-  .wc{font-size:12px;color:var(--muted);text-align:right;margin-top:4px} .wc.over{color:var(--brand);font-weight:700}
-  .modal input[type=text]{width:100%;border:1px solid var(--line);border-radius:11px;padding:11px;font:inherit;margin-top:10px}
-  .consent{display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--muted);margin-top:12px}
-  .modal .mrow{display:flex;gap:10px;margin-top:16px}
-  .modal .mrow .btn{flex:1;text-align:center}
-  .thanks{display:none;text-align:center;padding:8px 0}
-  .thanks .big{font-size:40px}
-
-  /* carousel */
-  .compare{padding:48px 0 10px}
-  .compare h2{text-align:center;font-size:28px;letter-spacing:-.03em;margin:0 0 6px}
-  .compare .sub2{text-align:center;color:var(--muted);margin:0 0 22px;font-size:15px}
-  .ctable-wrap{overflow-x:auto;padding:4px}
-  .ctable{width:100%;border-collapse:separate;border-spacing:0;min-width:580px;background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:var(--shadow)}
-  .ctable th,.ctable td{padding:16px 18px;text-align:center;border-bottom:1px solid var(--line);font-size:14px}
-  .ctable thead th{font-weight:800;background:#faf8f2}
-  .ctable tbody th{text-align:left;font-weight:700;color:var(--muted);white-space:nowrap}
-  .ctable tbody tr:nth-child(even) th,.ctable tbody tr:nth-child(even) td:not(.us){background:#fcfbf8}
-  .ctable .us{background:#fff3ef}
-  .ctable thead .us{background:var(--brand);color:#fff}
-  .ctable tbody .us{font-weight:700;color:var(--ink)}
-  .ctable .yes{color:var(--good);font-weight:800}
-  .ctable .no{color:#c0392b;opacity:.5;font-weight:700;font-size:16px}
+  /* compare table */
+  #compareWrap{background:var(--card)}
+  #compareWrap .inner{display:flex;flex-direction:column;gap:36px}
+  .ctable-wrap{overflow-x:auto;padding:6px 6px 8px 2px}
+  .ctable{width:100%;border-collapse:separate;border-spacing:0;min-width:580px;background:var(--card);border:2px solid var(--ink);box-shadow:4px 4px 0 var(--ink)}
+  .ctable th,.ctable td{padding:14px 18px;text-align:center;border-bottom:2px solid var(--ink);font-size:14px}
+  .ctable thead th{font:800 13px/1.3 'Archivo',sans-serif;text-transform:uppercase;letter-spacing:.04em;background:var(--paper)}
+  .ctable tbody th{text-align:left;font:600 11px/1.4 'IBM Plex Mono',monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--body);white-space:nowrap}
+  .ctable .us{background:#E2EFE9}
+  .ctable thead .us{background:var(--green);color:var(--green-tint)}
+  .ctable tbody .us{font-weight:700}
+  .ctable .yes{color:var(--green);font-weight:800}
+  .ctable .no{color:var(--orange);font-weight:700;font-size:15px}
   .ctable tr:last-child td,.ctable tr:last-child th{border-bottom:none}
-  .compare .foot{font-size:11.5px;color:var(--muted);text-align:center;margin-top:10px}
-  .how{padding:48px 0 10px}
-  .how h2{text-align:center;font-size:28px;letter-spacing:-.03em;margin:0 0 22px}
-  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-  @media(max-width:640px){.steps{grid-template-columns:1fr}}
-  .step{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px;text-align:center}
-  .step .n{width:34px;height:34px;border-radius:50%;background:var(--brand);color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;margin:0 auto 12px}
-  .step h3{margin:0 0 6px;font-size:17px} .step p{margin:0;font-size:14px;color:var(--muted)}
-  .faq{padding:48px 0 10px}
-  .faq .wrap{max-width:720px}
-  .faq h2{text-align:center;font-size:28px;letter-spacing:-.03em;margin:0 0 18px}
-  .faq details{background:#fff;border:1px solid var(--line);border-radius:12px;padding:0 16px;margin-bottom:10px}
-  .faq summary{cursor:pointer;font-weight:700;padding:14px 0;font-size:15px;list-style:none}
-  .faq summary::-webkit-details-marker{display:none}
-  .faq summary::after{content:"+";float:right;color:var(--brand);font-weight:800}
-  .faq details[open] summary::after{content:"–"}
-  .faq details p{margin:0 0 14px;font-size:14px;color:#3a3d44}
-  .showcase{padding:46px 0 10px}
-  .showcase h2{text-align:center;font-size:28px;letter-spacing:-.03em;margin:0 0 6px}
-  .showcase .sub2{text-align:center;color:var(--muted);margin:0 0 22px;font-size:15px}
-  .vids{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-  @media(max-width:640px){.vids{grid-template-columns:1fr}}
-  .vids video{width:100%;border-radius:16px;border:1px solid var(--line);box-shadow:var(--shadow);display:block;background:#000}
-  .showcase .vidnote{font-size:12px;color:var(--muted);text-align:center;margin-top:12px}
-  .reviews{padding:58px 0 20px;display:none}
-  .reviews h2{text-align:center;font-size:28px;letter-spacing:-.03em;margin:0 0 4px}
-  .reviews .sub2{text-align:center;color:var(--muted);margin:0 0 24px;font-size:15px}
+  .cfoot{font:500 11px/1.6 'IBM Plex Mono',monospace;letter-spacing:.1em;color:var(--mutedmono);text-transform:uppercase}
+
+  /* bird section */
+  #bird{background:var(--green)}
+  #bird .inner{display:grid;grid-template-columns:1.1fr 0.9fr;gap:48px;align-items:center}
+  @media(max-width:900px){#bird .inner{grid-template-columns:1fr}}
+  #bird .copy{display:flex;flex-direction:column;gap:18px}
+  #bird h2{color:var(--green-tint)}
+  #bird p{margin:0;font:500 16px/1.6 'Archivo',sans-serif;color:var(--green-tint);max-width:520px}
+  .idmock{background:var(--card);border:2px solid var(--ink);box-shadow:6px 6px 0 var(--ink);padding:22px;display:flex;flex-direction:column;gap:14px;transform:rotate(1.5deg);max-width:400px;justify-self:end;width:100%}
+  @media(max-width:900px){.idmock{justify-self:start}}
+  .idmock .idhead{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid var(--ink);padding-bottom:10px}
+  .idmock .idhead .t{font:800 12px/1 'Archivo',sans-serif;letter-spacing:.14em}
+  .idmock .idhead .n{font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:.1em;color:var(--mutedmono)}
+  .idmock .idbody{display:grid;grid-template-columns:110px 1fr;gap:14px;align-items:start}
+  .idmock .idphoto{width:110px;height:130px;border:2px solid var(--ink);background:var(--paper)}
+  .idmock .idphoto img{width:100%;height:100%;object-fit:cover;display:block}
+  .idmock .idfields{display:flex;flex-direction:column;gap:7px;font:500 12px/1.4 'IBM Plex Mono',monospace}
+  .idmock .idfields .l{color:var(--mutedmono)}
+  .idmock .idfacts{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:4px;font:500 11px/1.5 'IBM Plex Mono',monospace;color:var(--body);border-top:2px solid var(--ink);padding-top:12px}
+  .idmock .idfacts li{padding-left:14px;position:relative}
+  .idmock .idfacts li::before{content:"·";position:absolute;left:2px;font-weight:800}
+
+  /* showcase videos */
+  #showcaseWrap .inner{display:flex;flex-direction:column;gap:36px}
+  .vids{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  @media(max-width:700px){.vids{grid-template-columns:1fr}}
+  .vids video{width:100%;border:2px solid var(--ink);box-shadow:4px 4px 0 var(--ink);display:block;background:#000}
+  .vidnote{font:500 11px/1.6 'IBM Plex Mono',monospace;letter-spacing:.1em;color:var(--mutedmono);text-transform:uppercase}
+
+  /* reviews */
+  .reviews{display:none;background:var(--card)}
+  .reviews .inner{display:flex;flex-direction:column;gap:30px}
+  .reviews .sub2{margin:-16px 0 0;font:500 16px/1.5 'Archivo',sans-serif;color:var(--body)}
   .carousel{position:relative;overflow:hidden}
   .track{display:flex;transition:transform .4s ease}
-  .rcard{min-width:100%;display:flex;gap:18px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px;flex-wrap:wrap}
-  .rcard img{width:130px;height:130px;border-radius:12px;object-fit:cover;border:1px solid var(--line)}
+  .rcard{min-width:100%;display:flex;gap:18px;align-items:center;background:var(--paper);border:2px solid var(--ink);box-shadow:4px 4px 0 var(--ink);padding:22px;flex-wrap:wrap}
+  .rcard img{width:130px;height:130px;object-fit:cover;border:2px solid var(--ink)}
   .rcard .rbody{flex:1;min-width:200px}
-  .rcard .rstars{color:var(--star);font-size:18px;letter-spacing:2px}
-  .rcard .rtext{font-size:17px;margin:8px 0 10px;line-height:1.4}
-  .rcard .rwho{font-weight:700;font-size:14px} .rcard .rbird{font-size:13px;color:var(--muted)}
-  .cdots{display:flex;gap:7px;justify-content:center;margin-top:16px}
-  .cdots button{width:9px;height:9px;border-radius:50%;border:none;background:var(--line);cursor:pointer}
+  .rcard .rstars{color:var(--orange);font-size:18px;letter-spacing:2px}
+  .rcard .rtext{font-size:17px;margin:8px 0 10px;line-height:1.4;font-weight:500}
+  .rcard .rwho{font-weight:800;font-size:14px;text-transform:uppercase;letter-spacing:.02em}
+  .rcard .rbird{font:500 11px/1.6 'IBM Plex Mono',monospace;letter-spacing:.08em;color:var(--mutedmono);text-transform:uppercase}
+  .cdots{display:flex;gap:8px;justify-content:center}
+  .cdots button{width:12px;height:12px;border:2px solid var(--ink);background:var(--card);cursor:pointer;padding:0}
   .cdots button.on{background:var(--ink)}
+  .awards{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .awards img{height:56px;width:auto;max-width:100%;display:block}
 
-  .about{padding:52px 0 10px;text-align:center}
-  .about .wrap{max-width:640px}
-  .about h2{font-size:28px;letter-spacing:-.03em;margin:0 0 14px}
-  .about p{font-size:16px;color:#3a3d44;margin:0 0 14px}
-  .about .by{font-size:14px;color:var(--muted)}
-  /* SCHEME Studio calling card — shared cross-site stamp (light variant) */
-  .ss-cc-wrap{display:flex;justify-content:center;margin:32px 0 8px}
+  /* faq */
+  #faqWrap{background:var(--card)}
+  #faqWrap .inner{display:flex;flex-direction:column;gap:36px}
+  .faqgrid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  @media(max-width:700px){.faqgrid{grid-template-columns:1fr}}
+  .faqcard{border:2px solid var(--ink);background:var(--paper);padding:22px;display:flex;flex-direction:column;gap:8px}
+  .faqcard .q{font:800 15px/1.3 'Archivo',sans-serif;text-transform:uppercase;letter-spacing:.02em}
+  .faqcard .a{font:500 14px/1.55 'Archivo',sans-serif;color:var(--body)}
+  .fineprint{display:flex;flex-direction:column;gap:10px}
+  .fineprint .fp-label{font:600 12px/1 'IBM Plex Mono',monospace;letter-spacing:.18em;text-transform:uppercase;color:var(--mutedmono)}
+  .fineprint details{background:var(--paper);border:2px solid var(--ink);padding:0 16px}
+  .fineprint summary{cursor:pointer;font-weight:800;padding:14px 0;font-size:14px;list-style:none;text-transform:uppercase;letter-spacing:.02em}
+  .fineprint summary::-webkit-details-marker{display:none}
+  .fineprint summary::after{content:"+";float:right;color:var(--green);font-weight:800}
+  .fineprint details[open] summary::after{content:"–"}
+  .fineprint details p{margin:0 0 14px;font-size:14px;color:var(--body)}
+  .fineprint details a{color:var(--green)}
+
+  /* about */
+  #aboutWrap .inner{max-width:640px;display:flex;flex-direction:column;gap:18px}
+  #aboutWrap p{margin:0;font:500 16px/1.6 'Archivo',sans-serif;color:var(--body)}
+  /* SCHEME Studio calling card — shared cross-site stamp (keeps its own identity) */
+  .ss-cc-wrap{display:flex;justify-content:flex-start;margin-top:14px}
   .ss-cc{display:inline-block;text-align:center;text-decoration:none;border-radius:16px;padding:18px 34px 16px;
     background:#FFF4DF;border:2.5px solid #0A0706;box-shadow:6px 6px 0 #FF4A2D;
     transform:rotate(-1.4deg);transition:transform .15s ease,box-shadow .15s ease}
@@ -240,300 +298,469 @@
   .ss-cc-tag{font-family:'Space Mono',ui-monospace,monospace;font-size:11px;font-weight:400;
     letter-spacing:.02em;color:#c23b22;margin-top:10px}
   @media(max-width:560px){.ss-cc{padding:14px 26px 12px}.ss-cc-name{font-size:26px}}
-  footer{padding:48px 0 40px;text-align:center;color:var(--muted);font-size:13px}
-  footer a{color:var(--muted);text-decoration:underline}
-  footer .links{margin-top:10px;font-size:13px;line-height:2}
-  footer .big{font-weight:800;color:var(--ink);font-size:15px;margin-bottom:6px}
-  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:999px;font-size:14px;font-weight:600;opacity:0;transition:.2s;z-index:60}
+
+  /* footer */
+  footer{background:var(--ink);color:var(--green-tint);padding:48px 40px}
+  footer .inner{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap}
+  footer .fmark{display:flex;flex-direction:column;gap:10px}
+  footer .fword{display:flex;align-items:baseline;gap:8px}
+  footer .fword span{font:400 22px/1 'Archivo Black',sans-serif;text-transform:uppercase;color:var(--green-tint)}
+  footer .fword span.b{color:var(--footer-green)}
+  footer .fcopy{font:500 11px/1.6 'IBM Plex Mono',monospace;letter-spacing:.12em;color:var(--mutedmono)}
+  footer .flinks{font:500 11px/2 'IBM Plex Mono',monospace;letter-spacing:.12em;text-transform:uppercase}
+  footer .flinks a{color:var(--mutedmono);text-decoration:none}
+  footer .flinks a:hover{color:var(--green-tint)}
+  .fcta{font:800 14px/1 'Archivo',sans-serif;letter-spacing:.02em;text-transform:uppercase;text-decoration:none;background:var(--green);color:var(--green-tint);
+    padding:15px 22px;border:2px solid var(--green-tint);box-shadow:3px 3px 0 var(--green-tint);display:inline-block;transition:box-shadow .1s,transform .1s}
+  .fcta:hover{box-shadow:1px 1px 0 var(--green-tint);transform:translate(2px,2px);color:var(--green-tint)}
+
+  /* ===== result flow ===== */
+  #resultWrap{display:none;padding:56px 40px;border-bottom:3px solid var(--ink)}
+  @media(max-width:700px){#resultWrap{padding:40px 20px}}
+  #resultWrap .inner{max-width:920px}
+  #result{display:none}
+  .pbar{margin:0 0 6px;height:12px;background:var(--card);border:2px solid var(--ink);overflow:hidden}
+  .pbar i{display:block;height:100%;width:0;background:var(--green);transition:width .4s}
+  .pmsg{font:600 12px/1.5 'IBM Plex Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--body);text-align:center;margin:0 0 20px}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media (max-width:560px){ .grid{grid-template-columns:repeat(2,1fr)} }
+  .cell{aspect-ratio:1;overflow:hidden;border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);background:var(--card);position:relative}
+  .cell img{width:100%;height:100%;object-fit:cover;display:block;cursor:pointer}
+  .cell .lbl{position:absolute;left:0;bottom:0;background:var(--ink);color:var(--paper);font:600 10px/1 'IBM Plex Mono',monospace;letter-spacing:.08em;text-transform:uppercase;padding:5px 9px}
+  .cell .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+  .cell.failed{display:flex;align-items:center;justify-content:center;font:600 11px/1.5 'IBM Plex Mono',monospace;color:var(--mutedmono);text-align:center;padding:10px;text-transform:uppercase}
+  .cell.sel{outline:3px solid var(--green);outline-offset:2px}
+  .cell .dl{position:absolute;top:0;right:0;width:30px;height:30px;display:none;align-items:center;justify-content:center;background:var(--paper);border:none;border-left:2px solid var(--ink);border-bottom:2px solid var(--ink);cursor:pointer;padding:0;font-size:14px;color:var(--ink)}
+  .cell:hover .dl{display:flex}
+  .spin{width:26px;height:26px;border:3px solid var(--paper);border-top-color:var(--green);border-radius:50%;animation:s 1s linear infinite}
+  @keyframes s{to{transform:rotate(360deg)}}
+  .res-actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:24px}
+  .abtn{border:2px solid var(--ink);background:var(--card);box-shadow:3px 3px 0 var(--ink);padding:13px 18px;font:800 13px/1 'Archivo',sans-serif;
+    text-transform:uppercase;letter-spacing:.02em;cursor:pointer;text-decoration:none;color:var(--ink);transition:box-shadow .1s,transform .1s;font-family:'Archivo',sans-serif}
+  .abtn:hover{box-shadow:1px 1px 0 var(--ink);transform:translate(2px,2px)}
+  .abtn.primary{background:var(--ink);color:var(--paper)}
+  .hint{text-align:center;color:var(--body);font-size:14px;margin:0 0 14px;font-weight:500}
+
+  /* Bird ID card (real product) — print-shop ID, matches drawCard() export */
+  .cardstage{display:flex;justify-content:center}
+  .sharecard{width:100%;max-width:400px;aspect-ratio:400/560;background:var(--card);border:3px solid var(--ink);box-shadow:6px 6px 0 var(--ink);padding:22px;display:flex;flex-direction:column;gap:12px}
+  .pkmn-inner{height:100%;display:flex;flex-direction:column;gap:12px;box-sizing:border-box}
+  .pkmn-head{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid var(--ink);padding-bottom:10px}
+  .pkmn-head .idt{font:800 12px/1 'Archivo',sans-serif;letter-spacing:.14em}
+  .pkmn-badge{font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:.1em;color:var(--mutedmono)}
+  .pkmn-art{flex:1;min-height:0;border:2px solid var(--ink);overflow:hidden;background:var(--paper);position:relative}
+  .pkmn-art #cardImg{width:100%;height:100%;object-fit:cover;display:none}
+  #cardBirdArt{position:absolute;inset:0;display:none;align-items:flex-end;justify-content:center;background:var(--paper)}
+  #cardBirdArt img{max-width:84%;max-height:90%;filter:drop-shadow(0 7px 12px rgba(0,0,0,.22))}
+  .pkmn-fields{display:flex;flex-direction:column;gap:6px;font:500 11.5px/1.4 'IBM Plex Mono',monospace;text-transform:uppercase}
+  .pkmn-fields .l{color:var(--mutedmono)}
+  .pkmn-facts{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:4px;font:500 10.5px/1.5 'IBM Plex Mono',monospace;color:var(--body)}
+  .pkmn-facts li{padding-left:14px;position:relative}
+  .pkmn-facts li::before{content:"·";position:absolute;left:2px;font-weight:800}
+  .pkmn-foot{text-align:center;font:600 10px/1 'IBM Plex Mono',monospace;letter-spacing:.14em;color:var(--green)}
+  .cardpick{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:14px auto 0;max-width:460px}
+  .cardpick button{border:2px solid var(--ink);background:var(--card);padding:8px 13px;font:700 12px/1 'Archivo',sans-serif;text-transform:uppercase;letter-spacing:.02em;cursor:pointer;color:var(--ink)}
+  .cardpick button.active{background:var(--green);color:var(--green-tint)}
+  #birdConfirm{display:none;flex-direction:column;align-items:center;gap:10px;margin:18px auto 0;max-width:420px;text-align:center}
+  #birdConfirm button{background:var(--orange);color:var(--green-tint);border:2px solid var(--ink);box-shadow:4px 4px 0 var(--ink);padding:15px 20px;
+    font:800 15px/1 'Archivo',sans-serif;text-transform:uppercase;letter-spacing:.02em;cursor:pointer;font-family:'Archivo',sans-serif;transition:box-shadow .1s,transform .1s}
+  #birdConfirm button:hover{box-shadow:1px 1px 0 var(--ink);transform:translate(3px,3px)}
+  #birdConfirm button:disabled{opacity:.45;cursor:not-allowed}
+  #birdConfirm .warn{font:500 11px/1.6 'IBM Plex Mono',monospace;letter-spacing:.08em;color:var(--mutedmono);text-transform:uppercase}
+  #finalShot{display:none;margin-top:26px;text-align:center}
+  #finalShot img{width:100%;max-width:400px;border:2px solid var(--ink);box-shadow:4px 4px 0 var(--ink)}
+
+  /* review modal */
+  .overlay{position:fixed;inset:0;background:rgba(18,18,18,.6);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
+  .modal{background:var(--card);border:2px solid var(--ink);box-shadow:6px 6px 0 var(--ink);max-width:440px;width:100%;padding:26px}
+  .modal h3{margin:0 0 4px;font:400 22px/1.1 'Archivo Black',sans-serif;text-transform:uppercase;letter-spacing:-.01em}
+  .modal p.lead{margin:0 0 16px;color:var(--body);font-size:14px;font-weight:500}
+  .stars{display:flex;gap:6px;font-size:30px;cursor:pointer;margin-bottom:14px}
+  .stars span{color:#d5cfc0;transition:.1s} .stars span.on{color:var(--orange)}
+  .modal textarea{width:100%;border:2px solid var(--ink);border-radius:0;padding:11px;font:inherit;resize:vertical;min-height:74px;background:var(--card)}
+  .wc{font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:.08em;color:var(--mutedmono);text-align:right;margin-top:4px}
+  .wc.over{color:var(--orange);font-weight:600}
+  .modal input[type=text]{width:100%;border:2px solid var(--ink);border-radius:0;padding:11px;font:inherit;margin-top:10px;background:var(--card)}
+  .consent{display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--body);margin-top:12px}
+  .modal .mrow{display:flex;gap:10px;margin-top:16px}
+  .modal .mrow .abtn{flex:1;text-align:center}
+  .thanks{display:none;text-align:center;padding:8px 0}
+  .thanks .big{font:400 34px/1 'Archivo Black',sans-serif;color:var(--green);margin-bottom:8px}
+
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:11px 18px;border:2px solid var(--paper);
+    font:600 12px/1 'IBM Plex Mono',monospace;letter-spacing:.06em;opacity:0;transition:.2s;z-index:60}
   .toast.show{opacity:1}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <nav>
-    <a class="logo" href="/"><span class="b">Headshots</span><span>🐦</span></a>
-  </nav>
 
-  <header class="hero">
-    <h1>Five serious headshots.<br><span class="hl">One bird. <span style="color:var(--good)">$1.</span></span></h1>
-    <p class="sub">Professional headshots without a photographer. Upload one selfie, get five polished looks in about a minute. Then pick one to meet your bird.</p>
-    <div class="awards">
-      <a href="https://peerpush.com/p/headshots-with-a-bird" target="_blank" rel="noopener"><img src="https://peerpush.com/p/headshots-with-a-bird/badge.png" alt="Headshots with a Bird on PeerPush" width="460" height="130" loading="lazy"></a>
-      <a href="https://peerpush.com/p/headshots-with-a-bird" target="_blank" rel="noopener"><img src="https://peerpush.com/p/headshots-with-a-bird/rating-badge.png" alt="Headshots with a Bird rating on PeerPush" width="800" height="130" loading="lazy"></a>
-    </div>
-  </header>
-
-  <div class="canceled" id="canceled">Payment canceled — no charge made. Your bird is still waiting. 🐦</div>
+<!-- ticker -->
+<div class="ticker" aria-hidden="true">
+  <div class="ticker-track">
+    <span>$1 HEADSHOTS · ONE MINUTE · ONE BIRD INCLUDED · NO SUBSCRIPTIONS · THE BIRD IS NOT OPTIONAL ·&nbsp;</span>
+    <span>$1 HEADSHOTS · ONE MINUTE · ONE BIRD INCLUDED · NO SUBSCRIPTIONS · THE BIRD IS NOT OPTIONAL ·&nbsp;</span>
+  </div>
 </div>
 
-<section class="showcase" id="showcaseWrap">
-  <div class="wrap">
-    <div class="vids">
-      <video src="/videos/demo1-web.mp4" autoplay muted loop playsinline webkit-playsinline preload="auto" aria-label="Headshot demo"></video>
-      <video src="/videos/man-web.mp4" autoplay muted loop playsinline webkit-playsinline preload="auto" aria-label="Headshot demo"></video>
+<!-- nav -->
+<div class="nav">
+  <a class="wordmark" href="/"><span>Headshots</span><span class="b">With a bird</span></a>
+  <div class="navlinks">
+    <a class="nl" href="#how">How it works</a>
+    <a class="nl" href="#pricing">Pricing</a>
+    <a class="nl" href="#bird">The bird</a>
+    <a class="navcta" href="#pricing">Get 5 for $1</a>
+  </div>
+</div>
+
+<div class="canceled" id="canceled">Payment canceled — no charge made. Your bird is still waiting.</div>
+
+<!-- hero -->
+<div class="hero" id="heroWrap">
+  <div class="inner">
+    <div class="hero-copy">
+      <div class="h1wrap">
+        <h1>Studio headshots.<br><span class="gr">One bird.</span></h1>
+        <div class="stamp">Only $1</div>
+      </div>
+      <p class="hero-sub">One selfie input, five professional looks, delivered in a minute. AI studios charge $35 and don't even include a bird. We checked.</p>
+      <div class="hero-ctas">
+        <a class="btn green" href="#pricing">Get 5 for $1</a>
+        <a class="btn" href="#bird">Meet the bird</a>
+      </div>
+      <div class="hero-foot">*ONE BIRD INCLUDED WITH EVERY PACK. THIS IS NOT NEGOTIABLE.</div>
     </div>
-    <p class="vidnote">Headshots are delivered as static <strong>.jpg</strong> images only. These videos are for illustration and entertainment purposes only.</p>
+    <!-- example strip -->
+    <div class="strip strip5">
+      <div class="frame">
+        <div class="ph"><img src="/examples/white-shirt.jpg" alt="Example headshot — The Boardroom" loading="lazy"></div>
+        <div class="cap">LOOK 01 — THE BOARDROOM</div>
+      </div>
+      <div class="frame">
+        <div class="ph"><img src="/examples/charcoal-cardigan-2.jpg" alt="Example headshot — The Studio" loading="lazy"></div>
+        <div class="cap">LOOK 05 — THE STUDIO</div>
+      </div>
+      <div class="frame bird">
+        <div class="ph"><img src="/examples/you-bird-kestrel.jpg" alt="A customer photographed with her kestrel" loading="lazy"></div>
+        <div class="cap">YOU + YOUR BIRD — INCLUDED</div>
+      </div>
+      <div class="frame bird">
+        <div class="ph"><img src="/examples/you-bird-frogmouth.jpg" alt="A customer photographed with his tawny frogmouth" loading="lazy"></div>
+        <div class="cap">THE BIRD — NOT OPTIONAL</div>
+      </div>
+      <div class="frame bird">
+        <div class="ph"><img src="/examples/you-bird-rhea.jpg" alt="A customer photographed with his rhea, at true scale" loading="lazy"></div>
+        <div class="cap">THE BIRD — TRUE SCALE</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- how it works -->
+<section id="how">
+  <div class="inner" id="howWrap">
+    <h2>Three steps. No studio.<br><span class="gr">No small talk.</span></h2>
+    <div class="steps3">
+      <div class="stepcard">
+        <div class="num">01</div>
+        <div class="t">Upload one selfie</div>
+        <div class="d">Any selfie. Bathroom lighting is fine. We've seen worse.</div>
+      </div>
+      <div class="stepcard">
+        <div class="num">02</div>
+        <div class="t">Get your looks</div>
+        <div class="d">Five to twenty-five professional headshots. Outfits, backdrops, the works. Delivered in a minute or less.</div>
+      </div>
+      <div class="stepcard birdstep">
+        <div class="num">03</div>
+        <div class="t">Meet your bird</div>
+        <div class="d">You are matched with one real bird species. Pick your favorite headshot to feature in a custom Bird ID card with your bird.</div>
+      </div>
+    </div>
   </div>
 </section>
 
-<section class="plans" id="plansWrap">
-  <div class="wrap">
-    <style>
-      #plansWrap .pp-head{text-align:center;max-width:620px;margin:0 auto 30px}
-      #plansWrap .pp-head h2{font-size:clamp(26px,5vw,38px);font-weight:900;letter-spacing:-.02em;line-height:1.1}
-      #plansWrap .pp-head h2 .hl{color:var(--brand)}
-      #plansWrap .pp-head p{color:var(--muted);font-size:16px;margin-top:12px}
-      #plansWrap .pp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;align-items:stretch;max-width:980px;margin:0 auto}
-      @media(max-width:820px){#plansWrap .pp-grid{grid-template-columns:1fr;max-width:420px}}
-      #plansWrap .pp-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:26px 22px 24px;display:flex;flex-direction:column;position:relative;box-shadow:var(--shadow)}
-      #plansWrap .pp-card--feature{border:2px solid var(--brand);box-shadow:0 16px 46px rgba(16,163,127,.2)}
-      @media(min-width:821px){#plansWrap .pp-card--feature{transform:scale(1.04)}}
-      #plansWrap .pp-card--premium{border:2px solid var(--orange)}
-      #plansWrap .pp-ribbon{position:absolute;top:-12px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:#fff;padding:5px 13px;border-radius:999px}
-      #plansWrap .pp-ribbon.green{background:var(--brand)} #plansWrap .pp-ribbon.orange{background:var(--orange)}
-      #plansWrap .pp-tier{font-size:14px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;color:var(--ink)}
-      #plansWrap .pp-priceRow{display:flex;align-items:baseline;gap:7px;margin:8px 0 2px}
-      #plansWrap .pp-price{font-size:44px;font-weight:900;letter-spacing:-.03em;line-height:1}
-      #plansWrap .pp-price .cur{font-size:24px;vertical-align:super;font-weight:800}
-      #plansWrap .pp-once{font-size:12px;color:var(--muted);font-weight:600}
-      #plansWrap .pp-count{font-size:15px;font-weight:700;color:var(--ink);margin-top:2px}
-      #plansWrap .pp-save{display:flex;align-items:center;gap:8px;margin:13px 0 16px;flex-wrap:wrap}
-      #plansWrap .pp-was{color:var(--muted);text-decoration:line-through;font-weight:600;font-size:13px}
-      #plansWrap .pp-savebadge{background:var(--accent);color:#3a2e00;font-weight:800;font-size:12px;padding:4px 10px;border-radius:999px}
-      #plansWrap .pp-benefits{list-style:none;display:flex;flex-direction:column;gap:10px;margin:2px 0 22px;padding:0}
-      #plansWrap .pp-benefits li{display:flex;gap:10px;font-size:14px;align-items:flex-start;text-align:left}
-      #plansWrap .pp-benefits li .ic{flex:none;width:18px;height:18px;border-radius:50%;background:rgba(22,163,74,.12);color:var(--good);font-size:11px;font-weight:900;display:grid;place-items:center;margin-top:1px}
-      #plansWrap .pp-benefits li.bird{font-weight:700} #plansWrap .pp-benefits li.bird .ic{background:rgba(255,210,60,.25);color:#9a7400}
-      #plansWrap .pp-benefits li.soon{color:var(--muted)} #plansWrap .pp-benefits li.soon .ic{background:#eee;color:var(--muted)}
-      #plansWrap .pp-benefits li .soontag{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;background:#eee;color:var(--muted);padding:1px 6px;border-radius:5px;margin-left:6px}
-      #plansWrap .pp-cta{margin-top:auto;display:block;width:100%;text-align:center;border-radius:12px;padding:13px 16px;font-weight:800;font-size:15px;border:1.5px solid var(--ink);color:var(--ink);background:#fff;cursor:pointer;font-family:inherit;transition:.15s}
-      #plansWrap .pp-cta:hover{transform:translateY(-1px)}
-      #plansWrap .pp-cta.brand{background:var(--brand);color:#fff;border-color:var(--brand)}
-      #plansWrap .pp-cta.orange{background:var(--orange);color:#fff;border-color:var(--orange)}
-      #plansWrap .pp-foot{text-align:center;color:var(--muted);font-size:12.5px;margin:28px auto 0;max-width:640px}
-    </style>
-
-    <div class="pp-head">
-      <h2>Pick your pack. <span class="hl">Each includes one (1) bird.</span></h2>
-      <p>Pro studios charge $35+ for a pack like this. One selfie, about a minute, done. Your bird arrives separately, on a shareable Bird ID card starring whichever shot you pick.</p>
-    </div>
+<!-- pricing -->
+<section id="pricing">
+  <div class="inner" id="plansWrap">
+    <h2>Pick your pack.<br><span class="gr">Each includes one bird.</span></h2>
+    <p class="pricing-sub">One-time payments. No subscriptions. Your bird arrives separately, on a Bird ID card starring whichever shot you pick.</p>
 
     <div class="pp-grid">
       <div class="pp-card">
         <div class="pp-tier">The Original</div>
-        <div class="pp-priceRow"><div class="pp-price"><span class="cur">$</span>1</div><div class="pp-once">one-time</div></div>
+        <div class="pp-priceRow">
+          <span class="pp-price">$1</span>
+          <span class="pp-was">$35+ elsewhere</span>
+          <span class="pp-savebadge">SAVE 97%</span>
+        </div>
         <div class="pp-count">5 professional headshots</div>
-        <div class="pp-save"><span class="pp-was">$35+ elsewhere</span><span class="pp-savebadge">Save 97%</span></div>
         <ul class="pp-benefits">
-          <li><span class="ic">✓</span>5 professional looks — 5 outfits, 5 backdrops</li>
-          <li><span class="ic">✓</span>Generated from a single selfie</li>
-          <li><span class="ic">✓</span>Pick ONE shot to be photographed with your bird — final</li>
-          <li class="bird"><span class="ic">🐦</span>One bird, contained — plus a “you + bird” photo</li>
+          <li>5 looks — 5 outfits, 5 backdrops</li>
+          <li>Generated from a single selfie</li>
+          <li>Pick one shot for your bird photo</li>
+          <li class="bird-line">One bird.</li>
         </ul>
-        <button type="button" class="pp-cta" data-tier="basic">Get 5 for $1</button>
+        <button type="button" class="pp-cta paper" data-tier="basic">Get 5 for $1</button>
       </div>
 
       <div class="pp-card pp-card--feature">
-        <span class="pp-ribbon green">Most popular</span>
+        <div class="pp-sticker green">MOST POPULAR</div>
         <div class="pp-tier">The Full Set</div>
-        <div class="pp-priceRow"><div class="pp-price"><span class="cur">$</span>3</div><div class="pp-once">one-time</div></div>
+        <div class="pp-priceRow">
+          <span class="pp-price green">$3</span>
+          <span class="pp-was">$35+ elsewhere</span>
+          <span class="pp-savebadge">SAVE 91%</span>
+        </div>
         <div class="pp-count">10 professional headshots</div>
-        <div class="pp-save"><span class="pp-was">$35+ elsewhere</span><span class="pp-savebadge">Save 91%</span></div>
         <ul class="pp-benefits">
-          <li><span class="ic">✓</span>10 professional looks — 10 outfits, 10 backdrops</li>
-          <li><span class="ic">✓</span>2× the variety for profiles, CV &amp; socials</li>
-          <li><span class="ic">✓</span>Pick ONE shot to be photographed with your bird — final</li>
-          <li class="bird"><span class="ic">🐦</span>The bird chooses you, as nature intended</li>
+          <li>10 looks — 10 outfits, 10 backdrops</li>
+          <li>2× the variety for your profiles</li>
+          <li>Pick one shot for your bird photo</li>
+          <li class="bird-line">And of course, one bird.</li>
         </ul>
-        <button type="button" class="pp-cta brand" data-tier="full">Get 10 for $3</button>
+        <button type="button" class="pp-cta green" data-tier="full">Get 10 for $3</button>
       </div>
 
       <div class="pp-card pp-card--premium">
-        <span class="pp-ribbon orange">You pick the bird</span>
+        <div class="pp-sticker orange">YOU PICK THE BIRD</div>
         <div class="pp-tier">The Whole Aviary</div>
-        <div class="pp-priceRow"><div class="pp-price"><span class="cur">$</span>10</div><div class="pp-once">one-time</div></div>
+        <div class="pp-priceRow">
+          <span class="pp-price">$10</span>
+          <span class="pp-was">$59+ premium packs</span>
+          <span class="pp-savebadge">SAVE 83%</span>
+        </div>
         <div class="pp-count">25 professional headshots</div>
-        <div class="pp-save"><span class="pp-was">$59+ premium packs</span><span class="pp-savebadge">Save 83%</span></div>
         <ul class="pp-benefits">
-          <li><span class="ic">✓</span>All 25 looks — our entire wardrobe</li>
-          <li><span class="ic">✓</span><b>Choose your bird</b> from all 148 species</li>
-          <li><span class="ic">✓</span>Bird ID card + “you + bird” photo, your pick of shot</li>
-          <li class="bird"><span class="ic">🐦</span>You pick the bird. The bird finds this arrangement irregular.</li>
+          <li>All 25 looks — our entire wardrobe</li>
+          <li>5x the variety for all your personal and professional profiles.</li>
+          <li>Choose your bird from all 148 species instead of random assignment.</li>
+          <li class="bird-line o">You pick the bird</li>
         </ul>
         <button type="button" class="pp-cta orange" data-tier="aviary">Get 25 for $10</button>
       </div>
     </div>
-    <p class="pp-foot">Comparisons are illustrative of typical AI headshot packages — standard packs from ~$35, premium from ~$59. One-time payments, no subscriptions. Every pack includes exactly one bird, contained. 🐦</p>
+    <div class="pp-disclaimer">COMPARISONS REFLECT TYPICAL AI HEADSHOT PACKAGES — STANDARD FROM ~$35, PREMIUM FROM ~$59. EVERY PACK INCLUDES EXACTLY ONE BIRD, CONTAINED.</div>
   </div>
 </section>
 
-<section class="compare" id="compareWrap">
-  <div class="wrap">
-    <h2>Headshots with a Bird vs. everyone else</h2>
-    <p class="sub2">Professional headshots, same as them — except ours cost $1 and come with a bird you can share.</p>
+<!-- upload tool -->
+<section id="toolWrap">
+  <div class="inner">
+    <section class="tool" id="tool">
+      <p class="step-label">Upload one selfie</p>
+      <label class="drop" id="drop">
+        <input type="file" id="file" accept="image/jpeg,image/png,image/heic,image/heif,.heic,.heif" multiple />
+        <p>Tap or drag a selfie here</p>
+        <small>One clear, front-facing photo is all we need.<br>JPG, PNG, or HEIC &middot; at least 768px &middot; 1024px+ is best</small>
+      </label>
+      <div class="thumbs" id="thumbs"></div>
+      <div class="count" id="count"></div>
+
+      <div class="tierpick" id="tierpick" role="radiogroup" aria-label="Choose your pack">
+        <button type="button" class="tieropt active" data-tier="basic" aria-pressed="true">
+          <span class="tt">5 looks</span><span class="tp">$1</span><span class="td">the essentials · 1 bird card</span>
+        </button>
+        <button type="button" class="tieropt" data-tier="full" aria-pressed="false">
+          <span class="tbadge">Popular</span><span class="tt">10 looks</span><span class="tp">$3</span><span class="td">2× the variety · 1 bird card</span>
+        </button>
+        <button type="button" class="tieropt" data-tier="aviary" aria-pressed="false">
+          <span class="tt">25 looks</span><span class="tp">$10</span><span class="td">choose your bird</span>
+        </button>
+      </div>
+
+      <!-- aviary-only perk: choose the species (everyone else is chosen BY the bird) -->
+      <div id="birdchooser">
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <img id="birdPrev" alt="" style="width:64px;height:64px;object-fit:contain;display:none" />
+          <div style="flex:1;min-width:220px">
+            <label for="birdChoice">Choose your bird <span>(a $10 privilege)</span></label>
+            <select id="birdChoice">
+              <option value="">Surprise me — let the bird choose</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <input type="email" id="email" placeholder="Your email address (required)" autocomplete="email" required />
+      <label class="optin">
+        <input type="checkbox" id="optin" /> <span>Email me occasional updates from Headshots with a Bird (optional).</span>
+      </label>
+      <input type="text" id="code" name="beta-code" placeholder="Have a beta code? Enter it here" autocomplete="off" autocorrect="off" autocapitalize="off" readonly onfocus="this.removeAttribute('readonly')" />
+      <button class="go" id="go" disabled>Continue to payment · $1</button>
+      <p class="note" id="goNote">5 headshots for you. The bird waits on your Bird ID.</p>
+      <div class="err" id="err"></div>
+    </section>
+  </div>
+</section>
+
+<!-- compare -->
+<section id="compareWrap">
+  <div class="inner">
+    <h2>Us vs. <span class="gr">everyone else.</span></h2>
     <div class="ctable-wrap">
       <table class="ctable">
         <thead>
-          <tr><th></th><th class="us">Us 🐦</th><th>HeadshotPro</th><th>InstaHeadshots</th><th>Dr. Headshot</th></tr>
+          <tr><th></th><th class="us">Us</th><th>HeadshotPro</th><th>InstaHeadshots</th><th>Dr. Headshot</th></tr>
         </thead>
         <tbody>
           <tr><th>Price</th><td class="us"><b>$1</b></td><td>from $29</td><td>from $59</td><td>from $34</td></tr>
           <tr><th>Headshots you get</th><td class="us">5</td><td>70+</td><td>100</td><td>40</td></tr>
           <tr><th>Outfits &amp; backdrops</th><td class="us">5</td><td>100s</td><td>5</td><td>4</td></tr>
           <tr><th>Turnaround</th><td class="us"><b>~1 min</b></td><td>~10 min–2 hrs</td><td>~90 min</td><td>~2 hrs</td></tr>
-          <tr><th>Bird in your headshots</th><td class="us yes">✗ Never (you're welcome)</td><td class="no">✗</td><td class="no">✗</td><td class="no">✗</td></tr>
-          <tr><th>Bird ID card + a bird to call your own</th><td class="us yes">✓ Always</td><td class="no">✗</td><td class="no">✗</td><td class="no">✗</td></tr>
+          <tr><th>Bird in your headshots</th><td class="us yes">Never. You're welcome.</td><td class="no">✗</td><td class="no">✗</td><td class="no">✗</td></tr>
+          <tr><th>Bird ID card + a bird to call your own</th><td class="us yes">Always</td><td class="no">✗</td><td class="no">✗</td><td class="no">✗</td></tr>
         </tbody>
       </table>
     </div>
-    <p class="foot">Competitor figures are their advertised entry plans (approximate). The bird is exclusively ours.</p>
+    <div class="cfoot">COMPETITOR FIGURES ARE THEIR ADVERTISED ENTRY PLANS, APPROXIMATE. THE BIRD IS EXCLUSIVELY OURS.</div>
   </div>
 </section>
 
-<div class="wrap">
-  <section class="tool" id="tool">
-    <p class="step-label">Upload a selfie</p>
-    <label class="drop" id="drop">
-      <input type="file" id="file" accept="image/jpeg,image/png,image/heic,image/heif,.heic,.heif" multiple />
-      <div class="icon">📸</div>
-      <p>Tap or drag a selfie here</p>
-      <small>One clear, front-facing photo is all we need.<br>JPG, PNG, or HEIC &middot; at least 768px &middot; 1024px+ is best</small>
-    </label>
-    <div class="thumbs" id="thumbs"></div>
-    <div class="count" id="count"></div>
-
-    <style>
-      .tierpick{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}
-      .tieropt{position:relative;border:1.5px solid var(--line);background:#fff;border-radius:12px;padding:14px 8px 11px;cursor:pointer;text-align:center;display:flex;flex-direction:column;gap:3px;font:inherit;color:var(--ink);transition:.12s}
-      .tieropt:hover{border-color:#c9c4b7}
-      .tieropt.active{border-color:var(--brand);box-shadow:0 0 0 3px rgba(16,163,127,.12)}
-      .tieropt .tt{font-weight:800;font-size:14px}
-      .tieropt .tp{font-weight:900;font-size:21px;color:var(--brand);line-height:1}
-      .tieropt .td{font-size:11px;color:var(--muted);line-height:1.25}
-      .tieropt .tbadge{position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:var(--brand);color:#fff;font-size:9px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:2px 8px;border-radius:999px;white-space:nowrap}
-      @media(max-width:480px){.tieropt .td{display:none}.tieropt{padding:11px 6px}}
-    </style>
-    <div class="tierpick" id="tierpick" role="radiogroup" aria-label="Choose your pack">
-      <button type="button" class="tieropt active" data-tier="basic" aria-pressed="true">
-        <span class="tt">5 looks</span><span class="tp">$1</span><span class="td">the essentials · 1 bird card</span>
-      </button>
-      <button type="button" class="tieropt" data-tier="full" aria-pressed="false">
-        <span class="tbadge">Popular</span><span class="tt">10 looks</span><span class="tp">$3</span><span class="td">2× the variety · 1 bird card</span>
-      </button>
-      <button type="button" class="tieropt" data-tier="aviary" aria-pressed="false">
-        <span class="tt">25 looks</span><span class="tp">$10</span><span class="td">choose your bird</span>
-      </button>
+<!-- the bird -->
+<section id="bird">
+  <div class="inner" id="birdWrap">
+    <div class="copy">
+      <h2>About the bird.</h2>
+      <p>Every pack includes one bird on its own Bird ID card with real bird facts. We feature 148 different species. Will you get an eagle, an egret, or an emu? Some people love their bird so much they use it on their professional profile.</p>
+      <p>It's a bit of a wink and a nudge. And a peck.</p>
     </div>
-
-    <!-- aviary-only perk: choose the species (everyone else is chosen BY the bird) -->
-    <div id="birdchooser" style="display:none;margin-top:14px;border:1.5px solid var(--line);border-radius:12px;padding:14px;background:#fcfbf8">
-      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-        <img id="birdPrev" alt="" style="width:64px;height:64px;object-fit:contain;display:none" />
-        <div style="flex:1;min-width:220px">
-          <label for="birdChoice" style="font-size:13px;font-weight:700;display:block;margin-bottom:6px">Choose your bird <span style="color:var(--muted);font-weight:600">(a $10 privilege)</span></label>
-          <select id="birdChoice" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:inherit;background:#fff">
-            <option value="">🎲 Surprise me — let the bird choose</option>
-          </select>
+    <!-- bird id card mock -->
+    <div class="idmock">
+      <div class="idhead">
+        <span class="t">BIRD ID</span>
+        <span class="n">№ 000148 · 2026</span>
+      </div>
+      <div class="idbody">
+        <div class="idphoto"><img src="/examples/eurasian-collared-dove.jpg" alt="Bird photo" loading="lazy"></div>
+        <div class="idfields">
+          <div><span class="l">SPECIES:</span> EURASIAN COLLARED DOVE</div>
+          <div><span class="l">NAME:</span> GERALD</div>
         </div>
       </div>
-    </div>
-
-    <input type="email" id="email" placeholder="Your email address (required)" autocomplete="email" required
-      style="display:block;width:100%;margin-top:14px;border:1px solid var(--line);border-radius:11px;padding:11px 14px;font:inherit" />
-    <label style="display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--muted);margin-top:10px;text-align:left">
-      <input type="checkbox" id="optin" /> <span>Email me occasional updates from Headshots with a Bird (optional).</span>
-    </label>
-    <input type="text" id="code" name="beta-code" placeholder="Have a beta code? Enter it here" autocomplete="off" autocorrect="off" autocapitalize="off" readonly onfocus="this.removeAttribute('readonly')"
-      style="display:block;width:100%;margin-top:12px;border:1px solid var(--line);border-radius:11px;padding:11px 14px;font:inherit;text-align:center" />
-    <button class="go" id="go" disabled>Continue to payment · $1</button>
-    <p class="note" id="goNote">5 headshots for you. The bird waits on your Bird ID. 🐦</p>
-    <div class="err" id="err"></div>
-  </section>
-</div>
-
-<section class="how" id="howWrap">
-  <div class="wrap">
-    <h2>How it works</h2>
-    <div class="steps">
-      <div class="step"><div class="n">1</div><h3>Upload a selfie</h3><p>One clear, front-facing, well-lit photo — that's all the likeness needs.</p></div>
-      <div class="step"><div class="n">2</div><h3>Pick a pack</h3><p>5 looks for $1, 10 for $3, or 25 for $10 — secure checkout via Stripe. No subscription.</p></div>
-      <div class="step"><div class="n">3</div><h3>Get your headshots — then meet your bird</h3><p>Professional looks in about a minute, plus your bird's own Bird ID card. Then the ceremony: pick ONE headshot to be photographed with your bird. One photo. Final.</p></div>
+      <ul class="idfacts">
+        <li>Its three-note coo is often mistaken for a cuckoo.</li>
+        <li>Colonised Europe in one of the fastest range expansions on record.</li>
+      </ul>
     </div>
   </div>
 </section>
 
-<div class="wrap">
-  <section id="result">
-    <div class="pbar"><i id="bar"></i></div>
-    <p class="pmsg" id="pmsg">Starting up…</p>
-    <div class="grid" id="grid"></div>
-    <div class="res-actions" style="margin-top:14px">
-      <button class="btn" id="downloadAll" type="button">⬇ Download all</button>
+<!-- showcase -->
+<section id="showcaseWrap">
+  <div class="inner">
+    <h2>Caught <span class="gr">on camera.</span></h2>
+    <div class="vids">
+      <video src="/videos/demo1-web.mp4" autoplay muted loop playsinline webkit-playsinline preload="auto" aria-label="Headshot demo"></video>
+      <video src="/videos/man-web.mp4" autoplay muted loop playsinline webkit-playsinline preload="auto" aria-label="Headshot demo"></video>
     </div>
-    <p class="step-label" style="text-align:center;margin-top:30px">Your Bird ID</p>
-    <div class="cardstage" id="cardstage">
-      <div class="sharecard" id="sharecard">
-        <div class="pkmn-inner">
-          <div class="pkmn-head"><span class="pkmn-name" id="cardName"></span><span class="pkmn-badge" id="cardBadge"></span></div>
-          <div class="pkmn-art"><img id="cardImg" alt="your headshot" style="display:none" /><div id="cardBirdArt"><img id="cardBirdImg" alt="your bird" /></div></div>
-          <div class="pkmn-sci" id="cardSci"></div>
-          <ul class="pkmn-facts" id="cardFacts"></ul>
-          <div class="pkmn-foot">headshotswithabird.com</div>
+    <div class="vidnote">HEADSHOTS ARE DELIVERED AS STATIC .JPG IMAGES ONLY. THESE VIDEOS ARE FOR ILLUSTRATION AND ENTERTAINMENT PURPOSES ONLY.</div>
+  </div>
+</section>
+
+<!-- result flow (hidden until paid) -->
+<div id="resultWrap">
+  <div class="inner">
+    <section id="result">
+      <div class="pbar"><i id="bar"></i></div>
+      <p class="pmsg" id="pmsg">Starting up…</p>
+      <div class="grid" id="grid"></div>
+      <div class="res-actions" style="margin-top:14px">
+        <button class="abtn" id="downloadAll" type="button">Download all</button>
+      </div>
+      <p class="step-label" style="text-align:center;margin-top:36px">Your Bird ID</p>
+      <div class="cardstage" id="cardstage">
+        <div class="sharecard" id="sharecard">
+          <div class="pkmn-inner">
+            <div class="pkmn-head"><span class="idt">BIRD ID</span><span class="pkmn-badge" id="cardBadge"></span></div>
+            <div class="pkmn-art"><img id="cardImg" alt="your headshot" /><div id="cardBirdArt"><img id="cardBirdImg" alt="your bird" /></div></div>
+            <div class="pkmn-fields">
+              <div><span class="l">SPECIES:</span> <span id="cardName"></span></div>
+              <div><span class="l">LATIN:</span> <span id="cardSci"></span></div>
+            </div>
+            <ul class="pkmn-facts" id="cardFacts"></ul>
+            <div class="pkmn-foot">HEADSHOTSWITHABIRD.COM</div>
+          </div>
         </div>
       </div>
-    </div>
-    <p class="hint" id="cardhint">Congrats! We've matched you to a bird above. Now choose your favorite headshot from the list below and we'll integrate it into your bird card. Choose your headshot then click the big orange button. Be careful! You cannot change your mind once you click the orange button.</p>
-    <div class="cardpick" id="cardpick"></div>
-    <div id="birdConfirm">
-      <button type="button" id="confirmBird">📸 Photograph us together</button>
-      <span class="warn">One bird photo per order. This is final — no re-rolls.</span>
-    </div>
-    <p class="hint" id="birdstat" style="margin-top:10px"></p>
-    <div id="finalShot">
-      <p class="step-label">You + your bird</p>
-      <img id="finalImg" alt="you and your bird" />
-    </div>
-    <div class="res-actions">
-      <button class="btn primary" id="copyCard" type="button">📋 Copy card to share</button>
-      <button class="btn" id="downloadCard" type="button">⬇ Download card</button>
-      <button class="btn" id="downloadBird" type="button" style="display:none">⬇ You + your bird</button>
-      <button class="btn" id="leaveReview" type="button">★ Leave a review</button>
-      <button class="btn" id="again" type="button">↻ Make another ($1)</button>
-    </div>
-  </section>
+      <p class="hint" id="cardhint">Your bird is above. Pick your favorite headshot below and we photograph the two of you together. One photo per order. It cannot be undone.</p>
+      <div class="cardpick" id="cardpick"></div>
+      <div id="birdConfirm">
+        <button type="button" id="confirmBird">Photograph us together</button>
+        <span class="warn">ONE BIRD PHOTO PER ORDER. THIS IS FINAL. NO RE-ROLLS.</span>
+      </div>
+      <p class="hint" id="birdstat" style="margin-top:10px"></p>
+      <div id="finalShot">
+        <p class="step-label">You + your bird</p>
+        <img id="finalImg" alt="you and your bird" />
+      </div>
+      <div class="res-actions">
+        <button class="abtn primary" id="copyCard" type="button">Copy card to share</button>
+        <button class="abtn" id="downloadCard" type="button">Download card</button>
+        <button class="abtn" id="downloadBird" type="button" style="display:none">You + your bird</button>
+        <button class="abtn" id="leaveReview" type="button">Leave a review</button>
+        <button class="abtn" id="again" type="button">Make another ($1)</button>
+      </div>
+    </section>
+  </div>
 </div>
 
 <!-- carousel of real, approved reviews -->
 <section class="reviews" id="reviews">
-  <div class="wrap">
-    <h2>What real people (and their birds) say</h2>
+  <div class="inner">
+    <h2>What people <span class="gr">say.</span></h2>
     <p class="sub2">Actual customers. Actual headshots. Actual, permanent birds.</p>
     <div class="carousel"><div class="track" id="track"></div></div>
     <div class="cdots" id="cdots"></div>
+    <div class="awards">
+      <a href="https://peerpush.com/p/headshots-with-a-bird" target="_blank" rel="noopener"><img src="https://peerpush.com/p/headshots-with-a-bird/badge.png" alt="Headshots with a Bird on PeerPush" width="460" height="130" loading="lazy"></a>
+      <a href="https://peerpush.com/p/headshots-with-a-bird" target="_blank" rel="noopener"><img src="https://peerpush.com/p/headshots-with-a-bird/rating-badge.png" alt="Headshots with a Bird rating on PeerPush" width="800" height="130" loading="lazy"></a>
+    </div>
   </div>
 </section>
 
-<section class="faq" id="faqWrap">
-  <div class="wrap">
-    <h2>Questions</h2>
-    <details><summary>Is there a bird in my headshots?</summary><p>No. Your headshots are entirely bird-free — safe for LinkedIn, CVs, and other bird-hostile environments. The bird lives on your shareable Bird ID card and in one photo of the two of you together. The bird is non-negotiable; its placement, mercifully, is ours.</p></details>
-    <details><summary>Can I get the bird IN a headshot?</summary><p>Yes — exactly once. After your headshots generate, you pick ONE to be photographed with your bird, and that photo is final: no re-rolls, no second sittings. Your Bird ID card stars the bird itself, and the rest of your headshots stay bird-free. Choose with the gravity the moment deserves.</p></details>
-    <details><summary>Will it actually look like me?</summary><p>Yes — the headshots are AI-generated from your photo, and we keep your exact expression rather than inventing one. A real likeness is the whole point.</p></details>
-    <details><summary>What do I get for $1?</summary><p>Five professional headshots across five outfit-and-backdrop looks, a Bird ID card starring the shot you pick (bird included), and a “you + your bird” photo.</p></details>
-    <details><summary>How long does it take?</summary><p>About a minute. No model training, no waiting hours like the other guys.</p></details>
-    <details><summary>What photos work best?</summary><p>One clear, front-facing, well-lit shot, at least 768px on the short side. JPG, PNG, or HEIC. Tip: your headshots will carry the same expression as your photo — so pick one where you look how you'd like your headshot to look.</p></details>
-    <details><summary>Do you keep my photos?</summary><p>No. Your uploads are used to generate your headshots and then discarded — we don't store them. See our <a href="/privacy.html">Privacy Policy</a>.</p></details>
-    <details><summary>Can I choose my bird?</summary><p>On the $10 Whole Aviary pack, yes — all 148 species, your call, drunk with power. On the $1 and $3 packs the bird chooses you, as nature intended.</p></details>
-    <details><summary>Why is my bird ENORMOUS?</summary><p>Because it's enormous in real life. Our 148 species include ostriches, condors, an emperor penguin, and a wandering albatross with a 3.5-metre wingspan. Small birds appear at polite, shoulder-adjacent scale. Birds that physics forbids from perching appear appropriately, alarmingly large. We could have shrunk them. We chose truth.</p></details>
-    <details><summary>Why only one photo? Other services want 10+.</summary><p>Because one good photo is enough — and it beats making you dig up twelve. Services demanding 10+ selfies are training a custom model, which is why they take hours and cost $30+. We do something smarter, faster, and one dollar-er.</p></details>
-    <details><summary>Why is it so cheap?</summary><p>Because it's cheap to make and we're not pretending otherwise. Your five headshots cost us about 40 cents to generate — honestly, the payment processor takes a bigger cut than the AI does. We charge $1 because that covers it. That's the whole business model.</p></details>
-    <details><summary>Refunds?</summary><p>If we fail to deliver your headshots, you're refunded. Otherwise all sales — and all birds — are final.</p></details>
+<!-- faq -->
+<section id="faqWrap">
+  <div class="inner">
+    <h2>Questions we get.</h2>
+    <div class="faqgrid">
+      <div class="faqcard">
+        <div class="q">Can I get headshots without the bird?</div>
+        <div class="a">No.</div>
+      </div>
+      <div class="faqcard">
+        <div class="q">Are the headshots actually good?</div>
+        <div class="a">Yes. Studio-quality, from one selfie. We engineered a fabulous image output by meticulously testing different image models until we had a great product at a low cost. The bird is the bonus.</div>
+      </div>
+      <div class="faqcard">
+        <div class="q">Which bird will I get?</div>
+        <div class="a">On the $10 pack, you choose your bird from all 148 available species. You could be a warbler, a pelican, or an osprey.</div>
+      </div>
+      <div class="faqcard">
+        <div class="q">Is this a subscription?</div>
+        <div class="a">No. One payment, one pack, one bird. Done.</div>
+      </div>
+    </div>
+    <div class="fineprint">
+      <div class="fp-label">The fine print</div>
+      <details><summary>Is there a bird in my headshots?</summary><p>No. Your headshots are entirely bird-free — safe for LinkedIn, CVs, and other bird-hostile environments. The bird lives on your shareable Bird ID card and in one photo of the two of you together. The bird is non-negotiable; its placement, mercifully, is ours.</p></details>
+      <details><summary>Can I get the bird IN a headshot?</summary><p>Yes — exactly once. After your headshots generate, you pick ONE to be photographed with your bird, and that photo is final: no re-rolls, no second sittings. Your Bird ID card stars the bird itself, and the rest of your headshots stay bird-free. Choose with the gravity the moment deserves.</p></details>
+      <details><summary>Will it actually look like me?</summary><p>Yes — the headshots are AI-generated from your photo, and we keep your exact expression rather than inventing one. A real likeness is the whole point.</p></details>
+      <details><summary>How long does it take?</summary><p>About a minute. No model training, no waiting hours like the other guys.</p></details>
+      <details><summary>What photos work best?</summary><p>One clear, front-facing, well-lit shot, at least 768px on the short side. JPG, PNG, or HEIC. Tip: your headshots will carry the same expression as your photo — so pick one where you look how you'd like your headshot to look.</p></details>
+      <details><summary>Do you keep my photos?</summary><p>No. Your uploads are used to generate your headshots and then discarded — we don't store them. See our <a href="/privacy.html">Privacy Policy</a>.</p></details>
+      <details><summary>Why is my bird ENORMOUS?</summary><p>Because it's enormous in real life. Our 148 species include ostriches, condors, an emperor penguin, and a wandering albatross with a 3.5-metre wingspan. Small birds appear at polite, shoulder-adjacent scale. Birds that physics forbids from perching appear appropriately, alarmingly large. We could have shrunk them. We chose truth.</p></details>
+      <details><summary>Why only one photo? Other services want 10+.</summary><p>Because one good photo is enough — and it beats making you dig up twelve. Services demanding 10+ selfies are training a custom model, which is why they take hours and cost $30+. We do something smarter, faster, and one dollar-er.</p></details>
+      <details><summary>Why is it so cheap?</summary><p>Because it's cheap to make and we're not pretending otherwise. Your five headshots cost us about 40 cents to generate — honestly, the payment processor takes a bigger cut than the AI does. We charge $1 because that covers it. That's the whole business model.</p></details>
+      <details><summary>Refunds?</summary><p>If we fail to deliver your headshots, you're refunded. Otherwise all sales — and all birds — are final.</p></details>
+    </div>
   </div>
 </section>
 
-<section class="about" id="about">
-  <div class="wrap">
-    <h2>About</h2>
+<!-- about -->
+<section id="aboutWrap">
+  <div class="inner">
+    <h2>About.</h2>
     <p>AI headshot companies charge a huge markup on what is, underneath, about a dollar of computing. We think a dollar of computing should cost about a dollar. So that's the price.</p>
     <p>Why the bird? Frankly, we're as confused as you are. Our bot makes excellent headshots quickly and cheaply, but it insists — insists — on pairing every customer with a bird.</p>
     <div class="ss-cc-wrap">
@@ -546,11 +773,18 @@
   </div>
 </section>
 
-<footer><div class="wrap">
-  <div class="big">Headshots with a Bird 🐦</div>
-  Not affiliated with any other headshot service. We don't store your selfie after generating. Your bird is assigned at random.
-  <div class="links"><a href="#about">About</a> · <a href="/terms.html">Terms</a> · <a href="/privacy.html">Privacy</a> · <a href="mailto:james@schemestudio.lol">Contact</a> · <a href="https://schemestudio.lol" target="_blank" rel="noopener">SCHEME Studio</a></div>
-</div></footer>
+<!-- footer -->
+<footer>
+  <div class="inner">
+    <div class="fmark">
+      <div class="fword"><span>Headshots</span><span class="b">With a bird</span></div>
+      <div class="fcopy">© 2026 HEADSHOTS WITH A BIRD. THE BIRD HAS BEEN WITH US FROM THE START.</div>
+      <div class="fcopy">NOT AFFILIATED WITH ANY OTHER HEADSHOT SERVICE. WE DON'T STORE YOUR SELFIE AFTER GENERATING.</div>
+      <div class="flinks"><a href="#aboutWrap">About</a> · <a href="/terms.html">Terms</a> · <a href="/privacy.html">Privacy</a> · <a href="mailto:james@schemestudio.lol">Contact</a> · <a href="https://schemestudio.lol" target="_blank" rel="noopener">SCHEME Studio</a></div>
+    </div>
+    <a class="fcta" href="#pricing">Get 5 for $1</a>
+  </div>
+</footer>
 
 <!-- REVIEW MODAL -->
 <div class="overlay" id="overlay">
@@ -566,15 +800,15 @@
       <input type="text" id="rname" placeholder="Your name or @handle (optional)" />
       <label class="consent"><input type="checkbox" id="consent" checked /> <span>You can feature my headshot &amp; review on the site.</span></label>
       <div class="mrow">
-        <button class="btn" id="skipReview" type="button">No thanks</button>
-        <button class="btn primary" id="submitReview" type="button">Submit review</button>
+        <button class="abtn" id="skipReview" type="button">No thanks</button>
+        <button class="abtn primary" id="submitReview" type="button">Submit review</button>
       </div>
     </div>
     <div class="thanks" id="thanks">
-      <div class="big">🐦</div>
-      <h3>Thank you!</h3>
-      <p class="lead">If it's a good one, you might spot it on the homepage soon.</p>
-      <button class="btn primary" id="closeThanks" type="button">Close</button>
+      <div class="big">Filed.</div>
+      <h3>Thank you.</h3>
+      <p class="lead">If it's a good one, you might spot it on the homepage.</p>
+      <button class="abtn primary" id="closeThanks" type="button">Close</button>
     </div>
   </div>
 </div>
@@ -600,9 +834,9 @@
   // ---- tier selection (must match server TIERS in server.js) ----
   const TIER_PRICE={basic:1,full:3,aviary:10};
   const TIER_NOTE={
-    basic:'5 headshots for you. The bird waits on your Bird ID. 🐦',
-    full:'10 headshots. One gets the bird — your pick. 🐦',
-    aviary:'25 headshots, and YOU choose the bird. Power corrupts. 🐦',
+    basic:'5 headshots for you. The bird waits on your Bird ID.',
+    full:'10 headshots. One gets the bird. Your pick.',
+    aviary:'25 headshots, and you choose the bird. Power corrupts.',
   };
   let selectedTier='basic', birdsLoaded=false;
   function goLabel(){ return 'Continue to payment · $'+TIER_PRICE[selectedTier]; }
@@ -613,7 +847,7 @@
       const list=await (await fetch('/api/birds')).json();
       const sel=$('birdChoice');
       list.sort((a,b)=>a.name.localeCompare(b.name)).forEach(b=>{
-        const o=document.createElement('option'); o.value=b.id; o.textContent=`${b.emoji||'🐦'} ${b.name}`; o.dataset.cutout=b.cutout||''; sel.appendChild(o);
+        const o=document.createElement('option'); o.value=b.id; o.textContent=b.name; o.dataset.cutout=b.cutout||''; sel.appendChild(o);
       });
       sel.addEventListener('change',()=>{
         const opt=sel.selectedOptions[0], img=$('birdPrev');
@@ -638,13 +872,13 @@
     $('thumbs').innerHTML='';
     photos.forEach((f,i)=>{
       const d=document.createElement('div'); d.className='thumb';
-      if(isHeicFile(f)){ const ph=document.createElement('div'); ph.className='heicph'; ph.innerHTML='📷<br>HEIC'; d.appendChild(ph); }
+      if(isHeicFile(f)){ const ph=document.createElement('div'); ph.className='heicph'; ph.innerHTML='HEIC'; d.appendChild(ph); }
       else { const im=document.createElement('img'); im.src=URL.createObjectURL(f); d.appendChild(im); }
       const b=document.createElement('button'); b.textContent='×'; b.title='Remove'; b.onclick=()=>{photos.splice(i,1);refresh();}; d.appendChild(b);
       $('thumbs').appendChild(d);
     });
     const n=photos.length;
-    $('count').textContent = n>=2 ? '✓ 2 photos — make sure they match: same hairstyle, facial hair, expression' : n===1 ? '✓ Ready' : '';
+    $('count').textContent = n>=2 ? '2 photos — make sure they match: same hairstyle, facial hair, expression' : n===1 ? 'Ready' : '';
     $('drop').style.display = n>=MAXP ? 'none' : 'flex';
   }
   function isImageFile(f){ return f && (/^image\//.test(f.type) || /\.(jpe?g|png|heic|heif)$/i.test(f.name||'') || !f.type); }
@@ -680,17 +914,19 @@
   });
 
   // ---- result ----
-  // The Bird ID card stars the BIRD ITSELF (its cutout on soft paper). The
-  // user's headshots stay in the grid; they pick ONE to be photographed with
-  // the bird — a single photoreal render, final, revealed under the card.
+  // The Bird ID card stars the BIRD ITSELF (its cutout on paper). The user's
+  // headshots stay in the grid; they pick ONE to be photographed with the
+  // bird — a single photoreal render, final, revealed under the card.
   let birdCut=null; // preloaded Image of the cutout (card art + canvas export)
+  const CARD_YEAR=new Date().getFullYear();
+  const cardNo=n=>'№ '+String(n||1).padStart(6,'0')+' · '+CARD_YEAR;
   function renderCard(b){
     cardBird=b;
-    $('cardName').textContent = (b.emoji?b.emoji+' ':'') + b.name;
-    $('cardBadge').textContent = '#'+String(b.assignmentNumber||1).padStart(4,'0');
-    $('cardSci').textContent = b.sci||'';
+    $('cardName').textContent = (b.name||'').toUpperCase();
+    $('cardBadge').textContent = cardNo(b.assignmentNumber);
+    $('cardSci').textContent = (b.sci||'').toUpperCase();
     const facts=(b.facts||[]).slice(0,2);
-    $('cardFacts').innerHTML = (facts.length?facts:[b.blurb||'']).map(f=>`<li>${f}</li>`).join('');
+    $('cardFacts').innerHTML = (facts.length?facts:[b.blurb||'']).map(f=>`<li>${esc(f)}</li>`).join('');
     if(b.cutout){
       birdCut=new Image();
       birdCut.onload=()=>{ postCard(); }; // post the card once the bird is drawable
@@ -700,13 +936,11 @@
     } else { birdCut=null; $('cardBirdArt').style.display='none'; }
     setTimeout(fitCard,0);
   }
-  function fitCard(){ /* card now sizes responsively via CSS — no transform-scaling (which blurred it) */ }
+  function fitCard(){ /* card sizes responsively via CSS */ }
   window.addEventListener('resize', fitCard);
   function buildGrid(n){
     const g=$('grid'); g.innerHTML='';
     for(let i=0;i<n;i++){ const c=document.createElement('div'); c.className='cell'; c.id='cell'+i; c.innerHTML='<div class="ph"><div class="spin"></div></div>'; g.appendChild(c); }
-    // (The birdless "Pro Pack" fake door was removed — birdless is now a real
-    //  product, the $10 Whole Aviary tier picked at checkout.)
   }
   function fillCell(i, r){
     const cell=document.getElementById('cell'+i); if(!cell || cell.dataset.filled) return;
@@ -717,8 +951,7 @@
       <button class="dl" type="button" title="Save" data-save="${r.src}" data-name="headshot-${r.look||(i+1)}.jpg">⬇</button>`;
   }
   // Picking a look ARMS the confirm button — nothing generates until the user
-  // explicitly locks it in. One photo per order, final: the confirm is the
-  // ritual, and it also means zero wasted renders from click-around.
+  // explicitly locks it in. One photo per order, final.
   let finalLook=null, finalSrc=null;
   function selectCard(i){
     const r=resultsData[i]; if(!r) return;
@@ -727,12 +960,12 @@
     const cell=$('cell'+i); if(cell) cell.classList.add('sel');
     [...$('cardpick').children].forEach(b=>b.classList.toggle('active', +b.dataset.index===i));
     if(finalLook){
-      setBirdStat(finalLook===r.look ? '' : '🐦 Your bird photo is final — the headshots are all still yours to download.');
+      setBirdStat(finalLook===r.look ? '' : 'Your bird photo is final — the headshots are all still yours to download.');
       return;
     }
     if(!jobComplete || !cardBird || !cardBird.cutout) return;
     const btn=$('confirmBird');
-    btn.textContent='📸 Photograph us together — '+(r.label||'this look');
+    btn.textContent='Photograph us together — '+(r.label||'this look');
     btn.disabled=false;
     $('birdConfirm').style.display='flex';
     setBirdStat('');
@@ -744,13 +977,13 @@
     $('finalImg').src=src;
     $('finalShot').style.display='block';
     $('downloadBird').style.display='';
-    setBirdStat('🐦 Final: you + your '+(cardBird?cardBird.name:'bird')+'. Forever.');
+    setBirdStat('Final: you + your '+(cardBird?cardBird.name:'bird')+'. Forever.');
   }
   $('confirmBird').addEventListener('click', async ()=>{
     if(!currentJob || !featuredLook || birdifyBusy || finalLook) return;
     birdifyBusy=true;
     const btn=$('confirmBird'); btn.disabled=true;
-    setBirdStat('🐦 Hold still — your bird is landing… ~15 seconds.');
+    setBirdStat('Hold still — your bird is landing. About 15 seconds.');
     try{
       const r=await fetch('/api/birdify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jobId:currentJob,look:featuredLook})});
       const d=await r.json();
@@ -766,14 +999,10 @@
     if(!currentJob) return;
     clearTimeout(cardPostTimer);
     cardPostTimer=setTimeout(()=>{
-      // two sequential posts (card, then the raw you+bird composite) so each
-      // stays well under the server's per-image 8 MB cap
       try{
         const png=drawCard().toDataURL('image/png');
         fetch('/api/card',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jobId:currentJob,png})}).catch(()=>{});
       }catch(e){ /* card image not ready yet — a later pick/completion will retry */ }
-      // (the "you + bird" keepsake is rendered SERVER-side via /api/birdify —
-      //  no client upload needed)
     },1200);
   }
   // explicit look-picker buttons under the card (outside #sharecard so they're not in the export)
@@ -805,10 +1034,9 @@
   async function fileFromSrc(src,name){ const b=await (await fetch(src)).blob(); return new File([b],name,{type:b.type||'image/jpeg'}); }
   const isMobile = ((window.matchMedia && matchMedia('(pointer:coarse)').matches) || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent||'')); // touch devices → share sheet; desktop → file download
   function canShareFiles(files){ try{ return isMobile && !!(navigator.canShare && navigator.canShare({files})); }catch{ return false; } }
-  // Card export: drawn directly on a 4x canvas from the FULL-RES headshot.
-  // html2canvas (kept as fallback) rasterizes the DOM at CSS pixel size, which
-  // softened both photo and text — the "card looks compressed" bug.
-  function rr(ctx,x,y,w,h,r){ ctx.beginPath(); if(ctx.roundRect){ ctx.roundRect(x,y,w,h,r); } else { ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); } }
+
+  // Card export: drawn directly on a 4x canvas from the bird cutout — the
+  // print-shop BIRD ID design, kept visually in sync with #sharecard (DOM).
   function wrapLines(ctx,text,maxW){ const words=String(text).split(/\s+/); const lines=[]; let cur=''; for(const w of words){ const t=cur?cur+' '+w:w; if(ctx.measureText(t).width>maxW&&cur){ lines.push(cur); cur=w; } else cur=t; } if(cur) lines.push(cur); return lines; }
   function drawCard(){
     const S=4, W=400, H=560, b=cardBird||{};
@@ -816,57 +1044,80 @@
     const c=document.createElement('canvas'); c.width=W*S; c.height=H*S;
     const ctx=c.getContext('2d'); ctx.scale(S,S);
     ctx.imageSmoothingEnabled=true; ctx.imageSmoothingQuality='high';
-    const F=(w,s,it)=>`${it?'italic ':''}${w} ${s}px Inter,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif`;
-    ctx.fillStyle='#10a37f'; rr(ctx,0,0,W,H,22); ctx.fill();
-    ctx.fillStyle='#fffdf7'; rr(ctx,12,12,W-24,H-24,14); ctx.fill();
+    const INK='#121212', PAPER='#EFEAE0', CARD='#FDFBF5', GREEN='#0D7A5C', YELLOW='#F6C445', MUTED='#8C877B', BODY='#3B382F';
+    const AR=(w,s)=>`${w} ${s}px Archivo,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif`;
+    const MO=(w,s)=>`${w} ${s}px 'IBM Plex Mono',ui-monospace,monospace`;
+    // card + border
+    ctx.fillStyle=CARD; ctx.fillRect(0,0,W,H);
+    ctx.strokeStyle=INK; ctx.lineWidth=6; ctx.strokeRect(3,3,W-6,H-6);
     const x0=26, x1=W-26, cw=x1-x0;
     ctx.textBaseline='middle';
-    ctx.font=F(800,12); const bt='#'+String(b.assignmentNumber||1).padStart(4,'0');
-    const bw=ctx.measureText(bt).width+20;
-    ctx.fillStyle='#10a37f'; rr(ctx,x1-bw,26,bw,22,11); ctx.fill();
-    ctx.fillStyle='#fff'; ctx.fillText(bt,x1-bw+10,37.5);
-    const name=(b.emoji?b.emoji+' ':'')+(b.name||'');
-    let fs=22; ctx.font=F(800,fs);
-    while(fs>13 && ctx.measureText(name).width > cw-bw-10){ fs--; ctx.font=F(800,fs); }
-    ctx.fillStyle='#0d0f14'; ctx.fillText(name,x0,37.5);
+    // header row
+    ctx.fillStyle=INK; ctx.font=AR(800,13);
+    try{ ctx.letterSpacing='1.8px'; }catch(e){}
+    ctx.fillText('BIRD ID', x0, 38);
+    try{ ctx.letterSpacing='1px'; }catch(e){}
+    ctx.font=MO(500,10.5); ctx.fillStyle=MUTED; ctx.textAlign='right';
+    ctx.fillText(cardNo(b.assignmentNumber), x1, 38);
+    ctx.textAlign='left';
+    try{ ctx.letterSpacing='0px'; }catch(e){}
+    ctx.fillStyle=INK; ctx.fillRect(x0,52,cw,2);
+    // ---- bottom-up layout ----
+    const footY=H-24;
+    // facts block
     const facts=((b.facts&&b.facts.length?b.facts:[b.blurb||'']).slice(0,2));
-    ctx.font=F(400,12.5);
-    const factLines=facts.map(f=>wrapLines(ctx,f,cw-24-14));
-    const nLines=factLines.reduce((a,l)=>a+l.length,0);
-    const factsH=20+nLines*17+(facts.length-1)*6;
-    const footY=H-34, sciH=18, gap=10;
-    const factsY=footY-10-factsH;
-    const sciY=factsY-gap-sciH;
-    const artY=58, artH=sciY-gap-artY, artW=cw;
-    ctx.fillStyle='#10a37f'; rr(ctx,x0,artY,artW,artH,10); ctx.fill();
-    ctx.save(); rr(ctx,x0+4,artY+4,artW-8,artH-8,7); ctx.clip();
-    // card art = the bird itself, centered on soft paper (matches #cardBirdArt)
-    const bw2=artW-8, bh=artH-8, ax=x0+4, ay=artY+4;
-    const g=ctx.createLinearGradient(0,ay,0,ay+bh); g.addColorStop(0,'#f7f4ec'); g.addColorStop(1,'#ece7d9');
-    ctx.fillStyle=g; ctx.fillRect(ax,ay,bw2,bh);
+    ctx.font=MO(500,10.5);
+    const factLines=facts.map(f=>wrapLines(ctx,f,cw-16));
+    const nFactLines=factLines.reduce((a,l)=>a+l.length,0);
+    const factsH=nFactLines*15+(facts.length-1)*4;
+    const factsY=footY-18-factsH;
+    // fields block (2 rows)
+    const fieldLH=19, fieldsH=2*fieldLH;
+    const fieldsY=factsY-14-fieldsH;
+    // art box fills the middle
+    const artY=66, artH=fieldsY-14-artY;
+    ctx.fillStyle=PAPER; ctx.fillRect(x0,artY,cw,artH);
+    ctx.strokeStyle=INK; ctx.lineWidth=2; ctx.strokeRect(x0+1,artY+1,cw-2,artH-2);
+    ctx.save();
+    ctx.beginPath(); ctx.rect(x0+2,artY+2,cw-4,artH-4); ctx.clip();
     if(birdCut&&birdCut.complete&&birdCut.naturalWidth){
+      const iw=cw-4, ih=artH-4, ax=x0+2, ay=artY+2;
       const ar=birdCut.naturalHeight/birdCut.naturalWidth;
-      let dw=bw2*0.84, dh=dw*ar;
-      if(dh>bh*0.9){ dh=bh*0.9; dw=dh/ar; }
-      const dx=ax+(bw2-dw)/2, dy=ay+bh-dh; // bottom-anchored, like it's standing
+      let dw=iw*0.84, dh=dw*ar;
+      if(dh>ih*0.9){ dh=ih*0.9; dw=dh/ar; }
+      const dx=ax+(iw-dw)/2, dy=ay+ih-dh; // bottom-anchored, like it's standing
       ctx.save();
       ctx.shadowColor='rgba(0,0,0,.22)'; ctx.shadowBlur=10; ctx.shadowOffsetY=6;
       ctx.drawImage(birdCut,dx,dy,dw,dh);
       ctx.restore();
     }
     ctx.restore();
-    ctx.font=F(400,13,true); ctx.fillStyle='#6b7180'; ctx.fillText(b.sci||'',x0,sciY+9);
-    ctx.fillStyle='#eafaf4'; rr(ctx,x0,factsY,cw,factsH,10); ctx.fill();
-    ctx.strokeStyle='#bdeade'; ctx.lineWidth=1; rr(ctx,x0,factsY,cw,factsH,10); ctx.stroke();
-    ctx.fillStyle='#26403a'; ctx.font=F(400,12.5);
-    let ly=factsY+18;
-    factLines.forEach(lines=>{ lines.forEach((ln,i)=>{ if(i===0){ ctx.font=F(400,9); ctx.fillText('🪶',x0+12,ly+1); ctx.font=F(400,12.5);} ctx.fillText(ln,x0+26,ly); ly+=17; }); ly+=6; });
-    ctx.font=F(800,11); ctx.fillStyle='#10a37f'; ctx.textAlign='center';
-    ctx.fillText('headshotswithabird.com',W/2,footY);
+    // fields
+    const field=(label,value,y)=>{
+      ctx.font=MO(500,11.5);
+      ctx.fillStyle=MUTED; ctx.fillText(label,x0,y);
+      const lw=ctx.measureText(label+' ').width;
+      ctx.fillStyle=INK;
+      let val=String(value||'').toUpperCase(), maxW=cw-lw;
+      while(val && ctx.measureText(val).width>maxW) val=val.slice(0,-2);
+      ctx.fillText(val,x0+lw,y);
+    };
+    field('SPECIES:', b.name, fieldsY+fieldLH*0.5);
+    field('LATIN:', b.sci, fieldsY+fieldLH*1.5);
+    // facts
+    ctx.font=MO(500,10.5); ctx.fillStyle=BODY;
+    let ly=factsY+8;
+    factLines.forEach(lines=>{ lines.forEach((ln,i)=>{ if(i===0) ctx.fillText('·',x0+2,ly); ctx.fillText(ln,x0+14,ly); ly+=15; }); ly+=4; });
+    // footer
+    ctx.font=MO(600,10); ctx.fillStyle=GREEN; ctx.textAlign='center';
+    try{ ctx.letterSpacing='1.4px'; }catch(e){}
+    ctx.fillText('HEADSHOTSWITHABIRD.COM',W/2,footY);
+    try{ ctx.letterSpacing='0px'; }catch(e){}
     ctx.textAlign='left';
     return c;
   }
   async function cardCanvas(){
+    try{ await (document.fonts&&document.fonts.ready); }catch(e){}
     try{ return drawCard(); }
     catch(e){ console.error('drawCard failed, falling back to html2canvas:', e);
       const el=$('sharecard'), pw=el.style.width, pmw=el.style.maxWidth, ph=el.style.height, par=el.style.aspectRatio;
@@ -906,15 +1157,18 @@
   });
 
   async function enterResult(jobId){
-    currentJob=jobId; $('tool').style.display='none'; $('result').style.display='block';
-    { ['showcaseWrap','compareWrap','plansWrap','howWrap','faqWrap'].forEach(id=>{const e=$(id); if(e) e.style.display='none';}); } window.scrollTo({top:0,behavior:'smooth'});
+    currentJob=jobId;
+    document.getElementById('toolWrap').style.display='none';
+    $('resultWrap').style.display='block'; $('result').style.display='block';
+    ['heroWrap','showcaseWrap','compareWrap','plansWrap','howWrap','faqWrap','birdWrap','aboutWrap'].forEach(id=>{const e=$(id); if(e){ const s=e.closest('section')||e; s.style.display='none'; }});
+    window.scrollTo({top:0,behavior:'smooth'});
     let fin; try{ fin=await (await fetch('/api/finalize/'+jobId)).json(); }catch{ $('pmsg').textContent='Could not verify payment.'; return; }
     if(fin.error){ $('pmsg').textContent=fin.error; return; }
     if(!fin.paid){ $('pmsg').textContent='Payment not confirmed. If you were charged, refresh in a moment.'; return; }
     resultsData=[]; featuredSrc=null; userPicked=false; renderCard(fin.bird); buildGrid(fin.total); pollImages(jobId, fin.total);
   }
   const msgs=['Developing your headshots…','Tailoring outfits…','Keeping the bird out of frame…','Adjusting the lighting…','Almost there…'];
-  const doneMsg=t=>'✓ All '+t+' ready. Now pick ONE to be photographed with your bird — one photo, and it\'s final.';
+  const doneMsg=t=>'All '+t+' ready. Pick one to be photographed with your bird. One photo. Final.';
   function pollImages(jobId,total){
     let mi=0; const mt=setInterval(()=>$('pmsg').textContent = $('bar').style.width==='100%'?doneMsg(total):msgs[mi=(mi+1)%msgs.length],2200);
     let fails=0;
@@ -936,8 +1190,8 @@
       else {
         clearInterval(mt); jobComplete=true;
         $('pmsg').textContent = j.status==='failed' ? 'Generation failed — your payment has been refunded automatically.' : doneMsg(total);
-        const got=resultsData.filter(Boolean).length, da=$('downloadAll'); if(da&&got) da.textContent='⬇ Download all '+got;
-        if(j.status!=='failed' && !finalLook) setBirdStat('🐦 One of these headshots gets the bird. Your call. Choose wisely — it\'s final.');
+        const got=resultsData.filter(Boolean).length, da=$('downloadAll'); if(da&&got) da.textContent='Download all '+got;
+        if(j.status!=='failed' && !finalLook) setBirdStat('One of these headshots gets the bird. Your call. Choose wisely — it\'s final.');
       }
     };
     tick();
@@ -980,10 +1234,10 @@
           <div class="rstars">${stars(r.stars)}</div>
           <div class="rtext">“${esc(r.text)}”</div>
           <div class="rwho">${esc(r.name)}</div>
-          ${r.birdName?`<div class="rbird">Paired with ${esc(r.birdEmoji||'')} ${esc(r.birdName)}</div>`:''}
+          ${r.birdName?`<div class="rbird">Paired with ${esc(r.birdName)}</div>`:''}
         </div>
       </div>`).join('');
-    $('cdots').innerHTML = list.map((_,i)=>`<button data-i="${i}" class="${i===0?'on':''}"></button>`).join('');
+    $('cdots').innerHTML = list.map((_,i)=>`<button data-i="${i}" class="${i===0?'on':''}" aria-label="Review ${i+1}"></button>`).join('');
     let idx=0; const go=i=>{ idx=(i+list.length)%list.length; $('track').style.transform=`translateX(-${idx*100}%)`;
       [...$('cdots').children].forEach((d,k)=>d.classList.toggle('on',k===idx)); };
     $('cdots').addEventListener('click',e=>{ const b=e.target.closest('button'); if(b) go(+b.dataset.i); });

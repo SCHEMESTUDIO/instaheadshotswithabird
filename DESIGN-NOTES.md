@@ -1,85 +1,100 @@
-# Design system — "The Field Guide" (applied 2026-07-04, in working tree, not yet committed)
+# Design — "Print Shop" system SHIPPED (2026-07-15)
 
-Status: **applied to `public/index.html`, awaiting James's review/commit.**
-Two earlier attempts (Dela Gothic/JetBrains, then Fraunces/Space Mono) failed on
-typography and were reverted — that history and the tell-list live in git
-(`d4bbbb7` via `git revert f626379`) and in this file's previous revision.
+Status: **the Print Shop design is now the design system**, implemented sitewide
+from James's approved design handoff (`design_handoff_homepage_redesign/README.md`,
+delivered 2026-07-15). Tokens: paper `#EFEAE0`, card `#FDFBF5`, ink `#121212`,
+green `#0D7A5C`, orange `#F2500A`, yellow `#F6C445`; Archivo Black display /
+Archivo UI / IBM Plex Mono accents; 2px ink borders, offset solid shadows,
+radius 0, press-down button hover. Landing copy is verbatim-final from the
+handoff — do not rewrite it. Voice guide: short declarative, deadpan,
+tongue-in-cheek about the bird, no exclamation marks, no emoji, no gradients.
+Applied to: index.html (all sections + upload/results flow), privacy.html,
+terms.html, the Bird ID card (DOM preview + `drawCard()` canvas export, kept in
+sync), favicon (emoji bird retired). Hero example strip uses AI-generated
+sample person in `public/examples/` — regenerate via
+`scripts/gen-example-headshots.mjs` (reuses `public/examples/source-selfie.jpg`
+for likeness consistency).
 
-## The voice
+Extend this system; don't replace it. The history below is kept because the
+lesson still applies: full design passes only with an explicit, signed-off
+direction from James.
 
-**Helpful ornithologist.** Witty, self-aware, deliberately unlike the sterile
-SaaS look of other AI headshot brands. The copy already spoke this way; the
-design now matches it.
+## History — original system retained, by choice (2026-07-04)
 
-- **Display: Besley** (Clarendon slab — the letterform family of vintage
-  natural-history plates). Weights 800–900, letter-spacing ~-.01em.
-- **Labels: Courier Prime** (typewritten specimen tags). Distinct from Space
-  Mono (studio) and JetBrains Mono (retired).
-- **Body: system sans, on purpose.** The guide is set in slab, the instrument
-  in sans. Nothing referenced-but-unloaded anymore (Inter removed).
-- Fraunces 900 + Space Mono still load but are used ONLY by the `.ss-cc`
-  scheme.studio calling card. Do not let them leak elsewhere.
+Three unsolicited redesign attempts were rejected — see the list below. The
+conclusion at the time: do not attempt another visual redesign unless James
+asks for one explicitly and signs off on a direction first. (The Print Shop
+handoff above is exactly that sign-off.)
 
-## What replaced each tell
+Commit `7596a08` ("Field Guide design system") shipped briefly on 2026-07-04
+and was reverted the same day at James's request — the revert keeps the
+zero-context copy pass but restores every visual to the pre-redesign system.
 
-- Nav pill → **specimen tag** (mono, square, punched hole via `::before`); nav
-  got a thick-thin double masthead rule; 4px brand rule at top of `<body>`.
-- Hero status-dot badge → **fig-caption** (mono italic, hairline rules flanking).
-- Uniform soft shadow → **flat print**: `--shadow:none`, 1px borders, the tool
-  and modal get double frames (`border` + offset `outline`). Radii 18→10/8.
-- "How it works" circles → **"Fig. 1/2/3"** mono plate labels (markup changed
-  `1`→`Fig. 1` — chrome, not copy).
-- Pricing: ribbons → square mono tags; "Save 97%" pill → bordered ledger stamp
-  (still accent yellow); prices in Besley 900; benefit-icon bubbles removed;
-  feature card = double green rule instead of glow.
-- 📸 dropzone emoji → inline SVG **line-drawn camera with a bird perched on
-  it** (decorative, `aria-hidden`). Emoji elsewhere (🐦, 🪶) kept — they're voice.
-- FAQ boxes → ruled index (top/bottom hairlines, Besley summaries).
-- Compare table: ink border, 2px rule under thead.
+## The brief (still valid)
 
-## Hard constraints (all held)
+Make the landing page feel bespoke and original — remove the "vibe coded
+tells" — with **zero functional or branding changes**. James's words: minor
+pass, spruce it up.
 
-- JS hooks untouched: `#tierpick`, `.pp-cta[data-tier]`, `#birdchooser`,
-  `#sharecard`, `#cardpick` — verified by grep after the pass.
-- **Bird ID card DOM ↔ canvas sync:** `drawCard()` now has `FS()` (Besley) and
-  `FM()` (Courier Prime) helpers; radii 16/10/8/4 match the CSS. Verified by
-  rendering the actual canvas export headlessly — matches the DOM preview.
-  If you touch `.pkmn-*` styles, change `drawCard()` in the same commit.
-- Palette and copy unchanged.
+## The tells identified (worth fixing, in rough priority)
 
-## Copy voice (pass done 2026-07-04, same session)
+- Nav pill top-right (`.pill` — "$1 · 5 clean headshots · 1 bird")
+- Hero status-dot badge (`.badge` + green `.dot`) — the classic AI-site pattern
+- Uniform soft shadow (`--shadow: 0 10px 40px`) on every card, uniform 18px radii
+- "How it works" numbered circles (`.step .n`)
+- Pricing section: strikethrough was-price + yellow "Save 97%" pills + "Most
+  popular" ribbon — template-grade, though arguably on-joke for a parody
+- Body/heading typography is all one generic sans stack (`Inter` is referenced
+  in CSS but never actually loaded — everything falls back to system sans)
+- Emoji used as icons throughout (📸 dropzone, ✓ chips, 🐦)
 
-Rule: **write for a visitor with zero context on the product's evolution.**
-No changelog vocabulary ("clean", "no bird in them" as reassurance-of-change),
-no build-history ("we built it in 2 days", "in our trials", "for the first
-time ever"). The gag is stated forward: every order includes exactly one bird,
-non-negotiably, on your Bird ID card. Matter-of-fact answers + deadpan cheek.
+## What was tried and why it was wrong (do not repeat)
 
-- Hero: "Five serious headshots. One bird. $1."
-- The ONE surviving "clean" is the hero fig-caption — "The headshots are
-  clean. The bird is contained." — kept deliberately as the deadpan safety
-  notice answering the brand-name question. If it ever grates, it dies alone.
-- About: bird-bot lore kept (it's the joke's foundation), design-decision
-  narration removed; "Negotiations failed. The treaty we reached:" carries it.
-- OG/twitter/meta all rewritten to match.
+1. **Dela Gothic One + JetBrains Mono** — retired scheme.studio fonts. Dead end.
+2. **Fraunces 900 + Space Mono** — these are the *current scheme.studio*
+   identity (see the `.ss-cc` calling card in index.html). Applying them here
+   dressed the product in the parent studio's clothes. The calling card should
+   stay the ONLY place the studio identity appears on this site.
+3. **"Field Guide" system (Besley + Courier Prime, flat print chrome, specimen
+   tags, Fig. labels)** — commit `7596a08`, rejected by James 2026-07-04
+   ("really bad, not getting it right AT ALL"). Technically clean execution,
+   wrong outcome: a full-system reskin when the original design was already
+   the preferred baseline. Lesson: the appetite was never for a new design
+   language — treat any future request as narrow and incremental.
 
-## Mobile (pass done 2026-07-04)
+The structural moves (kill pill, kill status dot, hard offset shadows, mono-ish
+step numerals) read well in renders — the *typography choice* was the failure.
+Screenshots of the reverted attempt: `design-hero.png` / `design-plans.png` in
+the Cowork outputs from 2026-07-04, if still around.
 
-- ≤560px layer at end of stylesheet: compact nav/specimen tag, shorter
-  fig-caption rules, tighter tool/modal/table padding, bigger touch targets on
-  cardpick, flexing res-action buttons. ≤380px: nav tag hides entirely.
-- Besley load trimmed to used axes (0,700..900; 1,400..500) for cellular.
-- Verified headless at 390×844: scrollWidth 390 (no horizontal overflow),
-  hero/plans/tool/how/faq/about eyeballed (`m-*.png` in Cowork outputs).
+## Open direction for next time
 
-## Verification done / caveats
+Headshots with a Bird needs its **own** display voice — distinct from both
+generic-AI-site and from scheme.studio. Its existing equity: brand green
+`#10a37f`, orange `#ff5a3c`, paper `#f7f5ef`, the Bird ID trading-card motif,
+field-guide/ornithology flavor, deadpan parody copy. Directions worth
+exploring (pick with James, don't unilaterally ship):
 
-- Headless Chromium render, desktop 1280px AND mobile 390px: hero, nav, plans,
-  tool, how, faq, about, DOM card, and the real `drawCard()` PNG export — all
-  checked visually with webfonts confirmed loaded.
-- Emoji render as tofu in the sandbox screenshots (no emoji font there) — not
-  a real bug, but eyeball 🐦/🪶 on a real device once.
-- Canvas export on a client that hasn't finished loading Besley falls back to
-  Georgia; postCard retries make this unlikely to matter.
-- Still open: demo videos + og.png show the old bird-in-headshot product;
-  decide separately whether to reshoot.
+- Field-guide / specimen-label aesthetic: serif or slab display that evokes
+  vintage bird guides (e.g. something Clarendon/slab-ish), specimen-tag
+  labels, ruled lines — ties into the Bird ID card without copying the studio.
+- Lean into the trading-card language sitewide (the pkmn-style card is the
+  most distinctive asset on the page).
+- Whatever is chosen, load the font(s) explicitly — today nothing loaded is
+  actually used by body/headings.
+
+## Hard constraints
+
+- All functionality and flow untouched: results grid, card pick, birdify
+  states, tier picker JS hooks (`#tierpick`, `.pp-cta[data-tier]`, `#birdchooser`).
+- The Bird ID card canvas (`drawCard()`) draws with Inter/system strings —
+  keep DOM preview and canvas export visually in sync if card styles change.
+- Brand palette stays. Copy voice (updated 2026-07-04, KEEP): written for a
+  zero-context visitor — no product-evolution narration, no "clean headshots"
+  changelog vocabulary, no build-history. Gag stated forward: every order
+  includes exactly one bird, on the Bird ID card. Hero: "Five serious
+  headshots. One bird. $1." The one surviving "clean" is the hero badge line
+  ("The headshots are clean. The bird is contained.") — kept as the deadpan
+  answer to the question the brand name raises.
+- Demo videos currently show the old bird-in-headshot product; decide
+  separately whether to pull or reshoot (og.png likely same issue).
