@@ -5,9 +5,9 @@ import fs from "fs";
 import { randomUUID } from "crypto";
 import Stripe from "stripe";
 import heicConvert from "heic-convert";
-import { buildTwoPersonPrompt, buildBirdifyPrompt } from "./lib/prompt.js";
-import { ALL_LOOKS, looksForTier } from "./lib/looks.js";
-import { hasRef, refPublicUrl, hasCutout, cutoutPublicUrl, cutoutPath } from "./lib/birdref.js";
+import { buildTwoPersonPrompt, DEBIRD_PROMPT } from "./lib/prompt.js";
+import { ALL_LOOKS, looksForTier, imagesForTier } from "./lib/looks.js";
+import { hasRef, refPublicUrl, hasCutout, cutoutPublicUrl } from "./lib/birdref.js";
 import { imageDimensions } from "./lib/imagesize.js";
 import { assignBird, chooseBird, stats } from "./lib/assign.js";
 import { BIRDS, HUGE_BIRD_IDS } from "./lib/birds.js";
@@ -23,16 +23,17 @@ dotenv.config();
 const PRICE_CENTS = Number(process.env.PRICE_CENTS || 100);
 
 // ---- pricing tiers: single source of truth for amount + product name ----
-// Clean-headshot hero (2026-07-04): ALL generation is birdless. The bird is
-// composited client-side onto ONE user-picked shot — it appears on the Bird ID
-// card and as a separate "you + your bird" download. Aviary buyers choose
-// their species; everyone else gets assigned one, as nature intended.
-//   basic → 5 clean · full → 10 clean · aviary → 25 clean + choose-your-bird
+// Bird-by-default pivot (2026-07-15): ALL generation includes the bird — the
+// bake-off-validated path (1/20 fails). Birdless variants are DEBIRD edits of
+// the finished bird shots, so each pair is the same photo minus the bird.
+//   basic  → 5 with bird + de-bird your favorite (once, final)
+//   full   → 5 looks × 2 ways (bird + birdless)  = 10 images
+//   aviary → 15 looks × 2 ways + choose-your-bird = 30 images
 // Amounts are overridable via env so prices can change without a code edit.
 const TIERS = {
-  basic:  { cents: Number(process.env.PRICE_BASIC_CENTS  || PRICE_CENTS), label: "Headshots with a Bird — 5 clean headshots + your Bird ID" },
-  full:   { cents: Number(process.env.PRICE_FULL_CENTS   || 300),         label: "Headshots with a Bird — 10 clean headshots + your Bird ID" },
-  aviary: { cents: Number(process.env.PRICE_AVIARY_CENTS || 1000),        label: "Headshots with a Bird — 25 clean headshots + choose your bird" },
+  basic:  { cents: Number(process.env.PRICE_BASIC_CENTS  || PRICE_CENTS), label: "Headshots with a Bird — 5 headshots (bird included) + your Bird ID" },
+  full:   { cents: Number(process.env.PRICE_FULL_CENTS   || 300),         label: "Headshots with a Bird — 5 looks, 2 ways (10 images) + your Bird ID" },
+  aviary: { cents: Number(process.env.PRICE_AVIARY_CENTS || 1000),        label: "Headshots with a Bird — 15 looks, 2 ways (30 images) + choose your bird" },
 };
 function resolveTier(t) { return (t && TIERS[t]) ? t : "basic"; } // never trust a client tier blindly
 const DAILY_CAP = Number(process.env.DAILY_CAP || 20);
@@ -261,121 +262,140 @@ async function rawGenerate(job, look, includeBird = true) {
   throw lastErr || new Error("Generation failed.");
 }
 
-// A task is { look, birdless }. Since the clean-headshot pivot every task is
-// birdless, so keys/labels are just the look's own — no "-nobird" suffixing.
-async function generateLook(job, task) {
-  const { look, birdless } = task;
+// Phase-1 task: one look, bird IN frame (the bake-off-validated path).
+async function generateLook(job, look) {
   try {
-    const src = await rawGenerate(job, look, !birdless);
+    const src = await rawGenerate(job, look, true);
     return { look: look.id, label: look.label, src };
   } catch (err) {
     return { look: look.id, label: look.label, error: err.message || "Generation failed." };
   }
 }
 
-// Build the generation work list for a job from its tier.
-//   basic  ($1)  → 5 looks   · full ($3) → 10 looks · aviary ($10) → 25 looks
-// EVERY look renders clean (birdless:true): the bird is composited onto one
-// user-picked shot by the browser, never painted in by the model. This keeps
-// bird identity pixel-perfect (it's literally the reference cutout) and
-// removes the model's old habit of mangling plumage.
-function tasksForJob(job) {
-  const tier = job.tier || "basic";
-  return looksForTier(tier).map((look) => ({ look, birdless: true }));
-}
-
-// ---- birdify: paint the bird INTO one finished headshot (the keepsake) ----
-// One Gemini edit call on the user's picked shot: huge birds stand behind at
-// true scale, small birds perch on the shoulder — photoreal lighting/occlusion,
-// person untouched.
-// ONE successful render per order, chosen by the user, and it's FINAL — that's
-// the product ritual (and the cost control). MAX_BIRDIFY only bounds total
-// CALLS so a failed attempt still leaves retry headroom.
-const MAX_BIRDIFY = Number(process.env.MAX_BIRDIFY || 3);
+// ---- shared edit call (debird): same retry taxonomy as rawGenerate ----
+// 3 transient retries, 1 re-roll on "no image", fail fast on deterministic.
 function dataUriToImage(src) {
   const m = /^data:([^;]+);base64,(.+)$/.exec(src || "");
   if (!m) return null;
   return { mimeType: m[1], buffer: Buffer.from(m[2], "base64") };
 }
-async function birdifyLook(job, lookKey) {
-  job.birdShots = job.birdShots || {};
-  if (job.birdShots[lookKey]) return job.birdShots[lookKey]; // same look → return the final
-  if (Object.keys(job.birdShots).length > 0) throw new Error("Your bird photo is already final for this order — one per customer, no re-rolls.");
-  job.birdifyCalls = job.birdifyCalls || 0;
-  if (job.birdifyCalls >= MAX_BIRDIFY) throw new Error("Bird photo limit reached for this order.");
-  const r = (job.results || []).find((x) => x && x.look === lookKey && x.src);
-  if (!r) throw new Error("That look isn't available.");
-  const headshot = dataUriToImage(r.src);
-  if (!headshot) throw new Error("That look isn't available.");
-  if (!hasCutout(job.bird.id)) throw new Error("No bird art available.");
-  const birdRef = { mimeType: "image/png", buffer: fs.readFileSync(cutoutPath(job.bird.id)) };
-  job.birdifyCalls++;
-  const prompt = buildBirdifyPrompt(job.bird);
-  // small retry budget: 3 transient, 1 re-roll on "no image" (same taxonomy as rawGenerate)
+async function editImage(job, images, prompt, tag) {
   let lastErr, transient = 0, noimage = 0;
   for (;;) {
     try {
       recordAttempt(); job.genAttempts = (job.genAttempts || 0) + 1;
-      addImages(1); // count against the daily image cap — paid birdifies still run, but future /api/start gates see the true day total
-      const { src } = await withSlot(() => getProvider().generate({ images: [headshot, birdRef], prompt }));
+      const { src } = await withSlot(() => getProvider().generate({ images, prompt }));
       recordImage(); job.genImages = (job.genImages || 0) + 1;
-      job.birdShots[lookKey] = src;
-      job.lastBirdified = lookKey; // the email keepsake follows the latest pick
       return src;
     } catch (err) {
       lastErr = err;
       const kind = classifyGenError(err);
-      console.error(`[job ${job.id}] birdify ${lookKey} (${kind}): ${err.message}`);
+      console.error(`[job ${job.id}] ${tag} (${kind}): ${err.message}`);
       if (kind === "client") break;
       if (kind === "noimage") { if (++noimage >= 2) break; await sleep(1500); continue; }
       if (++transient >= 3) break;
       await sleep(err.retryAfterMs ? err.retryAfterMs + 1000 : 2500);
     }
   }
-  throw lastErr || new Error("Could not add the bird.");
+  throw lastErr || new Error("Edit failed.");
+}
+
+// Phase-2 task ($3/$10): derive the birdless twin of a finished bird shot.
+// A DEBIRD edit of the delivered image — same photo, minus the bird — so the
+// "every look, 2 ways" promise is literal.
+async function debirdResult(job, base) {
+  const key = `${base.look}-nobird`, label = `${base.label} · no bird`;
+  if (base.error) return { look: key, label, error: "skipped — the bird version failed" };
+  try {
+    const headshot = dataUriToImage(base.src);
+    if (!headshot) throw new Error("Source image unavailable.");
+    const src = await editImage(job, [headshot], DEBIRD_PROMPT, `debird ${base.look}`);
+    return { look: key, label, src };
+  } catch (err) {
+    return { look: key, label, error: err.message || "Bird removal failed." };
+  }
+}
+
+// ---- basic-tier on-demand de-bird: ONE per order, user-picked, FINAL ----
+// That's the product ritual (and the cost control). MAX_DEBIRD only bounds
+// total CALLS so a failed attempt still leaves retry headroom.
+const MAX_DEBIRD = Number(process.env.MAX_DEBIRD || process.env.MAX_BIRDIFY || 3);
+async function debirdLook(job, lookKey) {
+  job.cleanShots = job.cleanShots || {};
+  if (job.cleanShots[lookKey]) return job.cleanShots[lookKey]; // same look → return the final
+  if (Object.keys(job.cleanShots).length > 0) throw new Error("Your bird removal is already final for this order — one per customer, no re-rolls.");
+  if ((job.tier || "basic") !== "basic") throw new Error("Your pack already includes birdless versions of every look.");
+  job.debirdCalls = job.debirdCalls || 0;
+  if (job.debirdCalls >= MAX_DEBIRD) throw new Error("Bird-removal limit reached for this order.");
+  const r = (job.results || []).find((x) => x && x.look === lookKey && x.src);
+  if (!r) throw new Error("That look isn't available.");
+  const headshot = dataUriToImage(r.src);
+  if (!headshot) throw new Error("That look isn't available.");
+  job.debirdCalls++;
+  addImages(1); // count against the daily image cap — future /api/start gates see the true day total
+  const src = await editImage(job, [headshot], DEBIRD_PROMPT, `debird ${lookKey}`);
+  job.cleanShots[lookKey] = src;
+  job.lastDebirded = lookKey; // the email keepsake follows the pick
+  return src;
 }
 
 async function startGeneration(job) {
   if (job.status === "generating" || job.status === "complete") return;
-  // Build the work list and size the results array up front (synchronously,
-  // before any await) so /api/finalize reports the correct total for this tier.
-  const tasks = tasksForJob(job);
-  job.total = tasks.length;
-  if (!Array.isArray(job.results) || job.results.length !== tasks.length) {
-    job.results = new Array(tasks.length).fill(null);
+  // Size the results array up front (synchronously, before any await) so
+  // /api/finalize reports the correct total for this tier. Layout: bird set
+  // first (looks.length slots), then — on $3/$10 — the derived birdless set.
+  const tier = job.tier || "basic";
+  const looks = looksForTier(tier);
+  const twoWay = tier !== "basic";
+  job.total = imagesForTier(tier);
+  if (!Array.isArray(job.results) || job.results.length !== job.total) {
+    job.results = new Array(job.total).fill(null);
   }
   job.status = "generating";
   if (job.ip) bump(job.ip); // count against the daily JOB cap when generation actually starts
-  addImages(tasks.length); // and against the image-weighted daily cap
+  addImages(job.total); // and against the image-weighted daily cap
+  // Phase 1 — every look WITH the bird
   let cursor = 0;
   async function worker() {
-    while (cursor < tasks.length) {
+    while (cursor < looks.length) {
       const i = cursor++;
-      job.results[i] = await generateLook(job, tasks[i]);
+      job.results[i] = await generateLook(job, looks[i]);
       job.done++;
     }
   }
-  await Promise.all(Array.from({ length: Math.min(CONCURRENCY, tasks.length) }, worker));
+  await Promise.all(Array.from({ length: Math.min(CONCURRENCY, looks.length) }, worker));
+  // Phase 2 ($3/$10) — the birdless twins, derived from the finished bird shots
+  if (twoWay) {
+    let c2 = 0;
+    async function worker2() {
+      while (c2 < looks.length) {
+        const i = c2++;
+        job.results[looks.length + i] = await debirdResult(job, job.results[i]);
+        job.done++;
+      }
+    }
+    await Promise.all(Array.from({ length: Math.min(CONCURRENCY, looks.length) }, worker2));
+  }
   job.status = job.results.every((r) => r?.error) ? "failed" : "complete";
   // Per-job cost line (visible in Render logs). attempts ≥ images when retries
   // or billed empties happened — a gap here is the Finding-1 leak showing up.
   const ja = job.genAttempts || 0, ji = job.genImages || 0;
-  console.log(`[cost] job ${job.id}: ${job.status} · ${ji}/${tasks.length} images · ${ja} provider calls · ~$${(ja * EST_COST_PER_IMAGE).toFixed(3)} (today: ${spend.images} imgs / ${spend.attempts} calls / ~$${(spend.attempts * EST_COST_PER_IMAGE).toFixed(2)})`);
-  // (No automatic bird render: the user PICKS one headshot to be photographed
-  //  with their bird — one shot per order, final. See /api/birdify.)
+  console.log(`[cost] job ${job.id}: ${job.status} · ${ji}/${job.total} images · ${ja} provider calls · ~$${(ja * EST_COST_PER_IMAGE).toFixed(3)} (today: ${spend.images} imgs / ${spend.attempts} calls / ~$${(spend.attempts * EST_COST_PER_IMAGE).toFixed(2)})`);
+  // (Basic tier: no automatic de-bird — the user PICKS one headshot to lose
+  //  its bird. One removal per order, final. See /api/debird.)
   if (job.status === "complete" && job.email) {
-    // Delay the delivery email so the user's Bird-ID photo pick (made on the
-    // results page, uploaded via /api/card) can ride along. The browser posts
-    // a default card (look 3) on completion, and re-posts if they pick another.
+    // Delay the delivery email so the user's basic-tier de-bird pick (made on
+    // the results page) can ride along. The browser posts the Bird ID card on
+    // completion via /api/card.
     setTimeout(async () => {
       try {
         // Persist images (R2 if configured, else disk) and email DOWNLOAD LINKS
-        // — not 25 inline attachments, which Gmail/Yahoo silently drop.
-        // The keepsake = the user's LAST birdified look (their active pick).
-        const shots = job.birdShots || {};
-        const lastShot = job.lastBirdified && shots[job.lastBirdified] ? shots[job.lastBirdified] : Object.values(shots).pop();
+        // — not 30 inline attachments, which Gmail/Yahoo silently drop.
+        // The keepsake = the basic tier's bird-free pick (if they made one).
+        const shots = job.cleanShots || {};
+        const lastShot = job.lastDebirded && shots[job.lastDebirded] ? shots[job.lastDebirded] : Object.values(shots).pop();
         const { images, cardUrl, birdUrl } = await persistDelivery(job.id, job.results, job.cardPng, lastShot || job.birdPng);
-        await sendHeadshots({ to: job.email, bird: job.bird, images, cardUrl, birdUrl });
+        await sendHeadshots({ to: job.email, bird: job.bird, images, cardUrl, cleanUrl: birdUrl });
       } catch (e) { console.error("[mail]", e.message); }
     }, EMAIL_DELAY_MS).unref?.();
   }
@@ -417,7 +437,7 @@ app.post("/api/start", upload.array("photos", 2), async (req, res) => {
     }
     // image-weighted cap — gate on this job's planned image count (tier-dependent)
     const tier = resolveTier((req.body.tier || "").trim());
-    const jobImages = tasksForJob({ tier }).length;
+    const jobImages = imagesForTier(tier);
     if (peekImages() + jobImages > GLOBAL_DAILY_IMAGE_CAP) {
       console.warn(`[cap] image cap would exceed ${GLOBAL_DAILY_IMAGE_CAP} (today ${peekImages()} + ${jobImages}) — refusing`);
       return res.status(429).json({ error: "We're at capacity today — the birds need a rest. Please come back tomorrow!" });
@@ -515,7 +535,7 @@ app.get("/api/finalize/:jobId", async (req, res) => {
     if (!job.paid) return res.json({ paid: false });
     // cap was already enforced (pre-payment) in /api/start; bump happens in startGeneration
     if (job.status === "awaiting_payment") startGeneration(job);
-    res.json({ paid: true, bird: withBirdImage(job.bird), status: job.status, total: job.total });
+    res.json({ paid: true, bird: withBirdImage(job.bird), status: job.status, total: job.total, tier: job.tier || "basic" });
   } catch (err) { console.error("[finalize]", err); res.status(500).json({ error: "Something went wrong on our end — please try again." }); }
 });
 
@@ -525,24 +545,25 @@ app.get("/api/job/:id", (req, res) => {
   if (!job) return res.status(404).json({ error: "Job not found or expired." });
   res.json({
     status: job.status, paid: job.paid, total: job.total, done: job.done,
+    tier: job.tier || "basic",
     bird: job.paid ? withBirdImage(job.bird) : null,
     results: job.paid ? job.results : [],
-    birdShots: job.paid ? (job.birdShots || {}) : {}, // look → integrated "you + bird" data URI
+    cleanShots: job.paid ? (job.cleanShots || {}) : {}, // look → bird-free data URI (basic-tier pick)
     error: job.error,
   });
 });
 
-// 4b) birdify a picked look: paints the bird INTO that headshot (photoreal),
-// returns the finished image. Cached per look; capped per job (MAX_BIRDIFY).
-app.post("/api/birdify", async (req, res) => {
+// 4b) de-bird a picked look (basic tier): removes the bird from that finished
+// headshot, returns the clean image. ONE per order, final; capped (MAX_DEBIRD).
+app.post("/api/debird", async (req, res) => {
   try {
     const job = jobs.get(req.body?.jobId);
     if (!job || !job.paid) return res.status(404).json({ error: "Job not found." });
     if (job.status !== "complete") return res.status(400).json({ error: "Headshots are still generating." });
-    const src = await birdifyLook(job, String(req.body?.look || ""));
+    const src = await debirdLook(job, String(req.body?.look || ""));
     res.json({ look: req.body.look, src });
   } catch (err) {
-    res.status(400).json({ error: err.message || "Could not add the bird." });
+    res.status(400).json({ error: err.message || "Could not remove the bird." });
   }
 });
 
@@ -695,5 +716,5 @@ app.use((err, _req, res, _next) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🐦  instaheadshotswithabird running → http://localhost:${PORT}`);
-  console.log(`    payments: ${PAYMENTS_ENABLED ? "Stripe ON" : "DEV BYPASS"} · $${(PRICE_CENTS / 100).toFixed(2)} · ${ALL_LOOKS.length} looks (clean) · admin ${ADMIN_KEY ? "ON" : "OFF"}`);
+  console.log(`    payments: ${PAYMENTS_ENABLED ? "Stripe ON" : "DEV BYPASS"} · $${(PRICE_CENTS / 100).toFixed(2)} · ${ALL_LOOKS.length} looks (bird in, debird derived) · admin ${ADMIN_KEY ? "ON" : "OFF"}`);
 });
