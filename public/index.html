@@ -627,6 +627,22 @@
         </button>
       </div>
 
+      <!-- outfit style (required): male / female / gender neutral looks -->
+      <div id="stylepickwrap" style="margin-top:14px">
+        <div style="font:500 11px/1.3 'IBM Plex Mono',monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--mutedmono);margin-bottom:6px">Outfit style — pick one</div>
+        <div class="tierpick" id="stylepick" role="radiogroup" aria-label="Choose outfit style" style="margin-top:0">
+          <button type="button" class="tieropt" data-style="male" aria-pressed="false">
+            <span class="tt">Male</span><span class="td">tees · shirts · polos</span>
+          </button>
+          <button type="button" class="tieropt" data-style="female" aria-pressed="false">
+            <span class="tt">Female</span><span class="td">blouses · jackets · dresses</span>
+          </button>
+          <button type="button" class="tieropt" data-style="neutral" aria-pressed="false">
+            <span class="tt">Neutral</span><span class="td">tees · knits · shirts</span>
+          </button>
+        </div>
+      </div>
+
       <!-- aviary-only perk: choose the species (everyone else is chosen BY the bird) -->
       <div id="birdchooser">
         <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
@@ -918,9 +934,18 @@
 
   // ---- upload (up to 2 photos) ----
   const emailOk = () => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(($('email').value||'').trim());
-  function updateGo(){ $('go').disabled = !(photos.length>=1 && emailOk()); }
+  function updateGo(){ $('go').disabled = !(photos.length>=1 && emailOk() && selectedStyle); }
   function refresh(){ renderThumbs(); updateGo(); }
   $('email').addEventListener('input', updateGo);
+
+  // ---- outfit style (required — no default, so it's a conscious pick) ----
+  let selectedStyle=null;
+  $('stylepick').addEventListener('click',e=>{
+    const b=e.target.closest('.tieropt'); if(!b) return;
+    selectedStyle=b.dataset.style;
+    document.querySelectorAll('#stylepick .tieropt').forEach(x=>{const on=x.dataset.style===selectedStyle;x.classList.toggle('active',on);x.setAttribute('aria-pressed',on?'true':'false');});
+    updateGo();
+  });
 
   // ---- tier selection (must match server TIERS in server.js) ----
   const TIER_PRICE={basic:1,full:3,aviary:10};
@@ -995,6 +1020,7 @@
       fd.append('email', ($('email').value||'').trim());
       fd.append('consent', $('optin').checked ? 'true' : 'false');
       fd.append('tier', selectedTier);
+      fd.append('outfitStyle', selectedStyle||'male');
       if(selectedTier==='aviary' && $('birdChoice') && $('birdChoice').value) fd.append('birdId', $('birdChoice').value);
       const s=await fetch('/api/start',{method:'POST',body:fd}); const sd=await s.json();
       if(!s.ok) throw new Error(sd.error||'Could not start.');

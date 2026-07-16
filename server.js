@@ -6,7 +6,7 @@ import { randomUUID } from "crypto";
 import Stripe from "stripe";
 import heicConvert from "heic-convert";
 import { buildTwoPersonPrompt, DEBIRD_PROMPT } from "./lib/prompt.js";
-import { ALL_LOOKS, looksForTier, imagesForTier } from "./lib/looks.js";
+import { ALL_LOOKS, looksForTier, imagesForTier, resolveStyle } from "./lib/looks.js";
 import { hasRef, refPublicUrl, hasCutout, cutoutPublicUrl } from "./lib/birdref.js";
 import { imageDimensions } from "./lib/imagesize.js";
 import { assignBird, chooseBird, stats } from "./lib/assign.js";
@@ -344,7 +344,7 @@ async function startGeneration(job) {
   // /api/finalize reports the correct total for this tier. Layout: bird set
   // first (looks.length slots), then — on $3/$10 — the derived birdless set.
   const tier = job.tier || "basic";
-  const looks = looksForTier(tier);
+  const looks = looksForTier(tier, job.outfitStyle);
   const twoWay = tier !== "basic";
   job.total = imagesForTier(tier);
   if (!Array.isArray(job.results) || job.results.length !== job.total) {
@@ -479,8 +479,11 @@ app.post("/api/start", upload.array("photos", 2), async (req, res) => {
     // cheaper tier is ignored and the bird chooses them, as nature intended.
     const requestedBird = (req.body.birdId || "").trim();
     const bird = (tier === "aviary" && requestedBird && chooseBird(requestedBird)) || assignBird();
+    // Outfit style (2026-07-16): male / female / neutral. Unknown or missing
+    // falls back to male — the original live set — so old clients keep working.
+    const outfitStyle = resolveStyle((req.body.outfitStyle || "").trim());
     const job = {
-      id: randomUUID(), bird, email, ip, tier,
+      id: randomUUID(), bird, email, ip, tier, outfitStyle,
       photos: req.files.map((f) => ({ buffer: f.buffer, mimeType: f.mimetype })),
       paid: false, status: "awaiting_payment",
       total: jobImages, done: 0, results: new Array(jobImages).fill(null),
