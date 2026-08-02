@@ -552,7 +552,9 @@ app.get("/api/finalize/:jobId", async (req, res) => {
     if (!job.paid) return res.json({ paid: false });
     // cap was already enforced (pre-payment) in /api/start; bump happens in startGeneration
     if (job.status === "awaiting_payment") startGeneration(job);
-    res.json({ paid: true, bird: withBirdImage(job.bird), status: job.status, total: job.total, tier: job.tier || "basic" });
+    // email is returned so the client can send it as enhanced-conversion
+    // user_data with the Google Ads purchase event (hashed by gtag before send).
+    res.json({ paid: true, bird: withBirdImage(job.bird), status: job.status, total: job.total, tier: job.tier || "basic", email: job.email || null });
   } catch (err) { console.error("[finalize]", err); res.status(500).json({ error: "Something went wrong on our end — please try again." }); }
 });
 

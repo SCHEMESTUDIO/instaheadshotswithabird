@@ -9,6 +9,8 @@
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
   gtag('config', 'G-D3263MM19X');
+  // Google Ads (Scheme Studio 629-033-9684) — same gtag.js loader, second config.
+  gtag('config', 'AW-18212544394', { allow_enhanced_conversions: true });
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
@@ -502,7 +504,7 @@
       <div class="stepcard">
         <div class="num">02</div>
         <div class="t">Get your looks</div>
-        <div class="d">Five to twenty-five professional headshots. Outfits, backdrops, the works. Delivered in a minute or less.</div>
+        <div class="d">Five to thirty professional headshots. Outfits, backdrops, the works. Delivered in a minute or less.</div>
       </div>
       <div class="stepcard birdstep">
         <div class="num">03</div>
@@ -1310,6 +1312,23 @@
     if(fin.error){ $('pmsg').textContent=fin.error; return; }
     if(!fin.paid){ $('pmsg').textContent='Payment not confirmed. If you were charged, refresh in a moment.'; return; }
     jobTier=fin.tier||'basic'; jobTotal=fin.total;
+    // Google Ads purchase conversion (hwab_purchase). Fires once per job:
+    // transaction_id dedups server-side at Google, localStorage guards repeat
+    // pageloads locally. Skipped for beta-code/dev-bypass jobs (free=1/dev=1).
+    try{
+      var qs=new URLSearchParams(location.search);
+      var TIER_USD={basic:1,full:3,aviary:10};
+      if(window.gtag && qs.get('free')!=='1' && qs.get('dev')!=='1' && !localStorage.getItem('hwab_conv_'+jobId)){
+        if(fin.email) gtag('set','user_data',{email:String(fin.email).trim().toLowerCase()});
+        gtag('event','conversion',{
+          'send_to':'AW-18212544394/d6XuCLvDy9kcEIq_texD',
+          'value':TIER_USD[jobTier]||1,
+          'currency':'USD',
+          'transaction_id':jobId
+        });
+        localStorage.setItem('hwab_conv_'+jobId,'1');
+      }
+    }catch(e){}
     $('ssub2').textContent = jobTier==='basic'
       ? fin.total+' looks, printed one at a time, fresh from the studio.'
       : 'Every look arrives twice — with your bird, then without. '+fin.total+' photos, printed one at a time.';
