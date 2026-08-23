@@ -724,6 +724,42 @@ app.get("/api/admin/cost", (req, res) => {
   });
 });
 
+// ── Cross-host sitemap proxy (added 2026-08-23) ──────────────────────────
+// GSC has refused to parse sitemaps served from dogshow.lol and
+// www.dollarbets.lol (both Vercel) since May — "Sitemap could not be read"
+// across static XML, plain text, AND serverless-function responses — while
+// this Render-served host's own sitemap parses fine. Serving their sitemaps
+// from here is both the isolating experiment and the fix: cross-host
+// sitemaps are valid when both sites are verified in the same Search
+// Console account (they are; referenced from each site's robots.txt too).
+// Each route proxies the live sitemap so content is never stale; a 60s
+// in-memory cache absorbs Googlebot retries, and stale content is served
+// in preference to a 5xx if an origin is down.
+const SITEMAP_PROXIES = {
+  "/dogshow-sitemap.xml": "https://dogshow.lol/api/sitemap",
+  "/dollarbets-sitemap.xml": "https://www.dollarbets.lol/api/sitemap.py",
+};
+const sitemapCache = new Map(); // path -> { body, at }
+for (const [path, origin] of Object.entries(SITEMAP_PROXIES)) {
+  app.get(path, async (_req, res) => {
+    const hit = sitemapCache.get(path);
+    if (hit && Date.now() - hit.at < 60_000) {
+      return res.type("application/xml").send(hit.body);
+    }
+    try {
+      const r = await fetch(origin, { redirect: "follow", signal: AbortSignal.timeout(10_000) });
+      if (!r.ok) throw new Error(`upstream ${r.status}`);
+      const body = await r.text();
+      if (!body.includes("<urlset")) throw new Error("upstream body is not a sitemap");
+      sitemapCache.set(path, { body, at: Date.now() });
+      res.type("application/xml").send(body);
+    } catch (err) {
+      if (hit) return res.type("application/xml").send(hit.body); // stale beats 5xx here
+      res.status(503).type("text/plain").send("sitemap upstream unavailable: " + err.message);
+    }
+  });
+}
+
 app.get("/api/stats", (_req, res) => res.json(stats()));
 app.get("/healthz", (_req, res) =>
   res.json({
