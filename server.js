@@ -782,10 +782,12 @@ app.get("/healthz", (_req, res) =>
   })
 );
 
-// Unknown paths: send humans home, give APIs a JSON 404 (never Express's HTML page)
+// Unknown paths: a real 404 for humans and crawlers, a JSON 404 for APIs (never
+// Express's HTML page). This used to redirect everything to "/", which Google
+// reads as a soft 404 and which made /.env, /README.md etc. look like 200s.
 app.use((req, res) => {
   if (req.path.startsWith("/api/")) return res.status(404).json({ error: "Not found." });
-  res.redirect("/");
+  res.status(404).sendFile("404.html", { root: "public" }); // same cwd-relative root as express.static
 });
 
 // JSON error handler — keeps the API from ever returning Express's HTML 500 page
