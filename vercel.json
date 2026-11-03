@@ -1,0 +1,12 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "buildCommand": "",
+  "installCommand": "",
+  "outputDirectory": "public",
+  "trailingSlash": true,
+  "rewrites": [
+    { "source": "/dogshow-sitemap.xml", "destination": "https://dogshow.lol/sitemap.xml" },
+    { "source": "/dollarbets-sitemap.xml", "destination": "https://www.dollarbets.lol/sitemap.xml" }
+  ]
+}

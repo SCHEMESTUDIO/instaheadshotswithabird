@@ -736,8 +736,8 @@ app.get("/api/admin/cost", (req, res) => {
 // in-memory cache absorbs Googlebot retries, and stale content is served
 // in preference to a 5xx if an origin is down.
 const SITEMAP_PROXIES = {
-  "/dogshow-sitemap.xml": "https://dogshow.lol/api/sitemap",
-  "/dollarbets-sitemap.xml": "https://www.dollarbets.lol/api/sitemap.py",
+  "/dogshow-sitemap.xml": "https://dogshow.lol/sitemap.xml",
+  "/dollarbets-sitemap.xml": "https://www.dollarbets.lol/sitemap.xml",
 };
 const sitemapCache = new Map(); // path -> { body, at }
 for (const [path, origin] of Object.entries(SITEMAP_PROXIES)) {
