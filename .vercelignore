@@ -1,0 +1,6 @@
+# Retired 2026-11-03: only the static public/ folder deploys. The Node app stays in the repo for reference.
+/*
+!/public
+!/vercel.json
+/public/birds
+/public/test-headshot-review.jpg
